@@ -745,32 +745,6 @@ export default function Admin() {
           </div>
         </motion.div>
 
-        {/* ======================== MOBILE TAB STRIP ======================== */}
-        <div className="sm:hidden flex items-center gap-1.5 overflow-x-auto p-2.5 bg-[var(--color-sidebar-bg)] shrink-0 no-scrollbar">
-          {TABS.map((tab) => {
-            const isActive = activeTab === tab.key;
-            return (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
-                className={`flex items-center gap-2 px-3 py-2 rounded-xl font-sans text-[10px] uppercase tracking-wider font-semibold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
-                  isActive
-                    ? 'bg-[var(--color-primary)] text-black font-bold shadow-sm'
-                    : 'bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)]'
-                }`}
-              >
-                {tab.icon}
-                <span>{tab.label}</span>
-                {tab.key === 'bookings' && pendingCount > 0 && (
-                  <span className="px-1.5 py-0.2 text-[8px] bg-red-500 text-white rounded-full font-bold">
-                    {pendingCount}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-
         {/* ======================== MAIN CONTENT AREA ======================== */}
         <div className="flex-1 h-full overflow-y-auto overflow-x-hidden bg-[var(--color-bg)] transition-colors">
           <div className="p-3.5 sm:p-8 md:p-12 pb-24 sm:pb-12 min-h-full flex flex-col">
