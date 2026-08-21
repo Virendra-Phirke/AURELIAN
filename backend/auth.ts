@@ -9,6 +9,14 @@ import { Resend } from "resend";
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 const EMAIL_FROM = process.env.EMAIL_FROM || "Aurelian <onboarding@resend.dev>";
 
+const getBaseURL = () => {
+    if (process.env.BETTER_AUTH_URL) return process.env.BETTER_AUTH_URL;
+    if (process.env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+    if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+    if (process.env.APP_URL) return process.env.APP_URL;
+    return "http://localhost:3000";
+};
+
 export const auth = betterAuth({
     database: drizzleAdapter(db, {
         provider: "pg", 
@@ -23,7 +31,14 @@ export const auth = betterAuth({
     logger: {
         level: 'debug'
     },
-    baseURL: process.env.BETTER_AUTH_URL || process.env.APP_URL || "http://localhost:3000",
+    baseURL: getBaseURL(),
+    trustedOrigins: [
+        process.env.BETTER_AUTH_URL,
+        process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : null,
+        process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
+        "http://localhost:3000",
+        "http://localhost:5173",
+    ].filter(Boolean) as string[],
     emailAndPassword: {  
         enabled: true,
         minPasswordLength: 4,

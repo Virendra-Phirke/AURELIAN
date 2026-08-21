@@ -2,8 +2,15 @@
 import { createAuthClient } from "better-auth/react";
 import { twoFactorClient, emailOTPClient, oneTapClient, oauthPopupClient } from "better-auth/client/plugins";
 
+const getClientBaseURL = () => {
+  if (typeof window !== 'undefined' && window.location?.origin) {
+    return window.location.origin;
+  }
+  return import.meta.env.VITE_APP_URL || "http://localhost:3000";
+};
+
 export const authClient = createAuthClient({
-  baseURL: import.meta.env.VITE_APP_URL || "http://localhost:3000",
+  baseURL: getClientBaseURL(),
   plugins: [
     twoFactorClient(),
     emailOTPClient(),
