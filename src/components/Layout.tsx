@@ -77,7 +77,7 @@ export default function Layout() {
       <Particles className="pointer-events-none opacity-25 fixed inset-0 z-0" quantity={35} color="var(--color-primary)" />
 
       {/* Mobile Top Header */}
-      <header className="md:hidden shrink-0 h-14 px-4 flex items-center justify-between z-50 bg-[var(--color-sidebar-bg)]/95 backdrop-blur-xl sticky top-0 transition-colors">
+      <header className="md:hidden shrink-0 h-14 px-4 flex items-center justify-between z-50 bg-[var(--color-sidebar-bg)] sticky top-0 transition-colors">
         <Link to="/" className="text-base sm:text-lg tracking-[0.25em] font-semibold text-[var(--color-primary)] uppercase font-brand">
           AURELIAN
         </Link>
@@ -182,10 +182,10 @@ export default function Layout() {
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}
-              initial={{ opacity: 0, filter: 'blur(4px)', y: 15 }}
-              animate={{ opacity: 1, filter: 'blur(0px)', y: 0 }}
-              exit={{ opacity: 0, filter: 'blur(4px)', y: -15 }}
-              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
             >
               <Outlet />
             </motion.div>
@@ -194,7 +194,7 @@ export default function Layout() {
       </main>
 
       {/* Mobile Bottom Nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-14 bg-[var(--color-sidebar-bg)]/95 backdrop-blur-xl z-50 flex items-center justify-around px-2 pb-1 shadow-lg">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-14 bg-[var(--color-sidebar-bg)] z-50 flex items-center justify-around px-2 pb-1 shadow-lg">
         {session?.user ? (
           <>
             <Link

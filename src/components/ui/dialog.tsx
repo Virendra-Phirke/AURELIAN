@@ -28,7 +28,7 @@ export function Dialog({ open, onOpenChange, children }: DialogProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => onOpenChange(false)}
-            className="fixed inset-0 bg-black/70 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/70"
           />
 
           {/* Dialog Container */}

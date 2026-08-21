@@ -1571,7 +1571,7 @@ export default function Admin() {
       </div>
 
       {/* ======================== MOBILE BOTTOM NAVIGATION ======================== */}
-      <div className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-[var(--color-sidebar-bg)]/95 backdrop-blur-xl border-t border-[var(--color-border)] pb-safe pt-1 px-2 shadow-2xl transition-colors">
+      <div className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-[var(--color-sidebar-bg)] border-t border-[var(--color-border)] pb-safe pt-1 px-2 shadow-2xl transition-colors">
         <div role="tablist" className="flex justify-around items-center h-[72px]">
           {TABS.map((tab) => {
             const isActive = activeTab === tab.key;
