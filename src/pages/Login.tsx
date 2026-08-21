@@ -118,7 +118,7 @@ export default function Login() {
   };
 
   const inputClass = (hasError: boolean) =>
-    `w-full px-5 py-4 bg-[#0a0a0a] border rounded-xl ${hasError ? 'border-red-500/50' : 'border-[#ffffff15]'} text-white placeholder-[#555] focus:outline-none focus:border-[#C5A059] focus:shadow-[0_0_15px_rgba(197,160,89,0.08)] font-sans text-sm transition-all`;
+    `w-full px-5 py-3.5 bg-[var(--color-input-bg)] border rounded-xl ${hasError ? 'border-red-500/50' : 'border-[var(--color-border)]'} text-[var(--color-primary-text)] placeholder:text-[var(--color-muted-text)] focus:outline-none focus:border-[var(--color-primary)] focus:shadow-[0_0_15px_rgba(229,195,120,0.15)] font-sans text-sm transition-all`;
 
   return (
     <motion.div 
@@ -127,14 +127,14 @@ export default function Login() {
       transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       className="w-full max-w-md"
     >
-      <div className="bg-[#0a0a0a] border border-[#ffffff15] rounded-3xl p-8 sm:p-12 shadow-[0_20px_60px_rgba(0,0,0,0.5)] relative overflow-hidden">
-        <BorderBeam size={160} duration={12} colorFrom="#E5C378" borderWidth={1.5} />
+      <div className="bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden transition-colors">
+        <BorderBeam size={160} duration={12} colorFrom="var(--color-primary)" borderWidth={1.5} />
         {/* Gold top accent */}
-        <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#C5A059] to-transparent opacity-60" />
+        <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[var(--color-primary)] to-transparent opacity-60" />
         
         <div className="text-center mb-10">
-          <h1 className="text-4xl font-light text-white mb-3 italic tracking-tight">Welcome Back</h1>
-          <p className="font-sans text-[11px] uppercase tracking-widest text-[#888]">
+          <h1 className="text-4xl font-light text-[var(--color-primary-text)] mb-3 italic tracking-tight font-serif">Welcome Back</h1>
+          <p className="font-sans text-[11px] uppercase tracking-widest text-[var(--color-secondary-text)] font-medium">
             Client Portal
           </p>
         </div>
@@ -143,7 +143,7 @@ export default function Login() {
           <motion.div 
             initial={{ opacity: 0, y: -5 }} 
             animate={{ opacity: 1, y: 0 }} 
-            className="p-4 mb-6 text-[11px] text-red-400 bg-red-900/20 border border-red-500/20 uppercase tracking-widest text-center rounded-xl"
+            className="p-4 mb-6 text-[11px] text-red-500 bg-red-500/10 border border-red-500/20 uppercase tracking-widest text-center rounded-xl"
           >
             {serverError}
           </motion.div>
@@ -152,14 +152,14 @@ export default function Login() {
         {needs2FA ? (
           <form onSubmit={handle2FASubmit} className="flex flex-col gap-6">
             <div>
-              <label className="block font-sans text-[10px] uppercase tracking-[0.2em] text-[#C5A059] mb-3 ml-1">Authenticator Code</label>
+              <label className="block font-sans text-[10px] uppercase tracking-[0.2em] text-[var(--color-primary)] mb-3 ml-1 font-semibold">Authenticator Code</label>
               <input
                 type="text"
                 required
                 value={twoFactorCode}
                 onChange={(e) => setTwoFactorCode(e.target.value)}
                 placeholder="000000"
-                className={`${inputClass(false)} text-center tracking-[0.5em] text-lg`}
+                className={`${inputClass(false)} text-center tracking-[0.5em] text-lg font-bold`}
               />
             </div>
             <motion.button
@@ -167,7 +167,7 @@ export default function Login() {
               whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={loading}
-              className="w-full py-4 bg-[#C5A059] text-black font-sans text-[11px] uppercase tracking-widest rounded-xl hover:bg-[#d4b06a] transition-colors disabled:opacity-50 shadow-[0_0_20px_rgba(197,160,89,0.2)] flex items-center justify-center gap-2"
+              className="w-full py-4 bg-[var(--color-primary)] text-black font-sans text-[11px] uppercase tracking-widest rounded-xl hover:bg-[var(--color-primary-hover)] transition-colors disabled:opacity-50 shadow-[0_0_20px_rgba(229,195,120,0.25)] flex items-center justify-center gap-2 cursor-pointer font-bold"
             >
               {loading ? 'Verifying...' : 'Verify Code'}
               <ArrowRight size={14} />
@@ -175,7 +175,7 @@ export default function Login() {
             <button
               type="button"
               onClick={() => setNeeds2FA(false)}
-              className="w-full py-2 text-[#888] font-sans text-[10px] uppercase tracking-widest hover:text-white transition-colors"
+              className="w-full py-2 text-[var(--color-secondary-text)] font-sans text-[10px] uppercase tracking-widest hover:text-[var(--color-primary-text)] transition-colors cursor-pointer"
             >
               Cancel
             </button>
@@ -185,7 +185,7 @@ export default function Login() {
             {loginMethod === 'password' ? (
               <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
                 <div>
-                  <label className="flex items-center gap-2 font-sans text-[10px] uppercase tracking-[0.2em] text-[#C5A059] mb-3 ml-1">
+                  <label className="flex items-center gap-2 font-sans text-[10px] uppercase tracking-[0.2em] text-[var(--color-primary)] mb-3 ml-1 font-semibold">
                     <Mail size={12} /> Email
                   </label>
                   <input
@@ -195,14 +195,14 @@ export default function Login() {
                     className={inputClass(!!errors.email)}
                     placeholder="your@email.com"
                   />
-                  {errors.email && <span className="text-red-400 text-[10px] uppercase tracking-wider mt-2 block ml-1">{errors.email.message}</span>}
+                  {errors.email && <span className="text-red-500 text-[10px] uppercase tracking-wider mt-2 block ml-1">{errors.email.message}</span>}
                 </div>
                 <div>
                   <div className="flex justify-between items-center mb-3 ml-1">
-                    <label className="flex items-center gap-2 font-sans text-[10px] uppercase tracking-[0.2em] text-[#C5A059]">
+                    <label className="flex items-center gap-2 font-sans text-[10px] uppercase tracking-[0.2em] text-[var(--color-primary)] font-semibold">
                       <Lock size={12} /> Password
                     </label>
-                    <Link to="/forgot-password" className="font-sans text-[9px] uppercase tracking-widest text-[#888] hover:text-[#C5A059] transition-colors">Forgot?</Link>
+                    <Link to="/forgot-password" className="font-sans text-[9px] uppercase tracking-widest text-[var(--color-secondary-text)] hover:text-[var(--color-primary)] transition-colors">Forgot?</Link>
                   </div>
                   <input
                     type="password"
@@ -211,14 +211,14 @@ export default function Login() {
                     className={inputClass(!!errors.password)}
                     placeholder="••••••••"
                   />
-                  {errors.password && <span className="text-red-400 text-[10px] uppercase tracking-wider mt-2 block ml-1">{errors.password.message}</span>}
+                  {errors.password && <span className="text-red-500 text-[10px] uppercase tracking-wider mt-2 block ml-1">{errors.password.message}</span>}
                 </div>
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   type="submit"
                   disabled={loading}
-                  className="w-full mt-2 py-4 bg-[#C5A059] text-black font-sans text-[11px] uppercase tracking-widest rounded-xl hover:bg-[#d4b06a] transition-colors disabled:opacity-50 shadow-[0_0_20px_rgba(197,160,89,0.2)] flex items-center justify-center gap-2"
+                  className="w-full mt-2 py-4 bg-[var(--color-primary)] text-black font-sans text-[11px] uppercase tracking-widest rounded-xl hover:bg-[var(--color-primary-hover)] transition-colors disabled:opacity-50 shadow-[0_0_20px_rgba(229,195,120,0.25)] flex items-center justify-center gap-2 cursor-pointer font-bold"
                 >
                   {loading ? 'Authenticating...' : 'Secure Log In'}
                   <ArrowRight size={14} />
@@ -228,7 +228,7 @@ export default function Login() {
               <form onSubmit={otpStep === 'email' ? handleSendOtp : handleVerifyOtp} className="flex flex-col gap-5">
                 {otpStep === 'email' ? (
                   <div>
-                    <label className="flex items-center gap-2 font-sans text-[10px] uppercase tracking-[0.2em] text-[#C5A059] mb-3 ml-1">
+                    <label className="flex items-center gap-2 font-sans text-[10px] uppercase tracking-[0.2em] text-[var(--color-primary)] mb-3 ml-1 font-semibold">
                       <Mail size={12} /> Email for OTP
                     </label>
                     <input
@@ -242,7 +242,7 @@ export default function Login() {
                   </div>
                 ) : (
                   <div>
-                    <label className="flex items-center gap-2 font-sans text-[10px] uppercase tracking-[0.2em] text-[#C5A059] mb-3 ml-1">
+                    <label className="flex items-center gap-2 font-sans text-[10px] uppercase tracking-[0.2em] text-[var(--color-primary)] mb-3 ml-1 font-semibold">
                       <Lock size={12} /> Enter OTP from Email
                     </label>
                     <input
@@ -251,7 +251,7 @@ export default function Login() {
                       value={emailOtpCode}
                       onChange={(e) => setEmailOtpCode(e.target.value)}
                       placeholder="000000"
-                      className={`${inputClass(false)} text-center tracking-[0.5em] text-lg`}
+                      className={`${inputClass(false)} text-center tracking-[0.5em] text-lg font-bold`}
                     />
                   </div>
                 )}
@@ -260,7 +260,7 @@ export default function Login() {
                   whileTap={{ scale: 0.98 }}
                   type="submit"
                   disabled={loading}
-                  className="w-full mt-2 py-4 bg-[#C5A059] text-black font-sans text-[11px] uppercase tracking-widest rounded-xl hover:bg-[#d4b06a] transition-colors disabled:opacity-50 shadow-[0_0_20px_rgba(197,160,89,0.2)] flex items-center justify-center gap-2"
+                  className="w-full mt-2 py-4 bg-[var(--color-primary)] text-black font-sans text-[11px] uppercase tracking-widest rounded-xl hover:bg-[var(--color-primary-hover)] transition-colors disabled:opacity-50 shadow-[0_0_20px_rgba(229,195,120,0.25)] flex items-center justify-center gap-2 cursor-pointer font-bold"
                 >
                   {loading ? 'Processing...' : otpStep === 'email' ? 'Send OTP' : 'Verify & Log In'}
                   <ArrowRight size={14} />
@@ -269,7 +269,7 @@ export default function Login() {
                   <button
                     type="button"
                     onClick={() => setOtpStep('email')}
-                    className="w-full py-2 text-[#888] font-sans text-[10px] uppercase tracking-widest hover:text-white transition-colors"
+                    className="w-full py-2 text-[var(--color-secondary-text)] font-sans text-[10px] uppercase tracking-widest hover:text-[var(--color-primary-text)] transition-colors cursor-pointer"
                   >
                     Back to Email
                   </button>
@@ -284,16 +284,16 @@ export default function Login() {
                   setLoginMethod(loginMethod === 'password' ? 'email_otp' : 'password');
                   setServerError('');
                 }}
-                className="font-sans text-[10px] uppercase tracking-widest text-[#888] hover:text-white transition-colors underline decoration-[#ffffff20] underline-offset-4"
+                className="font-sans text-[10px] uppercase tracking-widest text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] transition-colors underline underline-offset-4 cursor-pointer"
               >
                 {loginMethod === 'password' ? 'Log In With Email OTP Instead' : 'Log In With Password Instead'}
               </button>
             </div>
 
             <div className="mt-8 flex items-center gap-4">
-              <div className="h-[1px] flex-1 bg-[#ffffff10]"></div>
-              <span className="font-sans text-[9px] uppercase tracking-widest text-[#555]">Or Continue With</span>
-              <div className="h-[1px] flex-1 bg-[#ffffff10]"></div>
+              <div className="h-[1px] flex-1 bg-[var(--color-border)]"></div>
+              <span className="font-sans text-[9px] uppercase tracking-widest text-[var(--color-muted-text)] font-semibold">Or Continue With</span>
+              <div className="h-[1px] flex-1 bg-[var(--color-border)]"></div>
             </div>
 
             <div className="mt-6 grid grid-cols-2 gap-3">
@@ -302,7 +302,7 @@ export default function Login() {
                 whileTap={{ scale: 0.98 }}
                 type="button"
                 onClick={() => handleOAuth('google')}
-                className="flex items-center justify-center gap-2.5 py-3.5 bg-[#111111] hover:bg-[#181818] border border-[#222222] hover:border-[#383838] rounded-xl transition-all text-white font-sans text-[11px] uppercase tracking-widest font-medium shadow-sm"
+                className="flex items-center justify-center gap-2.5 py-3.5 bg-[var(--color-surface-raised)] hover:bg-[var(--color-surface-hover)] border border-[var(--color-border)] hover:border-[var(--color-primary)]/40 rounded-xl transition-all text-[var(--color-primary-text)] font-sans text-[11px] uppercase tracking-widest font-semibold shadow-sm cursor-pointer"
               >
                 <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0" fill="none">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
@@ -317,17 +317,17 @@ export default function Login() {
                 whileTap={{ scale: 0.98 }}
                 type="button"
                 onClick={() => handleOAuth('github')}
-                className="flex items-center justify-center gap-2.5 py-3.5 bg-[#111111] hover:bg-[#181818] border border-[#222222] hover:border-[#383838] rounded-xl transition-all text-white font-sans text-[11px] uppercase tracking-widest font-medium shadow-sm"
+                className="flex items-center justify-center gap-2.5 py-3.5 bg-[var(--color-surface-raised)] hover:bg-[var(--color-surface-hover)] border border-[var(--color-border)] hover:border-[var(--color-primary)]/40 rounded-xl transition-all text-[var(--color-primary-text)] font-sans text-[11px] uppercase tracking-widest font-semibold shadow-sm cursor-pointer"
               >
-                <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0 fill-white">
+                <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0 fill-current">
                   <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
                 </svg>
                 <span>GitHub</span>
               </motion.button>
             </div>
             
-            <p className="mt-8 text-center font-sans text-[11px] uppercase tracking-widest text-[#555]">
-              New Client? <Link to="/register" className="text-[#C5A059] hover:text-[#d4b06a] ml-2 transition-colors">Request Access</Link>
+            <p className="mt-8 text-center font-sans text-[11px] uppercase tracking-widest text-[var(--color-secondary-text)]">
+              New Client? <Link to="/register" className="text-[var(--color-primary)] hover:underline ml-2 transition-colors font-semibold">Request Access</Link>
             </p>
           </>
         )}

@@ -14,7 +14,7 @@ export const TableHeader = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
-  <thead ref={ref} className={cn('border-b border-[#1c1c1c] bg-[#0d0d0d]', className)} {...props} />
+  <thead ref={ref} className={cn('border-b border-[var(--color-border)] bg-[var(--color-surface-raised)]', className)} {...props} />
 ));
 TableHeader.displayName = 'TableHeader';
 
@@ -22,7 +22,7 @@ export const TableBody = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
-  <tbody ref={ref} className={cn('divide-y divide-[#171717]', className)} {...props} />
+  <tbody ref={ref} className={cn('divide-y divide-[var(--color-border)]', className)} {...props} />
 ));
 TableBody.displayName = 'TableBody';
 
@@ -30,7 +30,7 @@ export const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttribut
   ({ className, ...props }, ref) => (
     <tr
       ref={ref}
-      className={cn('transition-colors hover:bg-[#141414]/60 data-[state=selected]:bg-[#1a1a1a]', className)}
+      className={cn('transition-colors hover:bg-[var(--color-surface-raised)]/60 data-[state=selected]:bg-[var(--color-surface-raised)]', className)}
       {...props}
     />
   )
@@ -44,7 +44,7 @@ export const TableHead = React.forwardRef<
   <th
     ref={ref}
     className={cn(
-      'h-11 px-6 py-3.5 text-left font-sans text-[10px] uppercase tracking-[0.2em] font-medium text-[#737373]',
+      'h-11 px-6 py-3.5 text-left font-sans text-[10px] uppercase tracking-[0.2em] font-semibold text-[var(--color-secondary-text)]',
       className
     )}
     {...props}
@@ -56,6 +56,6 @@ export const TableCell = React.forwardRef<
   HTMLTableCellElement,
   React.TdHTMLAttributes<HTMLTableCellElement>
 >(({ className, ...props }, ref) => (
-  <td ref={ref} className={cn('px-6 py-4 align-middle text-sm text-[#d4d4d4]', className)} {...props} />
+  <td ref={ref} className={cn('px-6 py-4 align-middle text-sm text-[var(--color-body-text)]', className)} {...props} />
 ));
 TableCell.displayName = 'TableCell';

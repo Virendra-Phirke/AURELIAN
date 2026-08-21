@@ -225,19 +225,19 @@ export default function Booking() {
       {/* ════════════════════════════════════════
           VERCEL-STYLE HEADER & BRAND
          ════════════════════════════════════════ */}
-      <div className="space-y-6 border-b border-[#1a1a1a] pb-6">
+      <div className="space-y-6 border-b border-[var(--color-border)] pb-6 transition-colors">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div className="flex flex-col gap-1">
             <div className="flex flex-wrap items-baseline gap-3">
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-brand font-semibold text-[#E5C378] tracking-[0.25em] uppercase">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-brand font-semibold text-[var(--color-primary)] tracking-[0.25em] uppercase">
                 AURELIAN
               </h1>
-              <span className="text-xs uppercase font-sans tracking-[0.25em] text-[#737373]">
+              <span className="text-xs uppercase font-sans tracking-[0.25em] text-[var(--color-secondary-text)]">
                 Salon & Grooming
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs text-[#525252] uppercase tracking-wider font-sans">Experience:</span>
+              <span className="text-xs text-[var(--color-muted-text)] uppercase tracking-wider font-sans">Experience:</span>
               <WordRotate
                 words={[
                   "Bespoke Hair Styling",
@@ -245,7 +245,7 @@ export default function Booking() {
                   "VIP Grooming Suites",
                   "Master Precision Cuts"
                 ]}
-                className="text-sm font-serif text-[#E5C378] font-normal tracking-wide italic"
+                className="text-sm font-serif text-[var(--color-primary)] font-normal tracking-wide italic"
               />
             </div>
           </div>
@@ -262,16 +262,16 @@ export default function Booking() {
                   { name: 'David Vance' },
                 ]}
               />
-              <div className="text-left font-sans text-[9px] uppercase tracking-wider text-[#737373]">
-                <span className="text-white font-medium block">VIP Experience</span>
+              <div className="text-left font-sans text-[9px] uppercase tracking-wider text-[var(--color-secondary-text)]">
+                <span className="text-[var(--color-primary-text)] font-medium block">VIP Experience</span>
                 <span>Verified Clients</span>
               </div>
             </div>
 
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#141414] border border-[#262626] text-[10px] uppercase font-sans tracking-widest text-[#a1a1a1] shrink-0 self-start sm:self-auto shadow-sm">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--color-surface-raised)] border border-[var(--color-border)] text-[10px] uppercase font-sans tracking-widest text-[var(--color-secondary-text)] shrink-0 self-start sm:self-auto shadow-sm">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#4ade80] opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#4ade80]"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
               </span>
               <span>Instant Confirmation</span>
             </div>
@@ -282,10 +282,10 @@ export default function Booking() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
           {/* Step 1 Bar */}
           <div className="space-y-2">
-            <div className="h-[2px] w-full rounded-full bg-[#E5C378] shadow-[0_0_8px_rgba(229,195,120,0.4)] transition-all" />
+            <div className="h-[2px] w-full rounded-full bg-[var(--color-primary)] shadow-[0_0_8px_rgba(229,195,120,0.4)] transition-all" />
             <div className="flex items-center justify-between text-[11px] font-sans uppercase tracking-[0.15em]">
-              <span className="text-[#E5C378] font-medium">Step 01 (Select Service)</span>
-              {selectedService && <Check size={12} className="text-[#E5C378]" />}
+              <span className="text-[var(--color-primary)] font-medium">Step 01 (Select Service)</span>
+              {selectedService && <Check size={12} className="text-[var(--color-primary)]" />}
             </div>
           </div>
 
@@ -293,14 +293,14 @@ export default function Booking() {
           <div className="space-y-2">
             <div
               className={`h-[2px] w-full rounded-full transition-all ${
-                selectedDate ? 'bg-[#E5C378] shadow-[0_0_8px_rgba(229,195,120,0.4)]' : 'bg-[#222222]'
+                selectedDate ? 'bg-[var(--color-primary)] shadow-[0_0_8px_rgba(229,195,120,0.4)]' : 'bg-[var(--color-border)]'
               }`}
             />
             <div className="flex items-center justify-between text-[11px] font-sans uppercase tracking-[0.15em]">
-              <span className={selectedDate ? 'text-[#E5C378] font-medium' : 'text-[#666666]'}>
+              <span className={selectedDate ? 'text-[var(--color-primary)] font-medium' : 'text-[var(--color-secondary-text)]'}>
                 Step 02 (Choose Date)
               </span>
-              {selectedDate && <Check size={12} className="text-[#E5C378]" />}
+              {selectedDate && <Check size={12} className="text-[var(--color-primary)]" />}
             </div>
           </div>
 
@@ -308,14 +308,14 @@ export default function Booking() {
           <div className="space-y-2">
             <div
               className={`h-[2px] w-full rounded-full transition-all ${
-                selectedTime ? 'bg-[#E5C378] shadow-[0_0_8px_rgba(229,195,120,0.4)]' : 'bg-[#222222]'
+                selectedTime ? 'bg-[var(--color-primary)] shadow-[0_0_8px_rgba(229,195,120,0.4)]' : 'bg-[var(--color-border)]'
               }`}
             />
             <div className="flex items-center justify-between text-[11px] font-sans uppercase tracking-[0.15em]">
-              <span className={selectedTime ? 'text-[#E5C378] font-medium' : 'text-[#666666]'}>
+              <span className={selectedTime ? 'text-[var(--color-primary)] font-medium' : 'text-[var(--color-secondary-text)]'}>
                 Step 03 (Available Slots)
               </span>
-              {selectedTime && <Check size={12} className="text-[#E5C378]" />}
+              {selectedTime && <Check size={12} className="text-[var(--color-primary)]" />}
             </div>
           </div>
         </div>
@@ -332,10 +332,10 @@ export default function Booking() {
              ────────────────────────────────────── */}
           <div className="space-y-5">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl sm:text-2xl font-serif text-[#E5C378] font-normal tracking-wide">
-                Step 01: Select Service
+              <h2 className="text-xl sm:text-2xl font-serif text-[var(--color-primary-text)] font-medium tracking-wide">
+                Step 01: <span className="text-[var(--color-primary)] font-normal">Select Service</span>
               </h2>
-              <span className="font-sans text-[10px] uppercase tracking-widest text-[#737373]">
+              <span className="font-sans text-[10px] uppercase tracking-widest text-[var(--color-secondary-text)]">
                 {services.length} services available
               </span>
             </div>
@@ -350,31 +350,31 @@ export default function Booking() {
                     <motion.div
                       whileHover={{ y: -2 }}
                       onClick={() => setSelectedService(service)}
-                      className={`relative overflow-hidden rounded-xl p-5 flex flex-col justify-between text-center transition-all cursor-pointer min-h-[220px] select-none ${
+                      className={`relative overflow-hidden rounded-2xl p-5 flex flex-col justify-between text-center transition-all cursor-pointer min-h-[220px] select-none ${
                         isSelected
-                          ? 'bg-[#0e0d09] border border-[#E5C378] shadow-[0_0_25px_rgba(229,195,120,0.12)] ring-1 ring-[#E5C378]/30'
-                          : 'bg-[#0a0a0a] border border-[#1f1f1f] hover:border-[#383838]'
+                          ? 'bg-[var(--color-primary)]/10 border-2 border-[var(--color-primary)] shadow-[0_0_25px_rgba(229,195,120,0.15)]'
+                          : 'bg-[var(--color-card-bg)] border border-[var(--color-border)] hover:border-[var(--color-primary)]/50 shadow-md'
                       }`}
                     >
                       {isSelected && (
-                        <BorderBeam size={90} duration={8} colorFrom="#E5C378" borderWidth={1.5} />
+                        <BorderBeam size={90} duration={8} colorFrom="var(--color-primary)" borderWidth={1.5} />
                       )}
 
                       {/* Top Icon and Name */}
                       <div>
-                        <div className="w-12 h-12 rounded-full mx-auto flex items-center justify-center mb-3.5 bg-[#141414] border border-[#222222]">
+                        <div className="w-12 h-12 rounded-full mx-auto flex items-center justify-center mb-3.5 bg-[var(--color-surface-raised)] border border-[var(--color-border)]">
                           {getServiceIcon(service.name)}
                         </div>
 
-                        <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-white mb-1.5">
+                        <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-primary-text)] mb-1.5">
                           {service.name}
                         </h3>
-                        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#141414] border border-[#262626] text-[10px] text-[#a1a1a1] font-sans tracking-wider mb-3">
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[var(--color-surface-raised)] border border-[var(--color-border)] text-[10px] text-[var(--color-secondary-text)] font-sans tracking-wider mb-3">
                           <span>{service.durationMinutes} min</span>
                           <span>•</span>
-                          <span className="text-[#E5C378] font-medium">${price}</span>
+                          <span className="text-[var(--color-primary)] font-semibold">${price}</span>
                         </div>
-                        <p className="text-[11px] text-[#666666] font-sans line-clamp-2 leading-relaxed px-1">
+                        <p className="text-[11px] text-[var(--color-secondary-text)] font-sans line-clamp-2 leading-relaxed px-1">
                           {getServiceDescription(service.name)}
                         </p>
                       </div>
@@ -386,10 +386,10 @@ export default function Booking() {
                           e.stopPropagation();
                           setSelectedService(service);
                         }}
-                        className={`w-full py-2.5 rounded-lg font-sans text-[10px] uppercase tracking-widest font-semibold transition-all mt-4 ${
+                        className={`w-full py-2.5 rounded-xl font-sans text-[10px] uppercase tracking-widest font-semibold transition-all mt-4 cursor-pointer ${
                           isSelected
-                            ? 'bg-[#E5C378] text-black shadow-[0_0_12px_rgba(229,195,120,0.3)]'
-                            : 'bg-[#141414] text-[#888888] hover:bg-[#202020] hover:text-white border border-[#222222]'
+                            ? 'bg-[var(--color-primary)] text-black shadow-md'
+                            : 'bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-primary-text)] border border-[var(--color-border)]'
                         }`}
                       >
                         {isSelected ? 'Selected' : 'Select'}
@@ -406,34 +406,34 @@ export default function Booking() {
              ────────────────────────────────────── */}
           <div className="space-y-5">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <h2 className="text-xl sm:text-2xl font-serif text-[#E5C378] font-normal tracking-wide">
-                Step 02: Choose Date
+              <h2 className="text-xl sm:text-2xl font-serif text-[var(--color-primary-text)] font-medium tracking-wide">
+                Step 02: <span className="text-[var(--color-primary)] font-normal">Choose Date</span>
               </h2>
               <div className="font-sans text-xs tracking-wider">
-                <span className="text-[#737373]">Selected: </span>
-                <span className="text-[#E5C378] font-medium font-serif">{formattedSelectedDate}</span>
+                <span className="text-[var(--color-secondary-text)]">Selected: </span>
+                <span className="text-[var(--color-primary)] font-semibold font-serif">{formattedSelectedDate}</span>
               </div>
             </div>
 
-            {/* MONTH CALENDAR CONTAINER (Geist Style) */}
-            <div className="bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl p-6 shadow-xl">
+            {/* MONTH CALENDAR CONTAINER */}
+            <div className="bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-2xl p-6 shadow-xl transition-colors">
               {/* Calendar Month Navigation */}
-              <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#171717]">
+              <div className="flex items-center justify-between mb-6 pb-4 border-b border-[var(--color-border)]">
                 <button
                   type="button"
                   onClick={handlePrevMonth}
-                  className="p-2 rounded-lg text-[#737373] hover:text-white hover:bg-[#171717] transition-colors"
+                  className="p-2 rounded-lg text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-raised)] transition-colors cursor-pointer"
                   aria-label="Previous month"
                 >
                   <ChevronLeft size={18} />
                 </button>
-                <div className="font-sans text-xs font-semibold uppercase tracking-[0.25em] text-white">
+                <div className="font-sans text-xs font-semibold uppercase tracking-[0.25em] text-[var(--color-primary-text)]">
                   {format(currentMonth, 'MMMM yyyy')}
                 </div>
                 <button
                   type="button"
                   onClick={handleNextMonth}
-                  className="p-2 rounded-lg text-[#737373] hover:text-white hover:bg-[#171717] transition-colors"
+                  className="p-2 rounded-lg text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-raised)] transition-colors cursor-pointer"
                   aria-label="Next month"
                 >
                   <ChevronRight size={18} />
@@ -441,7 +441,7 @@ export default function Booking() {
               </div>
 
               {/* Day of Week Headers */}
-              <div className="grid grid-cols-7 gap-2 mb-3 text-center font-sans text-[10px] uppercase tracking-[0.2em] text-[#666666] font-medium">
+              <div className="grid grid-cols-7 gap-2 mb-3 text-center font-sans text-[10px] uppercase tracking-[0.2em] text-[var(--color-muted-text)] font-semibold">
                 <div>SUN</div>
                 <div>MON</div>
                 <div>TUE</div>
@@ -467,7 +467,7 @@ export default function Booking() {
                     return (
                       <div
                         key={idx}
-                        className="py-3 font-sans text-xs text-[#2e2e2e] cursor-not-allowed select-none rounded-lg"
+                        className="py-3 font-sans text-xs text-[var(--color-border)] opacity-40 cursor-not-allowed select-none rounded-lg"
                       >
                         {format(day, 'd')}
                       </div>
@@ -481,10 +481,10 @@ export default function Booking() {
                       whileTap={{ scale: 0.95 }}
                       type="button"
                       onClick={() => setSelectedDate(dateStr)}
-                      className={`py-3 rounded-lg font-sans text-xs font-medium transition-all duration-150 ${
+                      className={`py-3 rounded-xl font-sans text-xs font-semibold transition-all duration-150 cursor-pointer ${
                         isSelected
-                          ? 'bg-[#E5C378] text-black font-bold shadow-[0_0_15px_rgba(229,195,120,0.4)]'
-                          : 'text-[#d4d4d4] hover:text-white hover:bg-[#171717]'
+                          ? 'bg-[var(--color-primary)] text-black font-bold shadow-[0_0_15px_rgba(229,195,120,0.4)]'
+                          : 'text-[var(--color-body-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-raised)]'
                       }`}
                     >
                       {format(day, 'd')}
@@ -498,28 +498,28 @@ export default function Booking() {
 
         {/* RIGHT COLUMN: STEP 03 (AVAILABLE SLOTS + CONFIRMATION) */}
         <div className="lg:col-span-4">
-          <div className="relative overflow-hidden bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl p-6 flex flex-col justify-between min-h-[560px] shadow-2xl sticky top-8">
+          <div className="relative overflow-hidden bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-2xl p-6 flex flex-col justify-between min-h-[560px] shadow-2xl sticky top-8 transition-colors">
             {selectedService && selectedDate && selectedTime && (
-              <BorderBeam size={180} duration={10} colorFrom="#E5C378" borderWidth={1.5} />
+              <BorderBeam size={180} duration={10} colorFrom="var(--color-primary)" borderWidth={1.5} />
             )}
             <div className="space-y-5">
-              <div className="flex items-center justify-between pb-3 border-b border-[#171717]">
-                <h2 className="text-xl font-serif text-[#E5C378] font-normal tracking-wide">
-                  Step 03: Available Slots
+              <div className="flex items-center justify-between pb-3 border-b border-[var(--color-border)]">
+                <h2 className="text-xl font-serif text-[var(--color-primary-text)] font-medium tracking-wide">
+                  Step 03: <span className="text-[var(--color-primary)] font-normal">Available Slots</span>
                 </h2>
-                <span className="font-sans text-[10px] uppercase tracking-widest text-[#737373]">
+                <span className="font-sans text-[10px] uppercase tracking-widest text-[var(--color-secondary-text)]">
                   {slots.length} open
                 </span>
               </div>
 
               {/* Summary of Active Choice */}
               {selectedService && (
-                <div className="p-3.5 rounded-lg bg-[#111111] border border-[#1c1c1c] text-xs space-y-1">
-                  <div className="flex items-center justify-between font-medium text-white">
+                <div className="p-3.5 rounded-xl bg-[var(--color-surface-raised)] border border-[var(--color-border)] text-xs space-y-1">
+                  <div className="flex items-center justify-between font-semibold text-[var(--color-primary-text)]">
                     <span>{selectedService.name}</span>
-                    <span className="text-[#E5C378] font-serif">${getServicePrice(selectedService.name, selectedService.durationMinutes)}</span>
+                    <span className="text-[var(--color-primary)] font-serif">${getServicePrice(selectedService.name, selectedService.durationMinutes)}</span>
                   </div>
-                  <div className="flex items-center gap-3 text-[10px] text-[#737373] font-sans tracking-wide">
+                  <div className="flex items-center gap-3 text-[10px] text-[var(--color-secondary-text)] font-sans tracking-wide">
                     <span className="flex items-center gap-1"><Clock size={11} /> {selectedService.durationMinutes} min</span>
                     <span>•</span>
                     <span className="flex items-center gap-1"><CalendarDays size={11} /> {format(parseISO(selectedDate), 'MMM d')}</span>
@@ -530,13 +530,13 @@ export default function Booking() {
               {/* Time Slots Grid */}
               {loadingSlots ? (
                 <div className="py-20 flex flex-col items-center justify-center gap-3">
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#E5C378] animate-ping" />
-                  <span className="font-sans text-[10px] uppercase tracking-widest text-[#737373]">
+                  <div className="w-3 h-3 rounded-full bg-[var(--color-primary)] animate-ping" />
+                  <span className="font-sans text-[10px] uppercase tracking-widest text-[var(--color-secondary-text)]">
                     Checking availability...
                   </span>
                 </div>
               ) : slots.length === 0 ? (
-                <div className="py-16 text-center font-sans text-xs uppercase tracking-widest text-[#666666] bg-[#111111] rounded-lg border border-[#1a1a1a] p-4">
+                <div className="py-16 text-center font-sans text-xs uppercase tracking-widest text-[var(--color-secondary-text)] bg-[var(--color-surface-raised)] rounded-xl border border-[var(--color-border)] p-4">
                   No slots available for this date.
                 </div>
               ) : (
@@ -552,10 +552,10 @@ export default function Booking() {
                         whileTap={{ scale: 0.98 }}
                         type="button"
                         onClick={() => setSelectedTime(timeStr)}
-                        className={`py-3.5 px-2 rounded-lg font-sans text-xs uppercase tracking-wider font-semibold transition-all text-center ${
+                        className={`py-3.5 px-2 rounded-xl font-sans text-xs uppercase tracking-wider font-semibold transition-all text-center cursor-pointer ${
                           isSelected
-                            ? 'bg-[#E5C378] text-black shadow-[0_0_15px_rgba(229,195,120,0.35)]'
-                            : 'bg-[#111111] border border-[#222222] text-[#d4d4d4] hover:border-[#E5C378]/50 hover:bg-[#171717] hover:text-white'
+                            ? 'bg-[var(--color-primary)] text-black shadow-[0_0_15px_rgba(229,195,120,0.35)]'
+                            : 'bg-[var(--color-surface-raised)] border border-[var(--color-border)] text-[var(--color-body-text)] hover:border-[var(--color-primary)]/50 hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-primary-text)]'
                         }`}
                       >
                         {formatted}
@@ -567,7 +567,7 @@ export default function Booking() {
             </div>
 
             {/* Bottom Action Area */}
-            <div className="pt-6 mt-6 border-t border-[#171717] space-y-4">
+            <div className="pt-6 mt-6 border-t border-[var(--color-border)] space-y-4">
               {/* Error Message */}
               <AnimatePresence>
                 {error && (
@@ -575,7 +575,7 @@ export default function Booking() {
                     initial={{ opacity: 0, y: -5 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
-                    className="p-3 bg-red-950/40 border border-red-500/30 text-red-400 font-sans text-[10px] uppercase tracking-wider text-center rounded-lg flex items-center justify-center gap-2"
+                    className="p-3 bg-red-950/20 border border-red-500/30 text-red-500 font-sans text-[10px] uppercase tracking-wider text-center rounded-xl flex items-center justify-center gap-2"
                   >
                     <AlertCircle size={14} className="shrink-0" />
                     <span>{error}</span>
@@ -588,22 +588,22 @@ export default function Booking() {
                 type="button"
                 onClick={handleBooking}
                 disabled={!selectedService || !selectedDate || !selectedTime || bookingLoading}
-                className="w-full py-3.5 px-6 font-sans text-xs font-bold uppercase tracking-[0.2em] disabled:opacity-40 disabled:pointer-events-none"
-                shimmerColor="#E5C378"
-                background="linear-gradient(135deg, #1f1a10 0%, #0d0d0d 100%)"
+                className="w-full py-4 px-6 font-sans text-xs font-bold uppercase tracking-[0.2em] disabled:opacity-40 disabled:pointer-events-none"
+                shimmerColor="var(--color-primary)"
+                background="var(--color-surface-raised)"
               >
                 {bookingLoading ? (
-                  <span>Reserving Appointment...</span>
+                  <span className="text-[var(--color-primary-text)]">Reserving Appointment...</span>
                 ) : (
-                  <div className="flex items-center justify-center gap-2 text-[#E5C378]">
+                  <div className="flex items-center justify-center gap-2 text-[var(--color-primary)] font-bold">
                     <span>Confirm Booking</span>
                     <ArrowRight size={14} />
                   </div>
                 )}
               </ShimmerButton>
 
-              <div className="flex items-center justify-center gap-2 text-[9px] text-[#666666] font-sans uppercase tracking-widest text-center">
-                <ShieldCheck size={12} className="text-[#4ade80]" />
+              <div className="flex items-center justify-center gap-2 text-[9px] text-[var(--color-secondary-text)] font-sans uppercase tracking-widest text-center">
+                <ShieldCheck size={12} className="text-emerald-500" />
                 <span>Instant Confirmation & Zero Delay</span>
               </div>
             </div>

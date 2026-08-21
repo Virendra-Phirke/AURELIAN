@@ -51,7 +51,7 @@ export function TabsList({
   return (
     <div
       className={cn(
-        'inline-flex items-center justify-center rounded-xl bg-[#0a0a0a] p-1 text-[#737373] border border-[#1f1f1f]',
+        'inline-flex items-center justify-center rounded-xl bg-[var(--color-surface-raised)] p-1 text-[var(--color-secondary-text)] border border-[var(--color-border)] shadow-inner',
         className
       )}
       {...props}
@@ -66,21 +66,23 @@ export function TabsTrigger({
   ...props
 }: {
   value: string;
+  className?: string;
+  children: React.ReactNode;
 } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
-  const ctx = React.useContext(TabsContext);
-  const isActive = ctx?.value === value;
+  const context = React.useContext(TabsContext);
+  const isActive = context?.value === value;
 
   return (
     <button
       type="button"
       role="tab"
       aria-selected={isActive}
-      onClick={() => ctx?.onValueChange(value)}
+      onClick={() => context?.onValueChange(value)}
       className={cn(
-        'inline-flex items-center justify-center whitespace-nowrap rounded-lg px-4 py-2 text-xs font-sans uppercase tracking-wider font-medium transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#E5C378] disabled:pointer-events-none disabled:opacity-50 cursor-pointer',
+        'inline-flex items-center justify-center whitespace-nowrap rounded-lg px-3.5 py-1.5 font-sans text-xs font-semibold uppercase tracking-wider transition-all focus-visible:outline-none cursor-pointer',
         isActive
-          ? 'bg-[#E5C378] text-black font-semibold shadow-[0_0_12px_rgba(229,195,120,0.25)]'
-          : 'text-[#888888] hover:text-white hover:bg-[#141414]',
+          ? 'bg-[var(--color-primary)] text-black shadow-sm font-bold'
+          : 'text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-hover)]',
         className
       )}
       {...props}
@@ -97,18 +99,18 @@ export function TabsContent({
   ...props
 }: {
   value: string;
+  className?: string;
+  children: React.ReactNode;
 } & React.HTMLAttributes<HTMLDivElement>) {
-  const ctx = React.useContext(TabsContext);
-  if (ctx?.value !== value) return null;
+  const context = React.useContext(TabsContext);
+  const isActive = context?.value === value;
+
+  if (!isActive) return null;
 
   return (
     <div
       role="tabpanel"
-      tabIndex={0}
-      className={cn(
-        'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#E5C378]',
-        className
-      )}
+      className={cn('mt-3 focus-visible:outline-none', className)}
       {...props}
     >
       {children}

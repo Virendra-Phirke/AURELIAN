@@ -146,15 +146,15 @@ export default function Settings() {
       </AnimatePresence>
 
       {/* Top Banner (Geist Style) */}
-      <div className="p-6 sm:p-8 bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl flex flex-col sm:flex-row items-center sm:items-start justify-between gap-6 shadow-xl">
+      <div className="p-6 sm:p-8 bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-2xl flex flex-col sm:flex-row items-center sm:items-start justify-between gap-6 shadow-xl transition-colors">
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
           <div className="relative group shrink-0">
-            <div className="w-20 h-20 rounded-full p-1 bg-[#141414] border border-[#2e2e2e]">
-              <div className="w-full h-full rounded-full bg-[#111111] flex items-center justify-center overflow-hidden relative">
+            <div className="w-20 h-20 rounded-full p-1 bg-[var(--color-surface-raised)] border border-[var(--color-border)]">
+              <div className="w-full h-full rounded-full bg-[var(--color-surface)] flex items-center justify-center overflow-hidden relative">
                 {newImage || user.image ? (
                   <img src={newImage || user.image} alt={user.name} className="w-full h-full object-cover" />
                 ) : (
-                  <User size={32} className="text-[#888888]" />
+                  <User size={32} className="text-[var(--color-secondary-text)]" />
                 )}
                 {isEditingProfile && (
                   <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
@@ -167,22 +167,22 @@ export default function Settings() {
 
           <div>
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 mb-1">
-              <h1 className="text-2xl font-serif text-white font-medium">{user.name}</h1>
-              <span className="px-2.5 py-0.5 rounded-full border border-[#E5C378]/30 bg-[#E5C378]/10 text-[#E5C378] font-sans text-[10px] uppercase tracking-widest font-medium">
+              <h1 className="text-2xl font-serif text-[var(--color-primary-text)] font-medium">{user.name}</h1>
+              <span className="px-2.5 py-0.5 rounded-full border border-[var(--color-primary)]/30 bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-sans text-[10px] uppercase tracking-widest font-semibold">
                 {user.role === 'ADMIN' ? 'Administrator' : 'Client Member'}
               </span>
             </div>
-            <p className="text-[#737373] font-sans text-xs">{user.email}</p>
+            <p className="text-[var(--color-secondary-text)] font-sans text-xs">{user.email}</p>
           </div>
         </div>
 
         <button
           onClick={handleUpdateProfile}
           disabled={updatingProfile}
-          className={`px-5 py-2.5 rounded-lg font-sans text-xs uppercase tracking-wider font-semibold transition-all inline-flex items-center gap-2 ${
+          className={`px-5 py-2.5 rounded-xl font-sans text-xs uppercase tracking-wider font-semibold transition-all inline-flex items-center gap-2 cursor-pointer ${
             isEditingProfile
-              ? 'bg-[#E5C378] hover:bg-[#edd495] text-black shadow-[0_0_15px_rgba(229,195,120,0.3)]'
-              : 'bg-[#141414] hover:bg-[#1f1f1f] text-[#d4d4d4] border border-[#262626]'
+              ? 'bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-black shadow-[0_0_15px_rgba(229,195,120,0.3)]'
+              : 'bg-[var(--color-surface-raised)] hover:bg-[var(--color-surface-hover)] text-[var(--color-primary-text)] border border-[var(--color-border)]'
           }`}
         >
           {updatingProfile ? 'Saving...' : isEditingProfile ? <><Check size={14} /> Save Profile</> : 'Edit Profile'}
@@ -192,16 +192,16 @@ export default function Settings() {
       {/* Main Grid Content */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left Column: Account Details */}
-        <div className="bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl p-6 sm:p-8 flex flex-col justify-between shadow-xl">
+        <div className="bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-2xl p-6 sm:p-8 flex flex-col justify-between shadow-xl transition-colors">
           <div className="space-y-6">
-            <div className="flex items-center gap-2.5 pb-4 border-b border-[#171717]">
-              <User size={16} className="text-[#E5C378]" />
-              <h2 className="text-white font-sans text-xs uppercase tracking-[0.2em] font-medium">Account Details</h2>
+            <div className="flex items-center gap-2.5 pb-4 border-b border-[var(--color-border)]">
+              <User size={16} className="text-[var(--color-primary)]" />
+              <h2 className="text-[var(--color-primary-text)] font-sans text-xs uppercase tracking-[0.2em] font-semibold">Account Details</h2>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="block font-sans text-[10px] uppercase tracking-[0.15em] text-[#737373] mb-1.5">
+                <label className="block font-sans text-[10px] uppercase tracking-[0.15em] text-[var(--color-secondary-text)] mb-1.5 font-medium">
                   Full Name
                 </label>
                 <input
@@ -209,19 +209,19 @@ export default function Settings() {
                   value={isEditingProfile ? newName : user.name}
                   onChange={(e) => setNewName(e.target.value)}
                   disabled={!isEditingProfile}
-                  className="w-full bg-[#111111] border border-[#222222] focus:border-[#E5C378] rounded-lg px-4 py-3 text-sm text-white focus:outline-none transition-colors disabled:opacity-60"
+                  className="w-full bg-[var(--color-surface-raised)] border border-[var(--color-border)] focus:border-[var(--color-primary)] rounded-xl px-4 py-3 text-sm text-[var(--color-primary-text)] focus:outline-none transition-colors disabled:opacity-60"
                 />
               </div>
 
               <div>
-                <label className="block font-sans text-[10px] uppercase tracking-[0.15em] text-[#737373] mb-1.5">
+                <label className="block font-sans text-[10px] uppercase tracking-[0.15em] text-[var(--color-secondary-text)] mb-1.5 font-medium">
                   Email Address
                 </label>
                 <input
                   type="email"
                   value={user.email}
                   disabled
-                  className="w-full bg-[#111111] border border-[#1c1c1c] rounded-lg px-4 py-3 text-sm text-[#737373] focus:outline-none cursor-not-allowed"
+                  className="w-full bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-xl px-4 py-3 text-sm text-[var(--color-secondary-text)] focus:outline-none cursor-not-allowed opacity-80"
                 />
               </div>
 
@@ -232,7 +232,7 @@ export default function Settings() {
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
                   >
-                    <label className="block font-sans text-[10px] uppercase tracking-[0.15em] text-[#737373] mb-1.5 mt-2">
+                    <label className="block font-sans text-[10px] uppercase tracking-[0.15em] text-[var(--color-secondary-text)] mb-1.5 mt-2 font-medium">
                       Avatar URL (Optional)
                     </label>
                     <input
@@ -240,7 +240,7 @@ export default function Settings() {
                       value={newImage}
                       onChange={(e) => setNewImage(e.target.value)}
                       placeholder="https://example.com/avatar.jpg"
-                      className="w-full bg-[#111111] border border-[#222222] focus:border-[#E5C378] rounded-lg px-4 py-3 text-sm text-white focus:outline-none transition-colors"
+                      className="w-full bg-[var(--color-surface-raised)] border border-[var(--color-border)] focus:border-[var(--color-primary)] rounded-xl px-4 py-3 text-sm text-[var(--color-primary-text)] focus:outline-none transition-colors"
                     />
                   </motion.div>
                 )}
@@ -249,14 +249,14 @@ export default function Settings() {
           </div>
 
           {isEditingProfile && (
-            <div className="pt-6 mt-6 border-t border-[#171717] flex gap-3">
+            <div className="pt-6 mt-6 border-t border-[var(--color-border)] flex gap-3">
               <button
                 onClick={() => {
                   setIsEditingProfile(false);
                   setNewName(user.name || '');
                   setNewImage(user.image || '');
                 }}
-                className="px-4 py-2 bg-[#141414] hover:bg-[#1a1a1a] text-[#888888] font-sans text-xs uppercase tracking-wider rounded-lg border border-[#222222] transition-colors"
+                className="px-4 py-2 bg-[var(--color-surface-raised)] hover:bg-[var(--color-surface-hover)] text-[var(--color-secondary-text)] font-sans text-xs uppercase tracking-wider rounded-xl border border-[var(--color-border)] transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -264,22 +264,22 @@ export default function Settings() {
           )}
         </div>
 
-        {/* Right Column: Security */}
+        {/* Right Column: Security & Theme */}
         <div className="space-y-6 flex flex-col">
-          <div className="bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl p-6 sm:p-8 flex-1 shadow-xl">
-            <div className="flex items-center gap-2.5 pb-4 mb-6 border-b border-[#171717]">
-              <Shield size={16} className="text-[#E5C378]" />
-              <h2 className="text-white font-sans text-xs uppercase tracking-[0.2em] font-medium">Security & Password</h2>
+          <div className="bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-2xl p-6 sm:p-8 flex-1 shadow-xl transition-colors">
+            <div className="flex items-center gap-2.5 pb-4 mb-6 border-b border-[var(--color-border)]">
+              <Shield size={16} className="text-[var(--color-primary)]" />
+              <h2 className="text-[var(--color-primary-text)] font-sans text-xs uppercase tracking-[0.2em] font-semibold">Security & Password</h2>
             </div>
 
             {checkingPassword ? (
-              <div className="py-8 text-center font-sans text-xs text-[#737373] uppercase tracking-wider">
+              <div className="py-8 text-center font-sans text-xs text-[var(--color-secondary-text)] uppercase tracking-wider">
                 Checking security status...
               </div>
             ) : (
               <div className="space-y-4">
                 {!hasPassword && (
-                  <div className="p-3.5 rounded-lg bg-[#1a1508] border border-[#E5C378]/30 text-[#E5C378] font-sans text-xs flex items-center gap-2.5">
+                  <div className="p-3.5 rounded-xl bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/30 text-[var(--color-primary)] font-sans text-xs flex items-center gap-2.5">
                     <AlertCircle size={14} className="shrink-0" />
                     <span>No password is currently set for this account.</span>
                   </div>
@@ -287,7 +287,7 @@ export default function Settings() {
 
                 {hasPassword && (
                   <div>
-                    <label className="block font-sans text-[10px] uppercase tracking-[0.15em] text-[#737373] mb-1.5">
+                    <label className="block font-sans text-[10px] uppercase tracking-[0.15em] text-[var(--color-secondary-text)] mb-1.5 font-medium">
                       Current Password
                     </label>
                     <input
@@ -295,13 +295,13 @@ export default function Settings() {
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full bg-[#111111] border border-[#222222] focus:border-[#E5C378] rounded-lg px-4 py-3 text-sm text-white focus:outline-none transition-colors placeholder:text-[#333333]"
+                      className="w-full bg-[var(--color-surface-raised)] border border-[var(--color-border)] focus:border-[var(--color-primary)] rounded-xl px-4 py-3 text-sm text-[var(--color-primary-text)] focus:outline-none transition-colors placeholder:text-[var(--color-muted-text)]"
                     />
                   </div>
                 )}
 
                 <div>
-                  <label className="block font-sans text-[10px] uppercase tracking-[0.15em] text-[#737373] mb-1.5">
+                  <label className="block font-sans text-[10px] uppercase tracking-[0.15em] text-[var(--color-secondary-text)] mb-1.5 font-medium">
                     New Password
                   </label>
                   <input
@@ -309,7 +309,7 @@ export default function Settings() {
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full bg-[#111111] border border-[#222222] focus:border-[#E5C378] rounded-lg px-4 py-3 text-sm text-white focus:outline-none transition-colors placeholder:text-[#333333]"
+                    className="w-full bg-[var(--color-surface-raised)] border border-[var(--color-border)] focus:border-[var(--color-primary)] rounded-xl px-4 py-3 text-sm text-[var(--color-primary-text)] focus:outline-none transition-colors placeholder:text-[var(--color-muted-text)]"
                   />
                 </div>
 
@@ -317,7 +317,7 @@ export default function Settings() {
                   <button
                     onClick={handleChangePassword}
                     disabled={updatingPassword}
-                    className="px-5 py-2.5 bg-[#E5C378] hover:bg-[#edd495] text-black font-sans text-xs font-semibold uppercase tracking-wider rounded-lg transition-all shadow-[0_0_15px_rgba(229,195,120,0.25)] disabled:opacity-50"
+                    className="px-5 py-2.5 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-black font-sans text-xs font-semibold uppercase tracking-wider rounded-xl transition-all shadow-[0_0_15px_rgba(229,195,120,0.25)] disabled:opacity-50 cursor-pointer"
                   >
                     {updatingPassword ? 'Updating...' : hasPassword ? 'Update Password' : 'Set Password'}
                   </button>
@@ -327,11 +327,11 @@ export default function Settings() {
           </div>
 
           {/* Theme & Appearance */}
-          <div className="bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl p-6 sm:p-8 shadow-xl space-y-4">
-            <div className="flex items-center justify-between pb-4 border-b border-[#171717]">
+          <div className="bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-2xl p-6 sm:p-8 shadow-xl space-y-4 transition-colors">
+            <div className="flex items-center justify-between pb-4 border-b border-[var(--color-border)]">
               <div className="flex items-center gap-2.5">
-                <Sun size={16} className="text-[#E5C378]" />
-                <h2 className="text-white font-sans text-xs uppercase tracking-[0.2em] font-medium">Appearance & Theme</h2>
+                <Sun size={16} className="text-[var(--color-primary)]" />
+                <h2 className="text-[var(--color-primary-text)] font-sans text-xs uppercase tracking-[0.2em] font-semibold">Appearance & Theme</h2>
               </div>
               <ThemeToggle showLabel />
             </div>
@@ -342,8 +342,8 @@ export default function Settings() {
                 onClick={() => setTheme('dark')}
                 className={`p-3.5 rounded-xl border flex flex-col items-center gap-2 transition-all cursor-pointer ${
                   theme === 'dark'
-                    ? 'border-[#E5C378] bg-[#141414] text-[#E5C378] shadow-[0_0_12px_rgba(229,195,120,0.2)]'
-                    : 'border-[#222222] bg-[#0d0d0d] text-[#737373] hover:text-white hover:border-[#333333]'
+                    ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/10 text-[var(--color-primary)] shadow-sm font-semibold'
+                    : 'border-[var(--color-border)] bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:border-[var(--color-primary)]/30'
                 }`}
               >
                 <Moon size={18} />
@@ -355,8 +355,8 @@ export default function Settings() {
                 onClick={() => setTheme('light')}
                 className={`p-3.5 rounded-xl border flex flex-col items-center gap-2 transition-all cursor-pointer ${
                   theme === 'light'
-                    ? 'border-[#E5C378] bg-[#141414] text-[#E5C378] shadow-[0_0_12px_rgba(229,195,120,0.2)]'
-                    : 'border-[#222222] bg-[#0d0d0d] text-[#737373] hover:text-white hover:border-[#333333]'
+                    ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/10 text-[var(--color-primary)] shadow-sm font-semibold'
+                    : 'border-[var(--color-border)] bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:border-[var(--color-primary)]/30'
                 }`}
               >
                 <Sun size={18} />
@@ -368,8 +368,8 @@ export default function Settings() {
                 onClick={() => setTheme('system')}
                 className={`p-3.5 rounded-xl border flex flex-col items-center gap-2 transition-all cursor-pointer ${
                   theme === 'system'
-                    ? 'border-[#E5C378] bg-[#141414] text-[#E5C378] shadow-[0_0_12px_rgba(229,195,120,0.2)]'
-                    : 'border-[#222222] bg-[#0d0d0d] text-[#737373] hover:text-white hover:border-[#333333]'
+                    ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/10 text-[var(--color-primary)] shadow-sm font-semibold'
+                    : 'border-[var(--color-border)] bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:border-[var(--color-primary)]/30'
                 }`}
               >
                 <Laptop size={18} />
@@ -378,22 +378,31 @@ export default function Settings() {
             </div>
           </div>
 
-          <div className="bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl p-5 flex items-center justify-between gap-4 shadow-xl">
+          <div className="bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-2xl p-5 flex items-center justify-between gap-4 shadow-xl transition-colors">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-[#141414] border border-[#222222] flex items-center justify-center shrink-0">
-                <Lock size={16} className="text-[#E5C378]" />
+              <div className="w-10 h-10 rounded-xl bg-[var(--color-surface-raised)] border border-[var(--color-border)] flex items-center justify-center shrink-0">
+                <Lock size={16} className="text-[var(--color-primary)]" />
               </div>
               <div>
-                <h3 className="text-white text-xs font-semibold uppercase tracking-wider">Two-Factor Authentication</h3>
-                <p className="text-[#737373] font-sans text-[11px]">Enhanced account protection</p>
+                <h3 className="text-[var(--color-primary-text)] text-xs font-semibold uppercase tracking-wider">Two-Factor Authentication</h3>
+                <p className="text-[var(--color-secondary-text)] font-sans text-[11px]">Enhanced account protection</p>
               </div>
             </div>
 
             <button
-              onClick={() => setToast({ message: '2FA configuration link sent to your email', type: 'success' })}
-              className="px-3.5 py-1.5 bg-[#141414] hover:bg-[#1f1f1f] text-[#d4d4d4] hover:text-white border border-[#262626] rounded-lg font-sans text-xs transition-colors"
+              onClick={() => {
+                setTwoFactorEnabled(!twoFactorEnabled);
+                setToast({ message: !twoFactorEnabled ? '2FA Enabled' : '2FA Disabled', type: 'success' });
+              }}
+              className={`w-12 h-6 rounded-full transition-colors relative cursor-pointer ${
+                twoFactorEnabled ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-surface-raised)] border border-[var(--color-border)]'
+              }`}
             >
-              Configure
+              <div
+                className={`w-4 h-4 rounded-full bg-black transition-transform absolute top-1 ${
+                  twoFactorEnabled ? 'left-7 bg-black' : 'left-1 bg-[var(--color-secondary-text)]'
+                }`}
+              />
             </button>
           </div>
         </div>

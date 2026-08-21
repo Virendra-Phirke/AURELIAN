@@ -73,18 +73,18 @@ export default function Layout() {
 
   // Regular user pages — PC: Sidebar, Mobile: Top Header + Bottom Nav
   return (
-    <div className="relative flex h-full bg-[var(--color-bg)] overflow-hidden flex-col md:flex-row">
-      <Particles className="pointer-events-none opacity-20 fixed inset-0 z-0" quantity={35} color="#E5C378" />
+    <div className="relative flex h-full bg-[var(--color-bg)] text-[var(--color-body-text)] overflow-hidden flex-col md:flex-row transition-colors duration-300">
+      <Particles className="pointer-events-none opacity-25 fixed inset-0 z-0" quantity={35} color="var(--color-primary)" />
 
       {/* Mobile Top Header */}
-      <header className="md:hidden shrink-0 h-16 border-b border-[#ffffff15] px-6 flex items-center justify-between z-50 bg-[#0a0a0a]/80 backdrop-blur-xl sticky top-0">
-        <Link to="/" className="text-lg tracking-[0.3em] font-light text-white uppercase">
+      <header className="md:hidden shrink-0 h-16 border-b border-[var(--color-border)] px-6 flex items-center justify-between z-50 bg-[var(--color-sidebar-bg)]/90 backdrop-blur-xl sticky top-0 transition-colors">
+        <Link to="/" className="text-lg tracking-[0.3em] font-light text-[var(--color-primary-text)] uppercase font-brand">
           AURELIAN
         </Link>
         <div className="flex items-center gap-2">
           <ThemeToggle />
           {session?.user && (
-            <button onClick={handleLogout} className="text-[#888] hover:text-[#C5A059] transition-colors p-2">
+            <button onClick={handleLogout} className="text-[var(--color-secondary-text)] hover:text-[var(--color-primary)] transition-colors p-2 cursor-pointer">
               <LogOut size={18} />
             </button>
           )}
@@ -96,10 +96,10 @@ export default function Layout() {
         initial={{ x: -20, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="hidden md:flex shrink-0 w-64 flex-col border-r border-[#1a1a1a] bg-[#0a0a0a] z-20"
+        className="hidden md:flex shrink-0 w-64 flex-col border-r border-[var(--color-border)] bg-[var(--color-sidebar-bg)] z-20 transition-colors"
       >
-        <div className="h-24 flex items-center px-8 border-b border-[#1a1a1a] shrink-0">
-          <Link to="/" className="text-2xl tracking-[0.35em] font-brand font-semibold text-[#E5C378] uppercase">
+        <div className="h-24 flex items-center px-8 border-b border-[var(--color-border)] shrink-0">
+          <Link to="/" className="text-2xl tracking-[0.35em] font-brand font-semibold text-[var(--color-primary)] uppercase">
             AURELIAN
           </Link>
         </div>
@@ -108,66 +108,66 @@ export default function Layout() {
             <>
               <Link
                 to="/booking"
-                className={`flex items-center gap-4 px-4 py-3.5 rounded-lg transition-all ${
+                className={`flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all ${
                   location.pathname === '/booking'
-                    ? 'border-l-4 border-[#E5C378] bg-[#E5C378]/10 text-[#E5C378] font-medium'
-                    : 'text-[#777] hover:text-white hover:bg-[#ffffff06] border-l-4 border-transparent'
+                    ? 'border-l-4 border-[var(--color-primary)] bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-medium shadow-sm'
+                    : 'text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-raised)] border-l-4 border-transparent'
                 }`}
               >
-                <CalendarDays size={18} className={location.pathname === '/booking' ? 'text-[#E5C378]' : 'text-[#777]'} />
+                <CalendarDays size={18} className={location.pathname === '/booking' ? 'text-[var(--color-primary)]' : 'text-[var(--color-secondary-text)]'} />
                 <span className="font-sans text-[11px] uppercase tracking-[0.2em]">Book</span>
               </Link>
               <Link
                 to="/dashboard"
-                className={`flex items-center gap-4 px-4 py-3.5 rounded-lg transition-all ${
+                className={`flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all ${
                   location.pathname === '/dashboard'
-                    ? 'border-l-4 border-[#E5C378] bg-[#E5C378]/10 text-[#E5C378] font-medium'
-                    : 'text-[#777] hover:text-white hover:bg-[#ffffff06] border-l-4 border-transparent'
+                    ? 'border-l-4 border-[var(--color-primary)] bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-medium shadow-sm'
+                    : 'text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-raised)] border-l-4 border-transparent'
                 }`}
               >
-                <LayoutDashboard size={18} className={location.pathname === '/dashboard' ? 'text-[#E5C378]' : 'text-[#777]'} />
+                <LayoutDashboard size={18} className={location.pathname === '/dashboard' ? 'text-[var(--color-primary)]' : 'text-[var(--color-secondary-text)]'} />
                 <span className="font-sans text-[11px] uppercase tracking-[0.2em]">Dashboard</span>
               </Link>
               <Link
                 to="/settings"
-                className={`flex items-center gap-4 px-4 py-3.5 rounded-lg transition-all ${
+                className={`flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all ${
                   location.pathname === '/settings'
-                    ? 'border-l-4 border-[#E5C378] bg-[#E5C378]/10 text-[#E5C378] font-medium'
-                    : 'text-[#777] hover:text-white hover:bg-[#ffffff06] border-l-4 border-transparent'
+                    ? 'border-l-4 border-[var(--color-primary)] bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-medium shadow-sm'
+                    : 'text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-raised)] border-l-4 border-transparent'
                 }`}
               >
-                <Settings size={18} className={location.pathname === '/settings' ? 'text-[#E5C378]' : 'text-[#777]'} />
+                <Settings size={18} className={location.pathname === '/settings' ? 'text-[var(--color-primary)]' : 'text-[var(--color-secondary-text)]'} />
                 <span className="font-sans text-[11px] uppercase tracking-[0.2em]">Settings</span>
               </Link>
             </>
           ) : (
-            <Link to="/login" className="flex items-center gap-4 px-4 py-3.5 rounded-lg text-[#777] hover:text-white hover:bg-[#ffffff06] border-l-4 border-transparent transition-colors">
+            <Link to="/login" className="flex items-center gap-4 px-4 py-3.5 rounded-xl text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-raised)] border-l-4 border-transparent transition-colors">
               <LogIn size={18} />
               <span className="font-sans text-[11px] uppercase tracking-[0.2em]">Sign In</span>
             </Link>
           )}
         </nav>
         {session?.user && (
-          <div className="p-6 border-t border-[#1a1a1a] shrink-0 flex flex-col items-center gap-4">
+          <div className="p-6 border-t border-[var(--color-border)] shrink-0 flex flex-col items-center gap-4">
             <div className="flex flex-col items-center text-center">
-              <div className="w-16 h-16 rounded-xl border border-[#E5C378] p-1 bg-[#111] shadow-[0_0_20px_rgba(229,195,120,0.25)] flex items-center justify-center overflow-hidden mb-2.5">
+              <div className="w-16 h-16 rounded-xl border border-[var(--color-primary)] p-1 bg-[var(--color-surface-raised)] shadow-[0_0_20px_rgba(229,195,120,0.2)] flex items-center justify-center overflow-hidden mb-2.5">
                 {session.user.image ? (
                   <img src={session.user.image} alt={session.user.name} className="w-full h-full rounded-lg object-cover" />
                 ) : (
-                  <div className="w-full h-full rounded-lg bg-[#181818] flex items-center justify-center">
-                    <User size={26} className="text-[#E5C378]" />
+                  <div className="w-full h-full rounded-lg bg-[var(--color-surface)] flex items-center justify-center">
+                    <User size={26} className="text-[var(--color-primary)]" />
                   </div>
                 )}
               </div>
-              <div className="text-sm font-light text-white tracking-wide truncate max-w-[190px]">
-                {session.user.name || 'Vishal Patil'}
+              <div className="text-sm font-medium text-[var(--color-primary-text)] tracking-wide truncate max-w-[190px]">
+                {session.user.name || 'Client'}
               </div>
             </div>
             <div className="flex items-center gap-2 w-full">
               <ThemeToggle className="shrink-0" />
               <button
                 onClick={handleLogout}
-                className="flex-1 py-2.5 rounded-lg text-[#777] hover:text-white hover:border-[#E5C378] border border-[#262626] bg-[#0e0e0e] font-sans text-[10px] uppercase tracking-[0.25em] transition-all"
+                className="flex-1 py-2.5 rounded-lg text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:border-[var(--color-primary)] border border-[var(--color-border)] bg-[var(--color-surface)] font-sans text-[10px] uppercase tracking-[0.25em] transition-all cursor-pointer"
               >
                 Logout
               </button>
@@ -194,12 +194,12 @@ export default function Layout() {
       </main>
 
       {/* Mobile Bottom Nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-20 border-t border-[#ffffff15] bg-[#0a0a0a]/80 backdrop-blur-xl z-50 flex items-center justify-around px-2 pb-2">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-20 border-t border-[var(--color-border)] bg-[var(--color-sidebar-bg)]/95 backdrop-blur-xl z-50 flex items-center justify-around px-2 pb-2">
         {session?.user ? (
           <>
             <Link
               to="/booking"
-              className={`flex flex-col items-center justify-center w-full h-full gap-1.5 transition-colors ${location.pathname === '/booking' ? 'text-[#C5A059]' : 'text-[#555] hover:text-[#888]'
+              className={`flex flex-col items-center justify-center w-full h-full gap-1.5 transition-colors ${location.pathname === '/booking' ? 'text-[var(--color-primary)]' : 'text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)]'
                 }`}
             >
               <CalendarDays size={20} />
@@ -207,7 +207,7 @@ export default function Layout() {
             </Link>
             <Link
               to="/dashboard"
-              className={`flex flex-col items-center justify-center w-full h-full gap-1.5 transition-colors ${location.pathname === '/dashboard' ? 'text-[#C5A059]' : 'text-[#555] hover:text-[#888]'
+              className={`flex flex-col items-center justify-center w-full h-full gap-1.5 transition-colors ${location.pathname === '/dashboard' ? 'text-[var(--color-primary)]' : 'text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)]'
                 }`}
             >
               <LayoutDashboard size={20} />
@@ -215,7 +215,7 @@ export default function Layout() {
             </Link>
             <Link
               to="/settings"
-              className={`flex flex-col items-center justify-center w-full h-full gap-1.5 transition-colors ${location.pathname === '/settings' ? 'text-[#C5A059]' : 'text-[#555] hover:text-[#888]'
+              className={`flex flex-col items-center justify-center w-full h-full gap-1.5 transition-colors ${location.pathname === '/settings' ? 'text-[var(--color-primary)]' : 'text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)]'
                 }`}
             >
               <Settings size={20} />
@@ -223,7 +223,10 @@ export default function Layout() {
             </Link>
           </>
         ) : (
-          <Link to="/login" className="flex flex-col items-center justify-center w-full h-full gap-1.5 text-[#555] hover:text-[#888]">
+          <Link
+            to="/login"
+            className="flex flex-col items-center justify-center w-full h-full gap-1.5 text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)]"
+          >
             <LogIn size={20} />
             <span className="font-sans text-[9px] uppercase tracking-widest">Sign In</span>
           </Link>

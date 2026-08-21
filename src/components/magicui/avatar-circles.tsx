@@ -17,7 +17,7 @@ export function AvatarCircles({
       {avatarUrls.map((url, index) => (
         <div
           key={index}
-          className="relative inline-block size-8 rounded-full border-2 border-[#0a0a0a] bg-[#1a1a1a] shadow-sm overflow-hidden"
+          className="relative inline-block size-8 rounded-full border-2 border-[var(--color-bg)] bg-[var(--color-surface-raised)] shadow-sm overflow-hidden"
           title={url.name || 'VIP Client'}
         >
           {url.imageUrl ? (
@@ -27,14 +27,14 @@ export function AvatarCircles({
               alt={url.name || 'Avatar'}
             />
           ) : (
-            <div className="size-full flex items-center justify-center font-sans text-[10px] uppercase font-bold text-[#E5C378]">
+            <div className="size-full flex items-center justify-center font-sans text-[10px] uppercase font-bold text-[var(--color-primary)]">
               {(url.name || 'VIP').substring(0, 2)}
             </div>
           )}
         </div>
       ))}
       {(numPeople ?? 0) > 0 && (
-        <div className="flex size-8 items-center justify-center rounded-full border-2 border-[#0a0a0a] bg-[#1a1a1a] text-center text-[10px] font-sans font-medium text-white shadow-sm">
+        <div className="flex size-8 items-center justify-center rounded-full border-2 border-[var(--color-bg)] bg-[var(--color-surface-raised)] text-center text-[10px] font-sans font-bold text-[var(--color-primary-text)] shadow-sm">
           +{numPeople}
         </div>
       )}
