@@ -4,8 +4,9 @@
       "root": ".",
       "framework": "vite"
     },
-    "backend": {
-      "root": "backend"
+    "server": {
+      "root": "backend",
+      "entrypoint": "server.ts"
     }
   },
   "rewrites": [
@@ -13,7 +14,7 @@
       "source": "/api(/.*)?",
       "destination": {
         "type": "service",
-        "service": "backend"
+        "service": "server"
       }
     },
     {
