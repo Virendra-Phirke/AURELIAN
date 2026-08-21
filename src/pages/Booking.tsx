@@ -280,24 +280,8 @@ export default function Booking() {
             </div>
           </div>
 
-          {/* Social Proof & Instant confirmation badge */}
+          {/* Instant confirmation badge */}
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2.5">
-              <AvatarCircles
-                numPeople={40}
-                avatarUrls={[
-                  { name: 'Marcus Sterling' },
-                  { name: 'Alexander Wright' },
-                  { name: 'Julian Hayes' },
-                  { name: 'David Vance' },
-                ]}
-              />
-              <div className="text-left font-sans text-[8.5px] uppercase tracking-wider text-[var(--color-secondary-text)]">
-                <span className="text-[var(--color-primary-text)] font-medium block">VIP Experience</span>
-                <span>Verified Clients</span>
-              </div>
-            </div>
-
             <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--color-surface-raised)] border border-[var(--color-border)] text-[9px] uppercase font-sans tracking-wider text-[var(--color-secondary-text)] shrink-0 shadow-sm">
               <span className="relative flex h-1.5 w-1.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
