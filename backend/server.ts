@@ -1,47 +1,16 @@
 import express from 'express';
 import path from 'path';
-import cors from 'cors';
 import { createServer as createViteServer } from 'vite';
-import { auth } from './auth.js';
-import { apiRouter } from './routes/api.js';
+import { app } from './app.js';
 import { db } from './db/index.js';
 import { services } from './db/schema.js';
-import { sql, eq } from 'drizzle-orm';
+import { sql } from 'drizzle-orm';
 import dotenv from 'dotenv';
 dotenv.config();
-import fs from 'fs';
 
 const PORT = 3000;
 
 async function startServer() {
-  const app = express();
-
-  // Security Headers
-  app.use((req, res, next) => {
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-    next();
-  });
-
-  app.use(cors());
-  app.use(express.json({ limit: '10kb' }));
-
-  // Better Auth handler
-  const { toNodeHandler } = await import('better-auth/node');
-  const authHandler = toNodeHandler(auth);
-  app.all('/api/auth/*all', async (req, res, next) => {
-    try {
-      await authHandler(req, res);
-    } catch (e: any) {
-      console.error('BetterAuth Error:', e);
-      fs.writeFileSync('auth-error.log', e.toString() + '\\n' + (e.stack || ''));
-      res.status(500).send('Error');
-    }
-  });
-
-  // Main API Routes
-  app.use('/api', apiRouter);
-
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
@@ -52,7 +21,7 @@ async function startServer() {
   } else {
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
-    app.get('*all', (req, res) => {
+    app.get('*splat', (req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }
