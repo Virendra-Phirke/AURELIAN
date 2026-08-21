@@ -278,44 +278,44 @@ export default function Booking() {
           </div>
         </div>
 
-        {/* TOP STEP PROGRESS INDICATORS (Geist Style) */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
+        {/* TOP STEP PROGRESS INDICATORS */}
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 pt-1">
           {/* Step 1 Bar */}
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <div className="h-[2px] w-full rounded-full bg-[var(--color-primary)] shadow-[0_0_8px_rgba(229,195,120,0.4)] transition-all" />
-            <div className="flex items-center justify-between text-[11px] font-sans uppercase tracking-[0.15em]">
-              <span className="text-[var(--color-primary)] font-medium">Step 01 (Select Service)</span>
-              {selectedService && <Check size={12} className="text-[var(--color-primary)]" />}
+            <div className="flex items-center justify-between text-[9px] sm:text-[11px] font-sans uppercase tracking-wider">
+              <span className="text-[var(--color-primary)] font-semibold truncate">01 Service</span>
+              {selectedService && <Check size={11} className="text-[var(--color-primary)] shrink-0 hidden sm:inline" />}
             </div>
           </div>
 
           {/* Step 2 Bar */}
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <div
               className={`h-[2px] w-full rounded-full transition-all ${
-                selectedDate ? 'bg-[var(--color-primary)] shadow-[0_0_8px_rgba(229,195,120,0.4)]' : 'bg-[var(--color-border)]'
+                selectedDate ? 'bg-[var(--color-primary)] shadow-[0_0_8px_rgba(229,195,120,0.4)]' : 'bg-[var(--color-surface-raised)]'
               }`}
             />
-            <div className="flex items-center justify-between text-[11px] font-sans uppercase tracking-[0.15em]">
-              <span className={selectedDate ? 'text-[var(--color-primary)] font-medium' : 'text-[var(--color-secondary-text)]'}>
-                Step 02 (Choose Date)
+            <div className="flex items-center justify-between text-[9px] sm:text-[11px] font-sans uppercase tracking-wider">
+              <span className={`truncate ${selectedDate ? 'text-[var(--color-primary)] font-semibold' : 'text-[var(--color-secondary-text)]'}`}>
+                02 Date
               </span>
-              {selectedDate && <Check size={12} className="text-[var(--color-primary)]" />}
+              {selectedDate && <Check size={11} className="text-[var(--color-primary)] shrink-0 hidden sm:inline" />}
             </div>
           </div>
 
           {/* Step 3 Bar */}
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <div
               className={`h-[2px] w-full rounded-full transition-all ${
-                selectedTime ? 'bg-[var(--color-primary)] shadow-[0_0_8px_rgba(229,195,120,0.4)]' : 'bg-[var(--color-border)]'
+                selectedTime ? 'bg-[var(--color-primary)] shadow-[0_0_8px_rgba(229,195,120,0.4)]' : 'bg-[var(--color-surface-raised)]'
               }`}
             />
-            <div className="flex items-center justify-between text-[11px] font-sans uppercase tracking-[0.15em]">
-              <span className={selectedTime ? 'text-[var(--color-primary)] font-medium' : 'text-[var(--color-secondary-text)]'}>
-                Step 03 (Available Slots)
+            <div className="flex items-center justify-between text-[9px] sm:text-[11px] font-sans uppercase tracking-wider">
+              <span className={`truncate ${selectedTime ? 'text-[var(--color-primary)] font-semibold' : 'text-[var(--color-secondary-text)]'}`}>
+                03 Slots
               </span>
-              {selectedTime && <Check size={12} className="text-[var(--color-primary)]" />}
+              {selectedTime && <Check size={11} className="text-[var(--color-primary)] shrink-0 hidden sm:inline" />}
             </div>
           </div>
         </div>
@@ -324,13 +324,13 @@ export default function Booking() {
       {/* ════════════════════════════════════════
           MAIN BOOKING GRID
          ════════════════════════════════════════ */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
         {/* LEFT COLUMN: STEP 01 (SERVICES) + STEP 02 (CALENDAR) */}
-        <div className="lg:col-span-8 space-y-10">
+        <div className="lg:col-span-8 space-y-6 sm:space-y-10">
           {/* ──────────────────────────────────────
               STEP 01: SELECT SERVICE
              ────────────────────────────────────── */}
-          <div className="space-y-4 sm:space-y-5">
+          <div className="space-y-3.5 sm:space-y-5">
             <div className="flex items-center justify-between">
               <h2 className="text-lg sm:text-2xl font-serif text-[var(--color-primary-text)] font-medium tracking-wide">
                 Step 01: <span className="text-[var(--color-primary)] font-normal">Select Service</span>
@@ -349,34 +349,40 @@ export default function Booking() {
                   <BlurFade key={service.id} delay={0.04 * idx} inView>
                     <motion.div
                       whileHover={{ y: -2 }}
+                      whileTap={{ scale: 0.98 }}
                       onClick={() => setSelectedService(service)}
-                      className={`relative overflow-hidden rounded-2xl p-3.5 sm:p-5 flex flex-col justify-between text-center transition-all cursor-pointer min-h-[160px] sm:min-h-[220px] select-none ${
+                      className={`relative overflow-hidden rounded-2xl p-3.5 sm:p-5 flex sm:flex-col items-center sm:items-stretch justify-between gap-3 text-left sm:text-center transition-all cursor-pointer select-none ${
                         isSelected
-                          ? 'bg-[var(--color-primary)]/10 shadow-[0_0_35px_rgba(229,195,120,0.22)]'
+                          ? 'bg-[var(--color-primary)]/10 shadow-[0_0_25px_rgba(229,195,120,0.18)]'
                           : 'bg-[var(--color-card-bg)] hover:bg-[var(--color-surface-hover)] shadow-md'
                       }`}
                     >
                       {isSelected && (
-                        <BorderBeam size={100} duration={7} colorFrom="var(--color-primary)" borderWidth={2} />
+                        <BorderBeam size={140} duration={8} colorFrom="var(--color-primary)" borderWidth={1.5} />
                       )}
 
-                      {/* Top Icon and Name */}
-                      <div>
-                        <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-full mx-auto flex items-center justify-center mb-2 sm:mb-3.5 bg-[var(--color-surface-raised)]">
+                      <div className="flex sm:flex-col items-center sm:items-stretch gap-3 sm:gap-0 flex-1 min-w-0">
+                        {/* Icon */}
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-full shrink-0 flex items-center justify-center sm:mx-auto sm:mb-3 bg-[var(--color-surface-raised)]">
                           {getServiceIcon(service.name)}
                         </div>
 
-                        <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.15em] sm:tracking-[0.2em] text-[var(--color-primary-text)] mb-1 sm:mb-1.5">
-                          {service.name}
-                        </h3>
-                        <div className="inline-flex items-center gap-1.5 px-2 sm:px-2.5 py-0.5 rounded-full bg-[var(--color-surface-raised)] text-[9px] sm:text-[10px] text-[var(--color-secondary-text)] font-sans tracking-wider mb-2 sm:mb-3">
-                          <span>{service.durationMinutes} min</span>
-                          <span>•</span>
-                          <span className="text-[var(--color-primary)] font-semibold">${price}</span>
+                        {/* Details */}
+                        <div className="flex-1 sm:text-center min-w-0">
+                          <div className="flex sm:flex-col items-center sm:justify-center gap-2 sm:gap-0 mb-0.5 sm:mb-1">
+                            <h3 className="font-sans text-xs font-semibold uppercase tracking-wider text-[var(--color-primary-text)] truncate">
+                              {service.name}
+                            </h3>
+                            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[var(--color-surface-raised)] text-[9px] sm:text-[10px] text-[var(--color-secondary-text)] font-sans tracking-wider sm:my-1.5 shrink-0">
+                              <span>{service.durationMinutes}m</span>
+                              <span>•</span>
+                              <span className="text-[var(--color-primary)] font-semibold">${price}</span>
+                            </div>
+                          </div>
+                          <p className="text-[10px] sm:text-[11px] text-[var(--color-secondary-text)] font-sans line-clamp-1 sm:line-clamp-2 leading-relaxed">
+                            {getServiceDescription(service.name)}
+                          </p>
                         </div>
-                        <p className="text-[10px] sm:text-[11px] text-[var(--color-secondary-text)] font-sans line-clamp-2 leading-relaxed px-1">
-                          {getServiceDescription(service.name)}
-                        </p>
                       </div>
 
                       {/* Select / Selected Button */}
@@ -386,7 +392,7 @@ export default function Booking() {
                           e.stopPropagation();
                           setSelectedService(service);
                         }}
-                        className={`w-full py-2 sm:py-2.5 rounded-xl font-sans text-[9px] sm:text-[10px] uppercase tracking-widest font-semibold transition-all mt-2.5 sm:mt-4 cursor-pointer ${
+                        className={`shrink-0 px-3.5 py-2 sm:w-full sm:py-2.5 rounded-xl font-sans text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold transition-all cursor-pointer ${
                           isSelected
                             ? 'bg-[var(--color-primary)] text-black shadow-md'
                             : 'bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-primary-text)]'
