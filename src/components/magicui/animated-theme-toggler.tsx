@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { flushSync } from 'react-dom';
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from '../../lib/theme';
+import { fireThemeWave } from '../../lib/theme-wave';
 import { cn } from '../../lib/utils';
 
 export interface AnimatedThemeTogglerProps
@@ -47,6 +48,9 @@ export function AnimatedThemeToggler({
       if (isAppearanceTransition) {
         const x = clientX || window.innerWidth / 2;
         const y = clientY || window.innerHeight / 2;
+
+        fireThemeWave(x, y, next, duration);
+
         const endRadius = Math.hypot(
           Math.max(x, window.innerWidth - x),
           Math.max(y, window.innerHeight - y)

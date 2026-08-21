@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { flushSync } from 'react-dom';
+import { fireThemeWave } from './theme-wave';
 
 export type Theme = 'dark' | 'light' | 'system';
 
@@ -106,6 +107,9 @@ export function ThemeProvider({
       x = event.clientX;
       y = event.clientY;
     }
+
+    // Fire the luminous expanding shockwave from the toggle button
+    fireThemeWave(x, y, nextTheme, 650);
 
     const endRadius = Math.hypot(
       Math.max(x, window.innerWidth - x),
