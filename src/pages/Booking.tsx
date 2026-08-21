@@ -33,6 +33,7 @@ import { WordRotate } from '../components/magicui/word-rotate';
 import { AvatarCircles } from '../components/magicui/avatar-circles';
 import { BlurFade } from '../components/magicui/blur-fade';
 import { AnimatedList } from '../components/magicui/animated-list';
+import { ServiceCardSkeleton, TimeSlotSkeleton } from '../components/ui/skeleton';
 
 type Service = {
   id: string;
@@ -394,10 +395,16 @@ export default function Booking() {
 
             {/* Animated List Container (Scrollable showing up to 3 items) */}
             <div className="max-h-[224px] sm:max-h-[238px] overflow-y-auto overflow-x-hidden pr-1 space-y-2 scrollbar-thin">
-              <AnimatedList delay={150} reverse={false} className="gap-2 sm:gap-2.5">
-                {services.map((service) => {
-                  const isSelected = selectedService?.id === service.id;
-                  const price = getServicePrice(service.name, service.durationMinutes);
+              {services.length === 0 ? (
+                <div className="space-y-2">
+                  <ServiceCardSkeleton />
+                  <ServiceCardSkeleton />
+                </div>
+              ) : (
+                <AnimatedList delay={150} reverse={false} className="gap-2 sm:gap-2.5">
+                  {services.map((service) => {
+                    const isSelected = selectedService?.id === service.id;
+                    const price = getServicePrice(service.name, service.durationMinutes);
 
                   return (
                     <div
@@ -459,6 +466,7 @@ export default function Booking() {
                   );
                 })}
               </AnimatedList>
+              )}
             </div>
           </div>
 
@@ -582,12 +590,7 @@ export default function Booking() {
 
               {/* Time Slots Grid (3 columns on mobile chips, 2 on desktop) */}
               {loadingSlots ? (
-                <div className="py-6 sm:py-12 flex flex-col items-center justify-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full bg-[var(--color-primary)] animate-ping" />
-                  <span className="font-sans text-[9px] uppercase tracking-widest text-[var(--color-secondary-text)]">
-                    Checking availability...
-                  </span>
-                </div>
+                <TimeSlotSkeleton />
               ) : slots.length === 0 ? (
                 <div className="py-4 sm:py-10 text-center font-sans text-[10px] sm:text-xs uppercase tracking-widest text-[var(--color-secondary-text)] bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-xl p-3">
                   No slots available for this date.

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { User, Shield, AlertCircle, Camera, Check, Key, Lock, Mail, ArrowRight, Sun, Moon, Laptop } from 'lucide-react';
 import { authClient } from '../lib/auth';
 import { useTheme } from '../lib/theme';
+import { Skeleton } from '../components/ui/skeleton';
 
 // Toast for feedback
 function Toast({ message, type, onDone }: { message: string; type: 'success' | 'error'; onDone: () => void }) {
@@ -70,7 +71,52 @@ export default function Settings() {
     }
   }, [user]);
 
-  if (!user) return null;
+  if (!user) {
+    return (
+      <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 pb-12 animate-in fade-in duration-300">
+        {/* Top Banner Skeleton */}
+        <div className="p-3.5 sm:p-5 bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-xl sm:rounded-2xl shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <Skeleton className="w-12 h-12 sm:w-14 sm:h-14 rounded-full shrink-0" />
+            <div className="space-y-2">
+              <Skeleton className="w-40 h-5 rounded-md" />
+              <Skeleton className="w-56 h-3 rounded-md" />
+            </div>
+          </div>
+          <Skeleton className="w-24 h-7 rounded-full" />
+        </div>
+
+        {/* Account Details Card Skeleton */}
+        <div className="bg-[var(--color-card-bg)] rounded-xl sm:rounded-2xl p-3.5 sm:p-5 border border-[var(--color-border)] shadow-sm space-y-4">
+          <div className="flex items-center justify-between pb-2.5 border-b border-[var(--color-border)]">
+            <Skeleton className="w-32 h-4 rounded-md" />
+            <Skeleton className="w-16 h-6 rounded-lg" />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div className="space-y-1.5">
+              <Skeleton className="w-20 h-3 rounded-md" />
+              <Skeleton className="w-full h-9 rounded-xl" />
+            </div>
+            <div className="space-y-1.5">
+              <Skeleton className="w-20 h-3 rounded-md" />
+              <Skeleton className="w-full h-9 rounded-xl" />
+            </div>
+          </div>
+        </div>
+
+        {/* Security Skeleton */}
+        <div className="bg-[var(--color-card-bg)] rounded-xl sm:rounded-2xl p-3.5 sm:p-5 border border-[var(--color-border)] shadow-sm space-y-4">
+          <div className="flex items-center justify-between pb-2.5 border-b border-[var(--color-border)]">
+            <Skeleton className="w-36 h-4 rounded-md" />
+          </div>
+          <div className="space-y-3">
+            <Skeleton className="w-full h-9 rounded-xl" />
+            <Skeleton className="w-full h-9 rounded-xl" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleUpdateProfile = async () => {
     if (!isEditingProfile) {

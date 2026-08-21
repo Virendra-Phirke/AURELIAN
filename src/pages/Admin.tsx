@@ -13,6 +13,7 @@ import { NumberTicker } from '../components/magicui/number-ticker';
 import { BorderBeam } from '../components/magicui/border-beam';
 import { BlurFade } from '../components/magicui/blur-fade';
 import { AnimatedList } from '../components/magicui/animated-list';
+import { Skeleton, StatCardSkeleton } from '../components/ui/skeleton';
 
 // --- Types ---
 type Booking = {
@@ -1272,17 +1273,30 @@ export default function Admin() {
         <div className="flex-1 h-full overflow-y-auto overflow-x-hidden bg-[var(--color-bg)] transition-colors">
           <div className="p-3.5 sm:p-6 lg:p-8 pb-20 sm:pb-8 min-h-full flex flex-col max-w-7xl mx-auto w-full">
             {loading ? (
-              <motion.div 
-                initial={{ opacity: 0 }} 
-                animate={{ opacity: 1 }} 
-                className="flex items-center justify-center h-64 text-[var(--color-primary)] font-sans text-xs uppercase tracking-widest"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 rounded-full bg-[var(--color-primary)] animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <div className="w-2 h-2 rounded-full bg-[var(--color-primary)] animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <div className="w-2 h-2 rounded-full bg-[var(--color-primary)] animate-bounce" style={{ animationDelay: '300ms' }} />
+              <div className="space-y-6 sm:space-y-8 flex-1 flex flex-col animate-in fade-in duration-300">
+                {/* Header Skeleton */}
+                <div className="mb-1.5 sm:mb-3 space-y-2">
+                  <Skeleton className="w-56 h-7 rounded-md" />
+                  <Skeleton className="w-40 h-5 rounded-full" />
                 </div>
-              </motion.div>
+
+                {/* 4 Stat Cards Skeleton */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5">
+                  <StatCardSkeleton />
+                  <StatCardSkeleton />
+                  <StatCardSkeleton />
+                  <StatCardSkeleton />
+                </div>
+
+                {/* Trends Chart Skeleton */}
+                <Skeleton className="w-full h-28 sm:h-36 rounded-xl sm:rounded-2xl" />
+
+                {/* Quick Actions & Recent Skeleton */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <Skeleton className="h-44 rounded-xl sm:rounded-2xl" />
+                  <Skeleton className="h-44 rounded-xl sm:rounded-2xl" />
+                </div>
+              </div>
             ) : (
               <AnimatePresence mode="wait">
                 <motion.div

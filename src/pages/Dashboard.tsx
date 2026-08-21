@@ -13,6 +13,7 @@ import { DataPagination } from '../components/ui/pagination';
 import { BorderBeam } from '../components/magicui/border-beam';
 import { NumberTicker } from '../components/magicui/number-ticker';
 import { SparklesText } from '../components/magicui/sparkles-text';
+import { Skeleton, StatCardSkeleton } from '../components/ui/skeleton';
 
 // --- Types ---
 type Booking = {
@@ -262,12 +263,71 @@ export default function Dashboard() {
   const spark3 = "M0,25 Q20,30 35,20 T60,10 T80,28 T100,15";
   const spark4 = "M0,18 Q20,25 40,30 T70,20 T100,25";
 
-  // --- Loading State ---
+  // --- Loading State: Realtime Skeleton ---
   if (loading || isPending) {
     return (
-      <div className="flex flex-col items-center justify-center h-64 gap-3">
-        <div className="w-6 h-6 rounded-full border-2 border-[#E5C378] border-t-transparent animate-spin" />
-        <span className="font-sans text-xs uppercase tracking-widest text-[#737373]">Loading dashboard...</span>
+      <div className="w-full max-w-7xl mx-auto space-y-4 sm:space-y-5 pb-12 animate-in fade-in duration-300">
+        {/* 1. Welcome Banner Skeleton */}
+        <div className="p-3.5 sm:p-5 bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-xl sm:rounded-2xl shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+          <div className="flex items-center gap-3">
+            <Skeleton className="w-10 h-10 sm:w-11 sm:h-11 rounded-full shrink-0" />
+            <div className="space-y-1.5">
+              <Skeleton className="w-44 h-5 rounded-md" />
+              <Skeleton className="w-64 h-3.5 rounded-md" />
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Skeleton className="w-24 h-7 rounded-full" />
+            <Skeleton className="w-32 h-8 rounded-xl" />
+          </div>
+        </div>
+
+        {/* 2. Stat Cards Grid Skeleton */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5">
+          <StatCardSkeleton />
+          <StatCardSkeleton />
+          <StatCardSkeleton />
+          <StatCardSkeleton />
+        </div>
+
+        {/* 3. Schedule & Salon Hours Skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5">
+          <div className="lg:col-span-7 bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-xl sm:rounded-2xl p-3.5 sm:p-5 space-y-3">
+            <div className="flex items-center justify-between pb-2.5 border-b border-[var(--color-border)]">
+              <Skeleton className="w-36 h-4 rounded-md" />
+              <Skeleton className="w-16 h-3 rounded-md" />
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="w-full h-12 rounded-xl" />
+              <Skeleton className="w-full h-12 rounded-xl" />
+            </div>
+          </div>
+          <div className="lg:col-span-5 bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-xl sm:rounded-2xl p-3.5 sm:p-5 space-y-3">
+            <div className="flex items-center justify-between pb-2.5 border-b border-[var(--color-border)]">
+              <Skeleton className="w-28 h-4 rounded-md" />
+              <Skeleton className="w-16 h-5 rounded-full" />
+            </div>
+            <div className="space-y-2 py-1">
+              <Skeleton className="w-full h-4 rounded-md" />
+              <Skeleton className="w-full h-4 rounded-md" />
+              <Skeleton className="w-full h-4 rounded-md" />
+            </div>
+            <Skeleton className="w-full h-8 rounded-xl mt-2" />
+          </div>
+        </div>
+
+        {/* 4. Upcoming Appointments Skeleton */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <Skeleton className="w-48 h-4 rounded-md" />
+            <Skeleton className="w-20 h-3 rounded-md" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <Skeleton className="h-32 rounded-xl sm:rounded-2xl" />
+            <Skeleton className="h-32 rounded-xl sm:rounded-2xl" />
+            <Skeleton className="h-32 rounded-xl sm:rounded-2xl" />
+          </div>
+        </div>
       </div>
     );
   }
