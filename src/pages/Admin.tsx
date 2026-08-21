@@ -173,19 +173,19 @@ function StatCard({ label, value, icon, accent = false, pathData }: { label: str
     <motion.div
       variants={itemVariants}
       whileHover={{ y: -4, boxShadow: '0 10px 30px rgba(229,195,120,0.15)' }}
-      className="relative overflow-hidden rounded-2xl bg-[var(--color-card-bg)] border border-[var(--color-border)] p-6 flex flex-col justify-between aspect-[4/3] transition-all group shadow-md"
+      className="relative overflow-hidden rounded-2xl bg-[var(--color-card-bg)] p-3.5 sm:p-6 flex flex-col justify-between min-h-[95px] sm:aspect-[4/3] transition-all group shadow-md"
     >
       {accent && <BorderBeam size={100} duration={8} colorFrom="var(--color-primary)" borderWidth={1.5} />}
-      <div className="flex items-center gap-2 z-10">
-        <div className="text-[var(--color-primary)]">{icon}</div>
-        <span className="font-sans text-[11px] uppercase tracking-wider font-bold text-[var(--color-secondary-text)]">{label}</span>
+      <div className="flex items-center gap-1.5 sm:gap-2 z-10">
+        <div className="text-[var(--color-primary)] scale-90 sm:scale-100">{icon}</div>
+        <span className="font-sans text-[9px] sm:text-[11px] uppercase tracking-wider font-bold text-[var(--color-secondary-text)]">{label}</span>
       </div>
-      <div className={`text-4xl sm:text-5xl font-semibold z-10 font-sans tracking-tight ${accent ? 'text-[var(--color-primary)]' : 'text-[var(--color-primary-text)]'}`}>
+      <div className={`text-2xl sm:text-5xl font-semibold z-10 font-sans tracking-tight mt-1 sm:mt-0 ${accent ? 'text-[var(--color-primary)]' : 'text-[var(--color-primary-text)]'}`}>
         <NumberTicker value={numValue} />
       </div>
       
       {/* Sparkline */}
-      <div className="absolute bottom-0 left-0 right-0 h-16 opacity-35 group-hover:opacity-90 transition-opacity duration-500">
+      <div className="absolute bottom-0 left-0 right-0 h-10 sm:h-16 opacity-35 group-hover:opacity-90 transition-opacity duration-500">
         <svg viewBox="0 0 100 40" preserveAspectRatio="none" className="w-full h-full">
           <defs>
             <linearGradient id={`grad-${label.replace(/\s+/g, '')}`} x1="0" x2="0" y1="0" y2="1">
@@ -745,9 +745,35 @@ export default function Admin() {
           </div>
         </motion.div>
 
+        {/* ======================== MOBILE TAB STRIP ======================== */}
+        <div className="sm:hidden flex items-center gap-1.5 overflow-x-auto p-2.5 bg-[var(--color-sidebar-bg)] shrink-0 no-scrollbar">
+          {TABS.map((tab) => {
+            const isActive = activeTab === tab.key;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`flex items-center gap-2 px-3 py-2 rounded-xl font-sans text-[10px] uppercase tracking-wider font-semibold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
+                  isActive
+                    ? 'bg-[var(--color-primary)] text-black font-bold shadow-sm'
+                    : 'bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)]'
+                }`}
+              >
+                {tab.icon}
+                <span>{tab.label}</span>
+                {tab.key === 'bookings' && pendingCount > 0 && (
+                  <span className="px-1.5 py-0.2 text-[8px] bg-red-500 text-white rounded-full font-bold">
+                    {pendingCount}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
         {/* ======================== MAIN CONTENT AREA ======================== */}
         <div className="flex-1 h-full overflow-y-auto overflow-x-hidden bg-[var(--color-bg)] transition-colors">
-          <div className="p-4 sm:p-8 md:p-12 pb-24 sm:pb-12 min-h-full flex flex-col">
+          <div className="p-3.5 sm:p-8 md:p-12 pb-24 sm:pb-12 min-h-full flex flex-col">
             {loading ? (
               <motion.div 
                 initial={{ opacity: 0 }} 
@@ -771,23 +797,23 @@ export default function Admin() {
                   role="tabpanel"
                   id={`panel-${activeTab}`}
                   aria-labelledby={`tab-${activeTab}`}
-                  className="space-y-8 flex-1 flex flex-col"
+                  className="space-y-6 sm:space-y-8 flex-1 flex flex-col"
                 >
 
                   {/* ======================== OVERVIEW TAB ======================== */}
                   {activeTab === 'overview' && (
                     <>
-                      <motion.div variants={itemVariants} className="mb-8">
-                        <h1 className="text-4xl md:text-5xl font-light text-[var(--color-primary-text)] mb-4 tracking-tight">Good day, <span className="text-[var(--color-primary)] italic font-serif">Admin.</span></h1>
-                        <button className="flex items-center gap-2 text-[var(--color-primary)] bg-[var(--color-primary)]/10 px-4 py-2 rounded-full font-sans text-[11px] tracking-widest hover:bg-[var(--color-primary)]/20 transition-colors border border-[var(--color-primary)]/30 shadow-sm cursor-pointer font-bold">
-                          <span className="w-6 h-6 rounded-full bg-[var(--color-primary)] text-black flex items-center justify-center font-bold">
-                            <ChevronRight size={14} />
+                      <motion.div variants={itemVariants} className="mb-4 sm:mb-8">
+                        <h1 className="text-2xl sm:text-4xl md:text-5xl font-light text-[var(--color-primary-text)] mb-2 sm:mb-4 tracking-tight">Good day, <span className="text-[var(--color-primary)] italic font-serif">Admin.</span></h1>
+                        <button className="flex items-center gap-2 text-[var(--color-primary)] bg-[var(--color-primary)]/10 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full font-sans text-[10px] sm:text-[11px] tracking-widest hover:bg-[var(--color-primary)]/20 transition-colors shadow-sm cursor-pointer font-bold">
+                          <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-[var(--color-primary)] text-black flex items-center justify-center font-bold">
+                            <ChevronRight size={12} />
                           </span>
                           This Week ({weekStartStr} - {weekEndStr})
                         </button>
                       </motion.div>
 
-                      <motion.div variants={listVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                      <motion.div variants={listVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-6">
                         <StatCard label="Total Bookings" value={bookings.length} icon={<CalendarDays size={18} />} pathData={sparkline1} />
                         <StatCard label="Pending Approval" value={pendingCount} icon={<LayoutDashboard size={18} />} accent={pendingCount > 0} pathData={sparkline2} />
                         <StatCard label="Total Customers" value={totalCustomers} icon={<Users size={18} />} pathData={sparkline3} />

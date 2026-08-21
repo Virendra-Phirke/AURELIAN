@@ -330,17 +330,17 @@ export default function Booking() {
           {/* ──────────────────────────────────────
               STEP 01: SELECT SERVICE
              ────────────────────────────────────── */}
-          <div className="space-y-5">
+          <div className="space-y-4 sm:space-y-5">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl sm:text-2xl font-serif text-[var(--color-primary-text)] font-medium tracking-wide">
+              <h2 className="text-lg sm:text-2xl font-serif text-[var(--color-primary-text)] font-medium tracking-wide">
                 Step 01: <span className="text-[var(--color-primary)] font-normal">Select Service</span>
               </h2>
-              <span className="font-sans text-[10px] uppercase tracking-widest text-[var(--color-secondary-text)]">
+              <span className="font-sans text-[9px] sm:text-[10px] uppercase tracking-widest text-[var(--color-secondary-text)]">
                 {services.length} services available
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4">
               {services.map((service, idx) => {
                 const isSelected = selectedService?.id === service.id;
                 const price = getServicePrice(service.name, service.durationMinutes);
@@ -350,7 +350,7 @@ export default function Booking() {
                     <motion.div
                       whileHover={{ y: -2 }}
                       onClick={() => setSelectedService(service)}
-                      className={`relative overflow-hidden rounded-2xl p-5 flex flex-col justify-between text-center transition-all cursor-pointer min-h-[220px] select-none ${
+                      className={`relative overflow-hidden rounded-2xl p-3.5 sm:p-5 flex flex-col justify-between text-center transition-all cursor-pointer min-h-[160px] sm:min-h-[220px] select-none ${
                         isSelected
                           ? 'bg-[var(--color-primary)]/10 shadow-[0_0_35px_rgba(229,195,120,0.22)]'
                           : 'bg-[var(--color-card-bg)] hover:bg-[var(--color-surface-hover)] shadow-md'
@@ -362,19 +362,19 @@ export default function Booking() {
 
                       {/* Top Icon and Name */}
                       <div>
-                        <div className="w-12 h-12 rounded-full mx-auto flex items-center justify-center mb-3.5 bg-[var(--color-surface-raised)]">
+                        <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-full mx-auto flex items-center justify-center mb-2 sm:mb-3.5 bg-[var(--color-surface-raised)]">
                           {getServiceIcon(service.name)}
                         </div>
 
-                        <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-primary-text)] mb-1.5">
+                        <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.15em] sm:tracking-[0.2em] text-[var(--color-primary-text)] mb-1 sm:mb-1.5">
                           {service.name}
                         </h3>
-                        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[var(--color-surface-raised)] text-[10px] text-[var(--color-secondary-text)] font-sans tracking-wider mb-3">
+                        <div className="inline-flex items-center gap-1.5 px-2 sm:px-2.5 py-0.5 rounded-full bg-[var(--color-surface-raised)] text-[9px] sm:text-[10px] text-[var(--color-secondary-text)] font-sans tracking-wider mb-2 sm:mb-3">
                           <span>{service.durationMinutes} min</span>
                           <span>•</span>
                           <span className="text-[var(--color-primary)] font-semibold">${price}</span>
                         </div>
-                        <p className="text-[11px] text-[var(--color-secondary-text)] font-sans line-clamp-2 leading-relaxed px-1">
+                        <p className="text-[10px] sm:text-[11px] text-[var(--color-secondary-text)] font-sans line-clamp-2 leading-relaxed px-1">
                           {getServiceDescription(service.name)}
                         </p>
                       </div>
@@ -386,7 +386,7 @@ export default function Booking() {
                           e.stopPropagation();
                           setSelectedService(service);
                         }}
-                        className={`w-full py-2.5 rounded-xl font-sans text-[10px] uppercase tracking-widest font-semibold transition-all mt-4 cursor-pointer ${
+                        className={`w-full py-2 sm:py-2.5 rounded-xl font-sans text-[9px] sm:text-[10px] uppercase tracking-widest font-semibold transition-all mt-2.5 sm:mt-4 cursor-pointer ${
                           isSelected
                             ? 'bg-[var(--color-primary)] text-black shadow-md'
                             : 'bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-primary-text)]'
@@ -404,39 +404,39 @@ export default function Booking() {
           {/* ──────────────────────────────────────
               STEP 02: CHOOSE DATE
              ────────────────────────────────────── */}
-          <div className="space-y-5">
+          <div className="space-y-4 sm:space-y-5">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <h2 className="text-xl sm:text-2xl font-serif text-[var(--color-primary-text)] font-medium tracking-wide">
+              <h2 className="text-lg sm:text-2xl font-serif text-[var(--color-primary-text)] font-medium tracking-wide">
                 Step 02: <span className="text-[var(--color-primary)] font-normal">Choose Date</span>
               </h2>
-              <div className="font-sans text-xs tracking-wider">
+              <div className="font-sans text-[11px] sm:text-xs tracking-wider">
                 <span className="text-[var(--color-secondary-text)]">Selected: </span>
                 <span className="text-[var(--color-primary)] font-semibold font-serif">{formattedSelectedDate}</span>
               </div>
             </div>
 
             {/* MONTH CALENDAR CONTAINER */}
-            <div className="bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-2xl p-6 shadow-xl transition-colors">
+            <div className="bg-[var(--color-card-bg)] rounded-2xl p-3.5 sm:p-6 shadow-xl transition-colors">
               {/* Calendar Month Navigation */}
-              <div className="flex items-center justify-between mb-6 pb-4 border-b border-[var(--color-border)]">
+              <div className="flex items-center justify-between mb-4 sm:mb-6 pb-3 sm:pb-4">
                 <button
                   type="button"
                   onClick={handlePrevMonth}
-                  className="p-2 rounded-lg text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-raised)] transition-colors cursor-pointer"
+                  className="p-1.5 sm:p-2 rounded-lg text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-raised)] transition-colors cursor-pointer"
                   aria-label="Previous month"
                 >
-                  <ChevronLeft size={18} />
+                  <ChevronLeft size={16} />
                 </button>
-                <div className="font-sans text-xs font-semibold uppercase tracking-[0.25em] text-[var(--color-primary-text)]">
+                <div className="font-sans text-xs font-semibold uppercase tracking-[0.2em] sm:tracking-[0.25em] text-[var(--color-primary-text)]">
                   {format(currentMonth, 'MMMM yyyy')}
                 </div>
                 <button
                   type="button"
                   onClick={handleNextMonth}
-                  className="p-2 rounded-lg text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-raised)] transition-colors cursor-pointer"
+                  className="p-1.5 sm:p-2 rounded-lg text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-raised)] transition-colors cursor-pointer"
                   aria-label="Next month"
                 >
-                  <ChevronRight size={18} />
+                  <ChevronRight size={16} />
                 </button>
               </div>
 

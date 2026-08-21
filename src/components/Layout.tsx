@@ -77,15 +77,15 @@ export default function Layout() {
       <Particles className="pointer-events-none opacity-25 fixed inset-0 z-0" quantity={35} color="var(--color-primary)" />
 
       {/* Mobile Top Header */}
-      <header className="md:hidden shrink-0 h-16 border-b border-[var(--color-border)] px-6 flex items-center justify-between z-50 bg-[var(--color-sidebar-bg)]/90 backdrop-blur-xl sticky top-0 transition-colors">
-        <Link to="/" className="text-lg tracking-[0.3em] font-light text-[var(--color-primary-text)] uppercase font-brand">
+      <header className="md:hidden shrink-0 h-14 px-4 flex items-center justify-between z-50 bg-[var(--color-sidebar-bg)]/95 backdrop-blur-xl sticky top-0 transition-colors">
+        <Link to="/" className="text-base sm:text-lg tracking-[0.25em] font-semibold text-[var(--color-primary)] uppercase font-brand">
           AURELIAN
         </Link>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <ThemeToggle />
           {session?.user && (
-            <button onClick={handleLogout} className="text-[var(--color-secondary-text)] hover:text-[var(--color-primary)] transition-colors p-2 cursor-pointer">
-              <LogOut size={18} />
+            <button onClick={handleLogout} className="text-[var(--color-secondary-text)] hover:text-[var(--color-primary)] transition-colors p-1.5 cursor-pointer" aria-label="Logout">
+              <LogOut size={16} />
             </button>
           )}
         </div>
@@ -177,8 +177,8 @@ export default function Layout() {
       </motion.aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto overflow-x-hidden relative pb-24 md:pb-0">
-        <div className="w-full px-4 sm:px-8 md:px-12 py-6 sm:py-10 md:py-12">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden relative pb-20 md:pb-0">
+        <div className="w-full px-3.5 sm:px-8 md:px-12 py-4 sm:py-10 md:py-12">
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}
@@ -194,41 +194,41 @@ export default function Layout() {
       </main>
 
       {/* Mobile Bottom Nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-20 border-t border-[var(--color-border)] bg-[var(--color-sidebar-bg)]/95 backdrop-blur-xl z-50 flex items-center justify-around px-2 pb-2">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-14 bg-[var(--color-sidebar-bg)]/95 backdrop-blur-xl z-50 flex items-center justify-around px-2 pb-1 shadow-lg">
         {session?.user ? (
           <>
             <Link
               to="/booking"
-              className={`flex flex-col items-center justify-center w-full h-full gap-1.5 transition-colors ${location.pathname === '/booking' ? 'text-[var(--color-primary)]' : 'text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)]'
+              className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${location.pathname === '/booking' ? 'text-[var(--color-primary)] font-semibold' : 'text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)]'
                 }`}
             >
-              <CalendarDays size={20} />
-              <span className="font-sans text-[9px] uppercase tracking-widest">Book</span>
+              <CalendarDays size={18} />
+              <span className="font-sans text-[9px] uppercase tracking-wider">Book</span>
             </Link>
             <Link
               to="/dashboard"
-              className={`flex flex-col items-center justify-center w-full h-full gap-1.5 transition-colors ${location.pathname === '/dashboard' ? 'text-[var(--color-primary)]' : 'text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)]'
+              className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${location.pathname === '/dashboard' ? 'text-[var(--color-primary)] font-semibold' : 'text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)]'
                 }`}
             >
-              <LayoutDashboard size={20} />
-              <span className="font-sans text-[9px] uppercase tracking-widest">Dashboard</span>
+              <LayoutDashboard size={18} />
+              <span className="font-sans text-[9px] uppercase tracking-wider">Dashboard</span>
             </Link>
             <Link
               to="/settings"
-              className={`flex flex-col items-center justify-center w-full h-full gap-1.5 transition-colors ${location.pathname === '/settings' ? 'text-[var(--color-primary)]' : 'text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)]'
+              className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${location.pathname === '/settings' ? 'text-[var(--color-primary)] font-semibold' : 'text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)]'
                 }`}
             >
-              <Settings size={20} />
-              <span className="font-sans text-[9px] uppercase tracking-widest">Settings</span>
+              <Settings size={18} />
+              <span className="font-sans text-[9px] uppercase tracking-wider">Settings</span>
             </Link>
           </>
         ) : (
           <Link
             to="/login"
-            className="flex flex-col items-center justify-center w-full h-full gap-1.5 text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)]"
+            className="flex flex-col items-center justify-center w-full h-full gap-1 text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)]"
           >
-            <LogIn size={20} />
-            <span className="font-sans text-[9px] uppercase tracking-widest">Sign In</span>
+            <LogIn size={18} />
+            <span className="font-sans text-[9px] uppercase tracking-wider">Sign In</span>
           </Link>
         )}
       </nav>

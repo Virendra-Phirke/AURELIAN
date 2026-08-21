@@ -105,24 +105,24 @@ function StatCard({ label, value, subtext, icon, accent = false, pathData }: {
     <motion.div
       variants={itemVariants}
       whileHover={{ y: -2 }}
-      className="relative overflow-hidden rounded-2xl bg-[var(--color-card-bg)] border border-[var(--color-border)] hover:border-[var(--color-primary)]/40 p-5 flex flex-col justify-between min-h-[135px] transition-all group shadow-sm"
+      className="relative overflow-hidden rounded-2xl bg-[var(--color-card-bg)] p-3.5 sm:p-5 flex flex-col justify-between min-h-[95px] sm:min-h-[135px] transition-all group shadow-sm"
     >
       {accent && <BorderBeam size={100} duration={8} colorFrom="var(--color-primary)" borderWidth={1.5} />}
       <div className="flex items-center justify-between z-10">
-        <span className="font-sans text-[11px] uppercase tracking-wider text-[var(--color-secondary-text)] font-bold">{label}</span>
-        <div className="text-[var(--color-primary)]">{icon}</div>
+        <span className="font-sans text-[9px] sm:text-[11px] uppercase tracking-wider text-[var(--color-secondary-text)] font-bold">{label}</span>
+        <div className="text-[var(--color-primary)] scale-90 sm:scale-100">{icon}</div>
       </div>
-      <div className="z-10 mt-2">
-        <div className={`text-3xl font-sans font-semibold tracking-tight block ${accent ? 'text-[var(--color-primary)]' : 'text-[var(--color-primary-text)]'}`}>
+      <div className="z-10 mt-1 sm:mt-2">
+        <div className={`text-xl sm:text-3xl font-sans font-semibold tracking-tight block ${accent ? 'text-[var(--color-primary)]' : 'text-[var(--color-primary-text)]'}`}>
           {isNum ? <NumberTicker value={Number(value)} /> : value}
         </div>
         {subtext && (
-          <span className="font-sans text-[10px] uppercase tracking-wider text-[var(--color-secondary-text)] mt-1 block truncate font-medium">{subtext}</span>
+          <span className="font-sans text-[8px] sm:text-[10px] uppercase tracking-wider text-[var(--color-secondary-text)] mt-0.5 sm:mt-1 block truncate font-medium">{subtext}</span>
         )}
       </div>
 
       {/* Sparkline */}
-      <div className="absolute bottom-0 left-0 right-0 h-12 opacity-25 group-hover:opacity-60 transition-opacity duration-500 pointer-events-none">
+      <div className="absolute bottom-0 left-0 right-0 h-8 sm:h-12 opacity-25 group-hover:opacity-60 transition-opacity duration-500 pointer-events-none">
         <svg viewBox="0 0 100 40" preserveAspectRatio="none" className="w-full h-full">
           <defs>
             <linearGradient id={`sg-${label.replace(/\s+/g, '')}`} x1="0" x2="0" y1="0" y2="1">
@@ -308,18 +308,18 @@ export default function Dashboard() {
          ════════════════════════════════════════ */}
       <motion.div
         variants={itemVariants}
-        className="relative p-6 sm:p-8 bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-2xl overflow-hidden shadow-xl transition-colors"
+        className="relative p-4 sm:p-8 bg-[var(--color-card-bg)] rounded-2xl overflow-hidden shadow-xl transition-colors"
       >
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
+          <div className="flex items-center gap-3 sm:gap-4">
             {/* Avatar */}
             <div className="shrink-0 relative group cursor-pointer" onClick={() => navigate('/settings')}>
-              <div className="w-14 h-14 rounded-full p-[2px] bg-[var(--color-surface-raised)] border border-[var(--color-border)] group-hover:border-[var(--color-primary)] transition-colors">
+              <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-full p-[2px] bg-[var(--color-surface-raised)] group-hover:border-[var(--color-primary)] transition-colors">
                 <div className="w-full h-full rounded-full bg-[var(--color-surface)] flex items-center justify-center overflow-hidden">
                   {user?.image ? (
                     <img src={user.image} alt={user.name} className="w-full h-full object-cover" />
                   ) : (
-                    <User size={22} className="text-[var(--color-secondary-text)] group-hover:text-[var(--color-primary)] transition-colors" />
+                    <User size={18} className="text-[var(--color-secondary-text)] group-hover:text-[var(--color-primary)] transition-colors sm:w-5 sm:h-5" />
                   )}
                 </div>
               </div>
@@ -327,10 +327,10 @@ export default function Dashboard() {
 
             {/* Greeting */}
             <div>
-              <h1 className="text-xl sm:text-2xl font-light text-[var(--color-primary-text)] tracking-wide">
+              <h1 className="text-lg sm:text-2xl font-light text-[var(--color-primary-text)] tracking-wide">
                 {getGreeting()}, <span className="font-medium text-[var(--color-primary)]">{user?.name?.split(' ')[0] || 'Client'}</span>
               </h1>
-              <div className="flex flex-wrap items-center gap-2.5 text-[var(--color-secondary-text)] font-sans text-[11px] uppercase tracking-wider mt-1">
+              <div className="flex flex-wrap items-center gap-2 text-[var(--color-secondary-text)] font-sans text-[10px] sm:text-[11px] uppercase tracking-wider mt-0.5 sm:mt-1">
                 <CalendarDays size={12} className="text-[var(--color-primary)]" />
                 <span>{format(new Date(), 'EEEE, MMMM d, yyyy')}</span>
                 {nextAppointment && (
@@ -343,17 +343,17 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
             <button
               onClick={() => navigate('/booking')}
-              className="flex-1 sm:flex-none px-5 py-2.5 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-black font-sans text-xs font-semibold uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(229,195,120,0.25)] cursor-pointer"
+              className="flex-1 sm:flex-none px-4 sm:px-5 py-2 sm:py-2.5 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-black font-sans text-[11px] sm:text-xs font-semibold uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(229,195,120,0.25)] cursor-pointer"
             >
               <CalendarDays size={14} />
               Book Appointment
             </button>
             <button
               onClick={() => navigate('/settings')}
-              className="p-2.5 bg-[var(--color-surface-raised)] hover:bg-[var(--color-surface-hover)] text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] border border-[var(--color-border)] rounded-xl transition-colors cursor-pointer"
+              className="p-2 sm:p-2.5 bg-[var(--color-surface-raised)] hover:bg-[var(--color-surface-hover)] text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] rounded-xl transition-colors cursor-pointer"
               title="Settings"
             >
               <Settings size={16} />
@@ -365,7 +365,7 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════
           2. STAT CARDS (4-column grid)
          ════════════════════════════════════════ */}
-      <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         <StatCard
           label="Next Appointment"
           value={nextAppointment ? format(parseISO(nextAppointment.bookingDate), 'MMM d') : '—'}
