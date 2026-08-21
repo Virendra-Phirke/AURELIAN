@@ -225,8 +225,9 @@ export default function Booking() {
       {/* ════════════════════════════════════════
           VERCEL-STYLE HEADER & BRAND
          ════════════════════════════════════════ */}
-      <div className="space-y-6 border-b border-[var(--color-border)] pb-6 transition-colors">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+      <div className="space-y-3 sm:space-y-6 pb-2 sm:pb-6 transition-colors">
+        {/* Desktop Header */}
+        <div className="hidden sm:flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div className="flex flex-col gap-1">
             <div className="flex flex-wrap items-baseline gap-3">
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-brand font-semibold text-[var(--color-primary)] tracking-[0.25em] uppercase">
@@ -252,7 +253,7 @@ export default function Booking() {
 
           {/* Social Proof & Instant confirmation badge */}
           <div className="flex items-center gap-4">
-            <div className="hidden sm:flex items-center gap-3">
+            <div className="flex items-center gap-3">
               <AvatarCircles
                 numPeople={40}
                 avatarUrls={[
@@ -268,7 +269,7 @@ export default function Booking() {
               </div>
             </div>
 
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--color-surface-raised)] border border-[var(--color-border)] text-[10px] uppercase font-sans tracking-widest text-[var(--color-secondary-text)] shrink-0 self-start sm:self-auto shadow-sm">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--color-surface-raised)] text-[10px] uppercase font-sans tracking-widest text-[var(--color-secondary-text)] shrink-0 shadow-sm">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
@@ -278,42 +279,65 @@ export default function Booking() {
           </div>
         </div>
 
+        {/* Mobile Header (Sleek, Compact, No redundant logo) */}
+        <div className="sm:hidden flex items-center justify-between gap-2 pb-1">
+          <div>
+            <h1 className="text-sm font-serif font-medium text-[var(--color-primary-text)]">Book Appointment</h1>
+            <div className="flex items-center gap-1.5 text-[10px] text-[var(--color-muted-text)]">
+              <span>Experience:</span>
+              <WordRotate
+                words={[
+                  "Bespoke Styling",
+                  "Hot Towel Shave",
+                  "VIP Suites",
+                  "Precision Cuts"
+                ]}
+                className="font-serif text-[var(--color-primary)] italic text-[11px]"
+              />
+            </div>
+          </div>
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--color-surface-raised)] text-[9px] font-sans tracking-wider text-[var(--color-secondary-text)] shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span>Instant</span>
+          </div>
+        </div>
+
         {/* TOP STEP PROGRESS INDICATORS */}
         <div className="grid grid-cols-3 gap-2 sm:gap-4 pt-1">
           {/* Step 1 Bar */}
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <div className="h-[2px] w-full rounded-full bg-[var(--color-primary)] shadow-[0_0_8px_rgba(229,195,120,0.4)] transition-all" />
-            <div className="flex items-center justify-between text-[9px] sm:text-[11px] font-sans uppercase tracking-wider">
-              <span className="text-[var(--color-primary)] font-semibold truncate">01 Service</span>
+            <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-sans uppercase tracking-wider font-semibold">
+              <span className="text-[var(--color-primary)] truncate">1. Service</span>
               {selectedService && <Check size={11} className="text-[var(--color-primary)] shrink-0 hidden sm:inline" />}
             </div>
           </div>
 
           {/* Step 2 Bar */}
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <div
               className={`h-[2px] w-full rounded-full transition-all ${
                 selectedDate ? 'bg-[var(--color-primary)] shadow-[0_0_8px_rgba(229,195,120,0.4)]' : 'bg-[var(--color-surface-raised)]'
               }`}
             />
-            <div className="flex items-center justify-between text-[9px] sm:text-[11px] font-sans uppercase tracking-wider">
-              <span className={`truncate ${selectedDate ? 'text-[var(--color-primary)] font-semibold' : 'text-[var(--color-secondary-text)]'}`}>
-                02 Date
+            <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-sans uppercase tracking-wider font-semibold">
+              <span className={`truncate ${selectedDate ? 'text-[var(--color-primary)]' : 'text-[var(--color-secondary-text)]'}`}>
+                2. Date
               </span>
               {selectedDate && <Check size={11} className="text-[var(--color-primary)] shrink-0 hidden sm:inline" />}
             </div>
           </div>
 
           {/* Step 3 Bar */}
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <div
               className={`h-[2px] w-full rounded-full transition-all ${
                 selectedTime ? 'bg-[var(--color-primary)] shadow-[0_0_8px_rgba(229,195,120,0.4)]' : 'bg-[var(--color-surface-raised)]'
               }`}
             />
-            <div className="flex items-center justify-between text-[9px] sm:text-[11px] font-sans uppercase tracking-wider">
-              <span className={`truncate ${selectedTime ? 'text-[var(--color-primary)] font-semibold' : 'text-[var(--color-secondary-text)]'}`}>
-                03 Slots
+            <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-sans uppercase tracking-wider font-semibold">
+              <span className={`truncate ${selectedTime ? 'text-[var(--color-primary)]' : 'text-[var(--color-secondary-text)]'}`}>
+                3. Slots
               </span>
               {selectedTime && <Check size={11} className="text-[var(--color-primary)] shrink-0 hidden sm:inline" />}
             </div>
