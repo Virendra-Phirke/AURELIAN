@@ -13,17 +13,13 @@ declare global {
 
 interface GoogleOneTapProps {
   callbackURL?: string;
-  buttonContainerId?: string;
 }
 
-export default function GoogleOneTap({
-  callbackURL = '/booking',
-  buttonContainerId = 'google-signin-button-container',
-}: GoogleOneTapProps) {
+export default function GoogleOneTap({ callbackURL = '/booking' }: GoogleOneTapProps) {
   useEffect(() => {
     let isMounted = true;
 
-    // 1. Clear Google One Tap cooldown cookie (g_state) to prevent suppression in dev
+    // Clear Google One Tap cooldown cookie (g_state) to prevent suppression in dev
     try {
       document.cookie = 'g_state=;path=/;expires=Thu, 01 Jan 1970 00:00:01 GMT';
     } catch {
@@ -63,7 +59,6 @@ export default function GoogleOneTap({
       }
 
       try {
-        // Initialize Google Identity Services
         window.google.accounts.id.initialize({
           client_id: GOOGLE_CLIENT_ID,
           callback: handleCredentialResponse,
@@ -74,32 +69,11 @@ export default function GoogleOneTap({
           use_fedcm_for_prompt: true,
         });
 
-        // 1. Render Google Sign In Button (Guaranteed to work in Firefox, Safari, Edge, Chrome)
-        if (buttonContainerId) {
-          const container = document.getElementById(buttonContainerId);
-          if (container) {
-            container.innerHTML = '';
-            window.google.accounts.id.renderButton(container, {
-              type: 'standard',
-              theme: 'filled_black',
-              size: 'large',
-              text: 'continue_with',
-              shape: 'rectangular',
-              logo_alignment: 'left',
-              width: 180,
-            });
-          }
-        }
-
-        // 2. Trigger One Tap floating prompt (supported in Chrome/Chromium)
         window.google.accounts.id.prompt((notification: any) => {
           if (!isMounted) return;
 
           if (notification.isNotDisplayed?.()) {
             const reason = notification.getNotDisplayedReason?.();
-            console.log('[Google One Tap] Prompt not displayed (Reason:', reason, '). Official Google button rendered as fallback.');
-
-            // Fallback retry without FedCM if suppressed
             if (reason === 'opt_out_or_no_session' || reason === 'suppressed_by_user' || reason === 'unknown_reason') {
               try {
                 window.google.accounts.id.initialize({
@@ -116,12 +90,6 @@ export default function GoogleOneTap({
                 // ignore
               }
             }
-          } else if (notification.isSkippedMoment?.()) {
-            console.log('[Google One Tap] Prompt skipped:', notification.getSkippedReason?.());
-          } else if (notification.isDismissedMoment?.()) {
-            console.log('[Google One Tap] Prompt dismissed:', notification.getDismissedReason?.());
-          } else {
-            console.log('[Google One Tap] Floating prompt active.');
           }
         });
 
@@ -153,7 +121,7 @@ export default function GoogleOneTap({
     return () => {
       isMounted = false;
     };
-  }, [callbackURL, buttonContainerId]);
+  }, [callbackURL]);
 
   return (
     <div
