@@ -52,20 +52,20 @@ function getGreeting(): string {
   return 'Good evening';
 }
 
-// --- StatusBadge (Geist Style) ---
+// --- StatusBadge (Block UI) ---
 function StatusBadge({ status }: { status: string }) {
   const colors: Record<string, string> = {
-    PENDING: 'text-[var(--color-primary)] border-[var(--color-primary)]/40 bg-[var(--color-primary)]/10',
-    ACCEPTED: 'text-emerald-500 border-emerald-500/40 bg-emerald-500/10',
-    REJECTED: 'text-red-500 border-red-500/40 bg-red-500/10',
-    CANCELLED: 'text-[var(--color-muted-text)] border-[var(--color-border)] bg-[var(--color-surface-raised)]',
-    COMPLETED: 'text-[var(--color-primary-text)] border-[var(--color-border)] bg-[var(--color-surface-raised)]',
+    PENDING: 'text-[var(--color-primary)] bg-[var(--color-primary)]/15',
+    ACCEPTED: 'text-emerald-500 bg-emerald-500/15',
+    REJECTED: 'text-red-500 bg-red-500/15',
+    CANCELLED: 'text-[var(--color-muted-text)] bg-[var(--color-surface-raised)]',
+    COMPLETED: 'text-[var(--color-primary-text)] bg-[var(--color-surface-raised)]',
   };
   const isPulse = status === 'ACCEPTED' || status === 'PENDING';
   const dotColor = status === 'ACCEPTED' ? 'bg-emerald-500' : 'bg-[var(--color-primary)]';
 
   return (
-    <span className={`border rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.15em] font-sans inline-flex items-center gap-1.5 font-semibold ${colors[status] || colors.PENDING}`}>
+    <span className={`rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.15em] font-sans inline-flex items-center gap-1.5 font-semibold ${colors[status] || colors.PENDING}`}>
       {isPulse && (
         <span className="relative flex h-1.5 w-1.5">
           <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${dotColor}`}></span>

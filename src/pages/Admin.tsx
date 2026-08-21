@@ -146,18 +146,18 @@ function ConfirmButton({
   );
 }
 
-// --- Status Badge ---
+// --- Status Badge (Block UI) ---
 function StatusBadge({ status }: { status: string }) {
   const colors: Record<string, string> = {
-    PENDING: 'text-[#C5A059] border-[#C5A059]/50 bg-[#C5A059]/10',
-    ACCEPTED: 'text-[#4ade80] border-[#4ade80]/50 bg-[#4ade80]/10',
-    REJECTED: 'text-red-400 border-red-400/50 bg-red-400/10',
-    CANCELLED: 'text-[#555] border-[#555] bg-[#ffffff05]',
-    COMPLETED: 'text-[#D4D4D4] border-[#ffffff30] bg-[#ffffff05]',
+    PENDING: 'text-[var(--color-primary)] bg-[var(--color-primary)]/15 font-bold',
+    ACCEPTED: 'text-emerald-500 bg-emerald-500/15 font-bold',
+    REJECTED: 'text-red-500 bg-red-500/15 font-bold',
+    CANCELLED: 'text-[var(--color-muted-text)] bg-[var(--color-surface-raised)] font-medium',
+    COMPLETED: 'text-[var(--color-primary-text)] bg-[var(--color-surface-raised)] font-medium',
   };
   return (
     <span
-      className={`border rounded-full px-3 py-1 text-[9px] uppercase tracking-[0.2em] font-sans ${colors[status] || colors.PENDING}`}
+      className={`rounded-full px-3 py-1 text-[9px] uppercase tracking-[0.2em] font-sans inline-flex items-center gap-1.5 ${colors[status] || colors.PENDING}`}
       role="status"
       aria-label={`Status: ${status.toLowerCase()}`}
     >
