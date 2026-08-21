@@ -10,6 +10,9 @@ import {
 import { authClient } from '../lib/auth';
 import { useNavigate } from 'react-router-dom';
 import { DataPagination } from '../components/ui/pagination';
+import { BorderBeam } from '../components/magicui/border-beam';
+import { NumberTicker } from '../components/magicui/number-ticker';
+import { SparklesText } from '../components/magicui/sparkles-text';
 
 // --- Types ---
 type Booking = {
@@ -93,24 +96,26 @@ function Toast({ message, type, onDone }: { message: string; type: 'success' | '
   );
 }
 
-// --- Stat Card with Sparkline ---
+// --- Stat Card with Sparkline & Magic UI ---
 function StatCard({ label, value, subtext, icon, accent = false, pathData }: {
   label: string; value: string | number; subtext?: string; icon: React.ReactNode; accent?: boolean; pathData: string;
 }) {
+  const isNum = typeof value === 'number' || (!isNaN(Number(value)) && typeof value === 'string' && !value.includes('%') && !value.includes('m') && !value.includes('★'));
   return (
     <motion.div
       variants={itemVariants}
       whileHover={{ y: -2 }}
       className="relative overflow-hidden rounded-xl bg-[#0a0a0a] border border-[#1f1f1f] hover:border-[#383838] p-5 flex flex-col justify-between min-h-[135px] transition-all group"
     >
+      {accent && <BorderBeam size={100} duration={8} colorFrom="#E5C378" borderWidth={1.5} />}
       <div className="flex items-center justify-between z-10">
         <span className="font-sans text-[11px] uppercase tracking-wider text-[#737373] font-medium">{label}</span>
         <div className="text-[#555555] group-hover:text-[#E5C378] transition-colors">{icon}</div>
       </div>
       <div className="z-10 mt-2">
-        <span className={`text-3xl font-sans font-semibold tracking-tight block ${accent ? 'text-[#E5C378]' : 'text-white'}`}>
-          {value}
-        </span>
+        <div className={`text-3xl font-sans font-semibold tracking-tight block ${accent ? 'text-[#E5C378]' : 'text-white'}`}>
+          {isNum ? <NumberTicker value={Number(value)} /> : value}
+        </div>
         {subtext && (
           <span className="font-sans text-[10px] uppercase tracking-wider text-[#737373] mt-1 block truncate">{subtext}</span>
         )}
@@ -536,11 +541,12 @@ export default function Dashboard() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {upcoming.map((b) => (
+            {upcoming.map((b, idx) => (
               <div
                 key={b.id}
-                className="p-5 bg-[#0a0a0a] border border-[#1f1f1f] hover:border-[#2e2e2e] rounded-xl transition-all space-y-4"
+                className="relative overflow-hidden p-5 bg-[#0a0a0a] border border-[#1f1f1f] hover:border-[#2e2e2e] rounded-xl transition-all space-y-4"
               >
+                {idx === 0 && <BorderBeam size={140} duration={9} colorFrom="#E5C378" borderWidth={1.5} />}
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <h4 className="text-base font-medium text-white mb-1.5">{services[b.serviceId] || 'Service'}</h4>

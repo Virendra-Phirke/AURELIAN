@@ -6,6 +6,8 @@ import { authClient } from '../lib/auth';
 import { DataPagination } from '../components/ui/pagination';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
+import { NumberTicker } from '../components/magicui/number-ticker';
+import { BorderBeam } from '../components/magicui/border-beam';
 
 // --- Types ---
 type Booking = {
@@ -162,26 +164,23 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-// --- Stat Card with SVG Sparkline ---
+// --- Stat Card with SVG Sparkline & Magic UI ---
 function StatCard({ label, value, icon, accent = false, pathData }: { label: string; value: number | string; icon?: React.ReactNode, accent?: boolean, pathData: string }) {
+  const numValue = typeof value === 'number' ? value : Number(value) || 0;
   return (
     <motion.div
       variants={itemVariants}
-      whileHover={{ y: -5, boxShadow: '0 10px 30px rgba(197,160,89,0.1)' }}
+      whileHover={{ y: -5, boxShadow: '0 10px 30px rgba(229,195,120,0.1)' }}
       className="relative overflow-hidden rounded-2xl bg-[#0a0a0a] border border-[#ffffff15] p-5 flex flex-col justify-between aspect-[4/3] transition-all group"
     >
+      {accent && <BorderBeam size={100} duration={8} colorFrom="#E5C378" borderWidth={1.5} />}
       <div className="flex items-center gap-2 text-[#888] z-10">
         {icon}
         <span className="font-sans text-[11px] uppercase tracking-wider">{label}</span>
       </div>
-      <motion.span 
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 0.2, type: 'spring' }}
-        className={`text-5xl font-light z-10 ${accent ? 'text-[#C5A059]' : 'text-white'}`}
-      >
-        {value}
-      </motion.span>
+      <div className={`text-5xl font-light z-10 ${accent ? 'text-[#E5C378]' : 'text-white'}`}>
+        <NumberTicker value={numValue} />
+      </div>
       
       {/* Sparkline */}
       <div className="absolute bottom-0 left-0 right-0 h-16 opacity-40 group-hover:opacity-100 transition-opacity duration-500">
@@ -751,6 +750,7 @@ export default function Admin() {
 
                       {/* Large Trend Chart (Decorative) */}
                       <motion.div variants={itemVariants} className="relative overflow-hidden rounded-2xl bg-[#0a0a0a] border border-[#ffffff15] p-6 md:p-8 shadow-[0_0_20px_rgba(197,160,89,0.02)] h-64 group">
+                        <BorderBeam size={220} duration={14} colorFrom="#E5C378" borderWidth={1} />
                         <div className="flex items-center justify-between z-10 relative">
                           <div className="text-[#888] font-sans text-[11px] uppercase tracking-widest flex items-center gap-2">
                             <div className="w-2 h-2 rounded-full bg-[#C5A059]" />

@@ -30,6 +30,9 @@ import {
   ShieldCheck,
   Zap
 } from 'lucide-react';
+import { BorderBeam } from '../components/magicui/border-beam';
+import { ShimmerButton } from '../components/magicui/shimmer-button';
+import { AnimatedGridPattern } from '../components/magicui/animated-grid-pattern';
 
 type Service = {
   id: string;
@@ -214,7 +217,8 @@ export default function Booking() {
   }, [selectedDate]);
 
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-8 pb-16">
+    <div className="relative w-full max-w-7xl mx-auto space-y-8 pb-16">
+      <AnimatedGridPattern className="opacity-15 pointer-events-none" numSquares={30} maxOpacity={0.2} />
       {/* ════════════════════════════════════════
           VERCEL-STYLE HEADER & BRAND
          ════════════════════════════════════════ */}
@@ -454,7 +458,10 @@ export default function Booking() {
 
         {/* RIGHT COLUMN: STEP 03 (AVAILABLE SLOTS + CONFIRMATION) */}
         <div className="lg:col-span-4">
-          <div className="bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl p-6 flex flex-col justify-between min-h-[560px] shadow-2xl sticky top-8">
+          <div className="relative overflow-hidden bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl p-6 flex flex-col justify-between min-h-[560px] shadow-2xl sticky top-8">
+            {selectedService && selectedDate && selectedTime && (
+              <BorderBeam size={180} duration={10} colorFrom="#E5C378" borderWidth={1.5} />
+            )}
             <div className="space-y-5">
               <div className="flex items-center justify-between pb-3 border-b border-[#171717]">
                 <h2 className="text-xl font-serif text-[#E5C378] font-normal tracking-wide">
@@ -536,24 +543,24 @@ export default function Booking() {
                 )}
               </AnimatePresence>
 
-              {/* Confirm Booking CTA */}
-              <motion.button
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.99 }}
+              {/* Confirm Booking Shimmer CTA */}
+              <ShimmerButton
                 type="button"
                 onClick={handleBooking}
                 disabled={!selectedService || !selectedDate || !selectedTime || bookingLoading}
-                className="w-full py-3.5 px-6 rounded-lg bg-[#E5C378] hover:bg-[#edd495] disabled:opacity-40 disabled:hover:bg-[#E5C378] text-black font-sans text-xs font-bold uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(229,195,120,0.25)] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+                className="w-full py-3.5 px-6 font-sans text-xs font-bold uppercase tracking-[0.2em] disabled:opacity-40 disabled:pointer-events-none"
+                shimmerColor="#E5C378"
+                background="linear-gradient(135deg, #1f1a10 0%, #0d0d0d 100%)"
               >
                 {bookingLoading ? (
                   <span>Reserving Appointment...</span>
                 ) : (
-                  <>
+                  <div className="flex items-center justify-center gap-2 text-[#E5C378]">
                     <span>Confirm Booking</span>
                     <ArrowRight size={14} />
-                  </>
+                  </div>
                 )}
-              </motion.button>
+              </ShimmerButton>
 
               <div className="flex items-center justify-center gap-2 text-[9px] text-[#666666] font-sans uppercase tracking-widest text-center">
                 <ShieldCheck size={12} className="text-[#4ade80]" />

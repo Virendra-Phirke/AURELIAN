@@ -1,9 +1,7 @@
 import React, { useEffect } from 'react';
 
 const GOOGLE_CLIENT_ID =
-  import.meta.env.VITE_GOOGLE_CLIENT_ID ||
-  '746469864617-u982sdj01nksir0dqgohgmkj8op44bdj.apps.googleusercontent.com';
-
+  import.meta.env.VITE_GOOGLE_CLIENT_ID;
 declare global {
   interface Window {
     google?: any;
