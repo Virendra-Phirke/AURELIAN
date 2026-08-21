@@ -473,7 +473,7 @@ export default function Booking() {
                     return (
                       <div
                         key={idx}
-                        className="py-3 font-sans text-xs text-[var(--color-border)] opacity-40 cursor-not-allowed select-none rounded-lg"
+                        className="py-2 sm:py-3 font-sans text-xs text-[var(--color-muted-text)] opacity-35 cursor-not-allowed select-none rounded-lg"
                       >
                         {format(day, 'd')}
                       </div>
@@ -487,7 +487,7 @@ export default function Booking() {
                       whileTap={{ scale: 0.95 }}
                       type="button"
                       onClick={() => setSelectedDate(dateStr)}
-                      className={`py-3 rounded-xl font-sans text-xs font-semibold transition-all duration-150 cursor-pointer ${
+                      className={`py-2 sm:py-3 rounded-xl font-sans text-xs font-semibold transition-all duration-150 cursor-pointer ${
                         isSelected
                           ? 'bg-[var(--color-primary)] text-black font-bold shadow-[0_0_15px_rgba(229,195,120,0.4)]'
                           : 'text-[var(--color-body-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-raised)]'
