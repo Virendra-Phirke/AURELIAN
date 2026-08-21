@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'motion/react';
 import { User, Shield, AlertCircle, Camera, Check, Key, Lock, Mail, ArrowRight, Sun, Moon, Laptop } from 'lucide-react';
 import { authClient } from '../lib/auth';
 import { useTheme } from '../lib/theme';
-import { ThemeToggle } from '../components/magicui/theme-toggle';
 
 // Toast for feedback
 function Toast({ message, type, onDone }: { message: string; type: 'success' | 'error'; onDone: () => void }) {
@@ -328,53 +327,50 @@ export default function Settings() {
           </div>
 
           {/* Theme & Appearance */}
-          <div className="bg-[var(--color-card-bg)] rounded-xl sm:rounded-2xl p-3.5 sm:p-6 shadow-md sm:shadow-xl space-y-2.5 sm:space-y-4 transition-colors">
-            <div className="flex items-center justify-between pb-2.5 sm:pb-4 border-b border-[var(--color-surface-raised)]">
-              <div className="flex items-center gap-2">
-                <Sun size={14} className="text-[var(--color-primary)] sm:w-4 sm:h-4" />
-                <h2 className="text-[var(--color-primary-text)] font-sans text-[11px] sm:text-xs uppercase tracking-wider font-semibold">Appearance & Theme</h2>
-              </div>
-              <ThemeToggle showLabel />
+          <div className="bg-[var(--color-card-bg)] rounded-xl sm:rounded-2xl p-3.5 sm:p-6 shadow-md sm:shadow-xl space-y-3 sm:space-y-4 transition-colors">
+            <div className="flex items-center gap-2 pb-2.5 sm:pb-4 border-b border-[var(--color-surface-raised)]">
+              <Sun size={14} className="text-[var(--color-primary)] sm:w-4 sm:h-4" />
+              <h2 className="text-[var(--color-primary-text)] font-sans text-[11px] sm:text-xs uppercase tracking-wider font-semibold">Appearance & Theme</h2>
             </div>
 
-            <div className="grid grid-cols-3 gap-2 pt-1">
+            <div className="grid grid-cols-3 gap-2 pt-0.5">
               <button
                 type="button"
                 onClick={() => setTheme('dark')}
-                className={`py-2 px-2 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                className={`py-2 sm:py-2.5 px-2 rounded-lg sm:rounded-xl flex items-center justify-center gap-1.5 sm:gap-2 transition-all cursor-pointer font-sans text-[10px] sm:text-xs uppercase tracking-wider ${
                   theme === 'dark'
                     ? 'bg-[var(--color-primary)] text-black font-bold shadow-sm'
-                    : 'bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)]'
+                    : 'bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-hover)]'
                 }`}
               >
                 <Moon size={14} />
-                <span className="font-sans text-[10px] uppercase tracking-wider">Dark</span>
+                <span>Dark</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setTheme('light')}
-                className={`py-2 px-2 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                className={`py-2 sm:py-2.5 px-2 rounded-lg sm:rounded-xl flex items-center justify-center gap-1.5 sm:gap-2 transition-all cursor-pointer font-sans text-[10px] sm:text-xs uppercase tracking-wider ${
                   theme === 'light'
                     ? 'bg-[var(--color-primary)] text-black font-bold shadow-sm'
-                    : 'bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)]'
+                    : 'bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-hover)]'
                 }`}
               >
                 <Sun size={14} />
-                <span className="font-sans text-[10px] uppercase tracking-wider">Light</span>
+                <span>Light</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setTheme('system')}
-                className={`py-2 px-2 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                className={`py-2 sm:py-2.5 px-2 rounded-lg sm:rounded-xl flex items-center justify-center gap-1.5 sm:gap-2 transition-all cursor-pointer font-sans text-[10px] sm:text-xs uppercase tracking-wider ${
                   theme === 'system'
                     ? 'bg-[var(--color-primary)] text-black font-bold shadow-sm'
-                    : 'bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)]'
+                    : 'bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-hover)]'
                 }`}
               >
                 <Laptop size={14} />
-                <span className="font-sans text-[10px] uppercase tracking-wider">System</span>
+                <span>System</span>
               </button>
             </div>
           </div>
