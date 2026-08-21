@@ -399,8 +399,8 @@ export default function Admin() {
   };
 
   // --- Data fetching ---
-  const fetchAll = useCallback(() => {
-    setLoading(true);
+  const fetchAll = useCallback((showSpinner = false) => {
+    if (showSpinner) setLoading(true);
     Promise.all([
       fetch('/api/admin/bookings').then(r => r.json()),
       fetch('/api/admin/services').then(r => r.json()),
@@ -418,7 +418,7 @@ export default function Admin() {
     }).catch(() => setLoading(false));
   }, []);
 
-  useEffect(() => { fetchAll(); }, [fetchAll]);
+  useEffect(() => { fetchAll(true); }, [fetchAll]);
 
   // --- Customer map for booking display ---
   const customerMap: Record<string, Customer> = {};
@@ -426,53 +426,79 @@ export default function Admin() {
 
   // --- Booking actions ---
   const handleBookingAction = async (id: string, action: string) => {
+    const statusMap: Record<string, string> = {
+      accept: 'ACCEPTED',
+      reject: 'REJECTED',
+      complete: 'COMPLETED',
+      cancel: 'CANCELLED',
+    };
+    const nextStatus = statusMap[action] || action.toUpperCase();
+
+    // Optimistic update (instant response, no full-page reload)
+    setBookings(prev => prev.map(b => b.id === id ? { ...b, status: nextStatus } : b));
+    showToast(`Booking ${action}ed`);
+
     const res = await fetch(`/api/admin/bookings/${id}/${action}`, { method: 'POST' });
     if (res.ok) {
-      fetchAll();
-      showToast(`Booking ${action}ed`);
+      fetchAll(false);
     } else {
+      fetchAll(false);
       showToast('Failed to update booking', 'error');
     }
   };
 
   // --- Customer actions ---
   const handleDeleteCustomer = async (id: string) => {
+    // Optimistic update
+    setCustomers(prev => prev.filter(c => c.id !== id));
+    showToast('Customer deleted');
+
     const res = await fetch(`/api/admin/customers/${id}`, { method: 'DELETE' });
     if (res.ok) {
-      fetchAll();
-      showToast('Customer deleted');
+      fetchAll(false);
     } else {
+      fetchAll(false);
       const data = await res.json();
       showToast(data.error || 'Failed to delete', 'error');
     }
   };
 
   const handleToggleRole = async (id: string) => {
+    setCustomers(prev => prev.map(c => c.id === id ? { ...c, role: c.role === 'ADMIN' ? 'USER' : 'ADMIN' } : c));
+    showToast('Role updated');
+
     const res = await fetch(`/api/admin/customers/${id}/role`, { method: 'PATCH' });
     if (res.ok) {
-      fetchAll();
-      showToast('Role updated');
+      fetchAll(false);
     } else {
+      fetchAll(false);
       const data = await res.json();
       showToast(data.error || 'Failed to update role', 'error');
     }
   };
 
   const handleSaveCustomerEdit = async (id: string) => {
-    if (!editCustomerName.trim()) return showToast('Customer name cannot be empty', 'error');
+    const trimmedName = editCustomerName.trim();
+    const trimmedEmail = editCustomerEmail.trim();
+    if (!trimmedName) return showToast('Customer name cannot be empty', 'error');
+
+    // Optimistic update
+    setCustomers(prev => prev.map(c => c.id === id ? { ...c, name: trimmedName, email: trimmedEmail || c.email } : c));
+    setEditingCustomerId(null);
+    showToast('Customer updated successfully');
+
     const res = await fetch(`/api/admin/customers/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        name: editCustomerName.trim(),
-        email: editCustomerEmail.trim() || undefined
+        name: trimmedName,
+        email: trimmedEmail || undefined
       }),
     });
     if (res.ok) {
-      fetchAll();
-      setEditingCustomerId(null);
-      showToast('Customer updated successfully');
+      fetchAll(false);
     } else {
+      fetchAll(false);
       const data = await res.json();
       showToast(data.error || 'Failed to update customer', 'error');
     }
@@ -490,7 +516,7 @@ export default function Admin() {
     if (res.ok) {
       setNewServiceName('');
       setNewServiceDuration(30);
-      fetchAll();
+      fetchAll(false);
       showToast('Service created');
     } else {
       showToast('Failed to create service', 'error');
@@ -498,46 +524,64 @@ export default function Admin() {
   };
 
   const handleToggleServiceActive = async (id: string, active: boolean) => {
+    // Optimistic UI update (immediate toggle with 0ms delay, no screen reload)
+    setAllServices(prev => prev.map(s => s.id === id ? { ...s, active: !active } : s));
+    showToast(active ? 'Service deactivated' : 'Service activated');
+
     const res = await fetch(`/api/admin/services/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ active: !active }),
     });
     if (res.ok) {
-      fetchAll();
-      showToast(active ? 'Service deactivated' : 'Service activated');
+      fetchAll(false);
     } else {
+      // Revert if error
+      setAllServices(prev => prev.map(s => s.id === id ? { ...s, active: active } : s));
       showToast('Failed to update service', 'error');
     }
   };
 
   const handleSaveServiceEdit = async (id: string) => {
+    const trimmedName = editServiceName.trim();
+    if (!trimmedName) return showToast('Service name cannot be empty', 'error');
+
+    // Optimistic UI update (instant, no screen reload)
+    setAllServices(prev => prev.map(s => s.id === id ? { ...s, name: trimmedName, durationMinutes: editServiceDuration } : s));
+    setServiceMap(prev => ({ ...prev, [id]: trimmedName }));
+    setEditingServiceId(null);
+    showToast('Service updated');
+
     const res = await fetch(`/api/admin/services/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: editServiceName.trim(), durationMinutes: editServiceDuration }),
+      body: JSON.stringify({ name: trimmedName, durationMinutes: editServiceDuration }),
     });
     if (res.ok) {
-      setEditingServiceId(null);
-      fetchAll();
-      showToast('Service updated');
+      fetchAll(false);
     } else {
+      fetchAll(false);
       showToast('Failed to update service', 'error');
     }
   };
 
   // --- Settings ---
+  const [savingSettings, setSavingSettings] = useState(false);
   const handleSettingsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setSavingSettings(true);
     const res = await fetch('/api/admin/settings', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(settings),
     });
-    if (res.ok) showToast('Settings saved');
-    else showToast('Failed to save settings', 'error');
-    setLoading(false);
+    if (res.ok) {
+      showToast('Settings saved');
+      fetchAll(false);
+    } else {
+      showToast('Failed to save settings', 'error');
+    }
+    setSavingSettings(false);
   };
 
   // --- Filtered & Paginated data ---

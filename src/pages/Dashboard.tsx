@@ -154,8 +154,8 @@ export default function Dashboard() {
   const [confirmingCancel, setConfirmingCancel] = useState<string | null>(null);
   const [showPastHistory, setShowPastHistory] = useState(false);
 
-  const fetchData = useCallback(() => {
-    setLoading(true);
+  const fetchData = useCallback((showSpinner = false) => {
+    if (showSpinner) setLoading(true);
     Promise.all([
       fetch('/api/bookings').then(r => r.json()),
       fetch('/api/services').then(r => r.json()),
@@ -170,7 +170,7 @@ export default function Dashboard() {
     }).catch(() => setLoading(false));
   }, []);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => { fetchData(true); }, [fetchData]);
 
   const handleCancel = async (id: string) => {
     const res = await fetch(`/api/bookings/${id}`, { method: 'DELETE' });
