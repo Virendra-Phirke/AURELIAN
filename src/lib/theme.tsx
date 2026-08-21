@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { flushSync } from 'react-dom';
 
 export type Theme = 'dark' | 'light' | 'system';
 
@@ -11,8 +12,8 @@ interface ThemeProviderProps {
 interface ThemeProviderState {
   theme: Theme;
   resolvedTheme: 'dark' | 'light';
-  setTheme: (theme: Theme) => void;
-  toggleTheme: () => void;
+  setTheme: (theme: Theme, event?: React.MouseEvent | MouseEvent | { clientX?: number; clientY?: number }) => void;
+  toggleTheme: (event?: React.MouseEvent | MouseEvent | { clientX?: number; clientY?: number }) => void;
 }
 
 const initialState: ThemeProviderState = {
@@ -36,50 +37,109 @@ export function ThemeProvider({
 
   const [resolvedTheme, setResolvedTheme] = useState<'dark' | 'light'>('dark');
 
-  useEffect(() => {
+  const applyThemeClasses = (activeTheme: Theme): 'dark' | 'light' => {
     const root = window.document.documentElement;
     root.classList.remove('light', 'dark');
 
     let resolved: 'dark' | 'light' = 'dark';
-    if (theme === 'system') {
+    if (activeTheme === 'system') {
       const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
         ? 'dark'
         : 'light';
       resolved = systemTheme;
     } else {
-      resolved = theme;
+      resolved = activeTheme;
     }
 
     setResolvedTheme(resolved);
     root.classList.add(resolved);
     root.setAttribute('data-theme', resolved);
+    return resolved;
+  };
+
+  useEffect(() => {
+    applyThemeClasses(theme);
   }, [theme]);
 
-  // Listen to system changes
+  // Listen to system theme changes
   useEffect(() => {
     if (theme !== 'system') return;
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = () => {
-      const resolved = mediaQuery.matches ? 'dark' : 'light';
-      setResolvedTheme(resolved);
-      const root = window.document.documentElement;
-      root.classList.remove('light', 'dark');
-      root.classList.add(resolved);
-      root.setAttribute('data-theme', resolved);
+      applyThemeClasses('system');
     };
 
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, [theme]);
 
-  const setTheme = (newTheme: Theme) => {
-    localStorage.setItem(storageKey, newTheme);
-    setThemeState(newTheme);
+  const setTheme = (
+    newTheme: Theme,
+    event?: React.MouseEvent | MouseEvent | { clientX?: number; clientY?: number }
+  ) => {
+    const isAppearanceTransitionSupported =
+      typeof document !== 'undefined' &&
+      'startViewTransition' in document &&
+      !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (!isAppearanceTransitionSupported) {
+      localStorage.setItem(storageKey, newTheme);
+      setThemeState(newTheme);
+      return;
+    }
+
+    // Determine coordinates for the circular expansion effect
+    let x = window.innerWidth / 2;
+    let y = window.innerHeight / 2;
+
+    if (
+      event &&
+      typeof event.clientX === 'number' &&
+      typeof event.clientY === 'number' &&
+      event.clientX > 0 &&
+      event.clientY > 0
+    ) {
+      x = event.clientX;
+      y = event.clientY;
+    }
+
+    const endRadius = Math.hypot(
+      Math.max(x, window.innerWidth - x),
+      Math.max(y, window.innerHeight - y)
+    );
+
+    const transition = (document as any).startViewTransition(() => {
+      flushSync(() => {
+        localStorage.setItem(storageKey, newTheme);
+        setThemeState(newTheme);
+        applyThemeClasses(newTheme);
+      });
+    });
+
+    transition.ready.then(() => {
+      const clipPath = [
+        `circle(0px at ${x}px ${y}px)`,
+        `circle(${endRadius}px at ${x}px ${y}px)`,
+      ];
+
+      document.documentElement.animate(
+        {
+          clipPath,
+        },
+        {
+          duration: 500,
+          easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+          pseudoElement: '::view-transition-new(root)',
+        }
+      );
+    });
   };
 
-  const toggleTheme = () => {
+  const toggleTheme = (
+    event?: React.MouseEvent | MouseEvent | { clientX?: number; clientY?: number }
+  ) => {
     const nextTheme = resolvedTheme === 'dark' ? 'light' : 'dark';
-    setTheme(nextTheme);
+    setTheme(nextTheme, event);
   };
 
   const value = {
