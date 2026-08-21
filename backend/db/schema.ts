@@ -1,5 +1,5 @@
-import { pgTable, text, timestamp, boolean, uuid, integer, time, varchar } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
+import { pgTable, text, timestamp, boolean, uuid, integer, time, varchar, uniqueIndex } from 'drizzle-orm/pg-core';
+import { relations, sql } from 'drizzle-orm';
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -77,7 +77,7 @@ export const bookings = pgTable("bookings", {
   bookingDate: varchar("bookingDate", { length: 10 }).notNull(), // YYYY-MM-DD
   startTime: varchar("startTime", { length: 5 }).notNull(), // HH:MM
   endTime: varchar("endTime", { length: 5 }).notNull(), // HH:MM
-  status: text("status").$type<"PENDING" | "ACCEPTED" | "REJECTED" | "CANCELLED" | "COMPLETED" | "EXPIRED">().default("PENDING").notNull(),
+  status: text("status").$type<"PENDING" | "ACCEPTED" | "REJECTED" | "CANCELLED" | "COMPLETED" | "EXPIRED">().default("ACCEPTED").notNull(),
   customerNote: text("customerNote"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().notNull(),
@@ -85,7 +85,9 @@ export const bookings = pgTable("bookings", {
   rejectedAt: timestamp("rejectedAt"),
   cancelledAt: timestamp("cancelledAt"),
   completedAt: timestamp("completedAt"),
-});
+}, (table) => [
+  uniqueIndex("unique_active_booking_slot").on(table.bookingDate, table.startTime).where(sql`${table.status} IN ('ACCEPTED', 'PENDING')`)
+]);
 
 export const shopSettings = pgTable("shop_settings", {
   id: uuid("id").primaryKey().defaultRandom(),

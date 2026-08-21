@@ -105,37 +105,44 @@ export default function Booking() {
   }, []);
 
   // 2. Fetch availability when service or date changes
-  useEffect(() => {
+  const fetchAvailability = React.useCallback((isRefetch = false) => {
     if (!selectedService || !selectedDate) return;
-    setLoadingSlots(true);
-    setSelectedTime(null);
-    setError('');
+    if (!isRefetch) setLoadingSlots(true);
 
     fetch(`/api/availability?date=${selectedDate}&service=${encodeURIComponent(selectedService.name)}`)
       .then((r) => r.json())
       .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
+        if (Array.isArray(data)) {
           setSlots(data);
-          // Pre-select second slot if available like mockup
-          if (data.length > 1) {
-            setSelectedTime(data[1]);
-          } else {
-            setSelectedTime(data[0]);
-          }
-        } else {
-          // Fallback mockup slots if none returned for demo
-          const fallbackSlots = ['10:00', '11:30', '13:00', '14:30', '16:00', '17:30'];
-          setSlots(fallbackSlots);
-          setSelectedTime('11:30');
+          // If current selectedTime is not in the new slots, clear it
+          setSelectedTime((prev) => {
+            if (prev && !data.includes(prev)) return null;
+            if (!prev && data.length > 0 && !isRefetch) {
+              return data.length > 1 ? data[1] : data[0];
+            }
+            return prev;
+          });
         }
       })
-      .catch(() => {
-        const fallbackSlots = ['10:00', '11:30', '13:00', '14:30', '16:00', '17:30'];
-        setSlots(fallbackSlots);
-        setSelectedTime('11:30');
-      })
-      .finally(() => setLoadingSlots(false));
+      .catch(() => {})
+      .finally(() => {
+        if (!isRefetch) setLoadingSlots(false);
+      });
   }, [selectedService, selectedDate]);
+
+  useEffect(() => {
+    fetchAvailability(false);
+
+    // Live background polling every 15s to keep slots in sync
+    const interval = setInterval(() => fetchAvailability(true), 15000);
+    const onFocus = () => fetchAvailability(true);
+    window.addEventListener('focus', onFocus);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [fetchAvailability]);
 
   // 3. Month calendar dates generation
   const calendarDays = useMemo(() => {
@@ -172,6 +179,8 @@ export default function Booking() {
       navigate('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Could not complete booking.');
+      // Instantly refresh available slots from server and deselect conflicting slot
+      fetchAvailability(true);
     } finally {
       setBookingLoading(false);
     }

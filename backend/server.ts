@@ -6,6 +6,7 @@ import { auth } from './auth.js';
 import { apiRouter } from './routes/api.js';
 import { db } from './db/index.js';
 import { services } from './db/schema.js';
+import { sql } from 'drizzle-orm';
 import dotenv from 'dotenv';
 dotenv.config();
 import fs from 'fs';
@@ -74,8 +75,16 @@ async function startServer() {
           { name: 'Zat Ke Bal', durationMinutes: 30 }
         ]);
       }
+
+      // Ensure database-level unique constraint on active booking slots
+      await db.execute(sql`
+        CREATE UNIQUE INDEX IF NOT EXISTS unique_active_booking_slot 
+        ON bookings ("bookingDate", "startTime") 
+        WHERE status IN ('ACCEPTED', 'PENDING');
+      `);
+      console.log("Database unique constraint active.");
     } catch (e) {
-      console.log("Could not seed DB, perhaps migrations are not run yet.");
+      console.log("DB initialization check:", e);
     }
   });
 }

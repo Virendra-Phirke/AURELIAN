@@ -118,7 +118,7 @@ apiRouter.get("/availability", rateLimit("avail", 300, 60), async (req, res) => 
         current = addMinutes(current, shop.slotDurationMinutes);
     }
 
-    await redisClient.set(cacheKey, JSON.stringify(slots), { EX: 60 });
+    await redisClient.set(cacheKey, JSON.stringify(slots), { EX: 15 });
     res.json(slots);
 });
 
@@ -218,11 +218,15 @@ apiRouter.post("/bookings", rateLimit("create_booking", 10, 60), requireAuth, as
             return { booking: created[0], serviceName: svc[0].name };
         });
 
-        // 8. Invalidate availability cache immediately
+        // 8. Invalidate availability cache immediately for this date
         await redisClient.del(`availability:${date}:${result.serviceName}`);
+        await redisClient.del(`availability:${date}`);
 
         res.status(201).json(result.booking);
     } catch (err: any) {
+        if (err?.code === '23505' || err?.message?.includes('unique_active_booking_slot') || err?.message?.includes('duplicate key')) {
+            return res.status(409).json({ error: "This slot was just confirmed by another user. Please choose another available time." });
+        }
         res.status(400).json({ error: err.message || "Booking failed" });
     } finally {
         await redisClient.del(lockKey);
