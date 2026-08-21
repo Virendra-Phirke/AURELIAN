@@ -54,25 +54,28 @@ function getGreeting(): string {
 
 // --- StatusBadge (Block UI) ---
 function StatusBadge({ status }: { status: string }) {
+  const isConfirmed = status === 'ACCEPTED' || status === 'CONFIRMED' || status === 'PENDING';
+  const displayLabel = isConfirmed ? 'CONFIRMED' : status;
   const colors: Record<string, string> = {
-    PENDING: 'text-[var(--color-primary)] bg-[var(--color-primary)]/15',
+    CONFIRMED: 'text-emerald-500 bg-emerald-500/15',
     ACCEPTED: 'text-emerald-500 bg-emerald-500/15',
+    PENDING: 'text-emerald-500 bg-emerald-500/15',
     REJECTED: 'text-red-500 bg-red-500/15',
     CANCELLED: 'text-[var(--color-muted-text)] bg-[var(--color-surface-raised)]',
     COMPLETED: 'text-[var(--color-primary-text)] bg-[var(--color-surface-raised)]',
   };
-  const isPulse = status === 'ACCEPTED' || status === 'PENDING';
-  const dotColor = status === 'ACCEPTED' ? 'bg-emerald-500' : 'bg-[var(--color-primary)]';
+  const isPulse = isConfirmed;
+  const dotColor = 'bg-emerald-500';
 
   return (
-    <span className={`rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.15em] font-sans inline-flex items-center gap-1.5 font-semibold ${colors[status] || colors.PENDING}`}>
+    <span className={`rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.15em] font-sans inline-flex items-center gap-1.5 font-semibold ${colors[status] || colors.CONFIRMED}`}>
       {isPulse && (
         <span className="relative flex h-1.5 w-1.5">
           <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${dotColor}`}></span>
           <span className={`relative inline-flex rounded-full h-1.5 w-1.5 ${dotColor}`}></span>
         </span>
       )}
-      {status}
+      {displayLabel}
     </span>
   );
 }
@@ -273,8 +276,9 @@ export default function Dashboard() {
       case 'COMPLETED': return <CheckCircle size={14} className="text-[#4ade80]" />;
       case 'CANCELLED': return <XCircle size={14} className="text-[#737373]" />;
       case 'REJECTED': return <XCircle size={14} className="text-red-400" />;
-      case 'ACCEPTED': return <CheckCircle size={14} className="text-[#4ade80]" />;
-      case 'PENDING': return <AlertCircle size={14} className="text-[#E5C378]" />;
+      case 'ACCEPTED':
+      case 'CONFIRMED':
+      case 'PENDING': return <CheckCircle size={14} className="text-[#4ade80]" />;
       default: return <Clock size={14} className="text-[#737373]" />;
     }
   };
@@ -282,8 +286,9 @@ export default function Dashboard() {
   const getActivityLabel = (b: Booking) => {
     const sName = services[b.serviceId] || 'Service';
     switch (b.status) {
-      case 'ACCEPTED': return `${sName} confirmed`;
-      case 'PENDING': return `${sName} scheduled`;
+      case 'ACCEPTED':
+      case 'CONFIRMED':
+      case 'PENDING': return `${sName} confirmed`;
       case 'COMPLETED': return `${sName} completed`;
       case 'CANCELLED': return `${sName} cancelled`;
       case 'REJECTED': return `${sName} declined`;

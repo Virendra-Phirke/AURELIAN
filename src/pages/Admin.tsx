@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo, KeyboardEvent } from 'react';
 import { format, parseISO, subDays, isAfter } from 'date-fns';
 import { motion, AnimatePresence } from 'motion/react';
-import { LayoutDashboard, CalendarDays, Users, Scissors, Settings as SettingsIcon, ChevronRight, ChevronDown, User, Shield, Lock, AlertCircle, Camera, Download, Search, RefreshCw, X, Check } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, Users, Scissors, Settings as SettingsIcon, ChevronRight, ChevronDown, Clock, User, Shield, Lock, AlertCircle, Camera, Download, Search, RefreshCw, X, Check } from 'lucide-react';
 import { authClient } from '../lib/auth';
 import { DataPagination } from '../components/ui/pagination';
 import { Badge } from '../components/ui/badge';
@@ -52,7 +52,7 @@ const TABS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
   { key: 'profile', label: 'My Profile', icon: <User size={20} /> },
 ];
 
-const STATUS_FILTERS = ['ALL', 'PENDING', 'ACCEPTED', 'COMPLETED', 'REJECTED', 'CANCELLED'] as const;
+const STATUS_FILTERS = ['ALL', 'CONFIRMED', 'COMPLETED', 'CANCELLED'] as const;
 
 // --- Animation Variants ---
 const pageVariants = {
@@ -148,20 +148,23 @@ function ConfirmButton({
 
 // --- Status Badge (Block UI) ---
 function StatusBadge({ status }: { status: string }) {
+  const isConfirmed = status === 'ACCEPTED' || status === 'CONFIRMED' || status === 'PENDING';
+  const displayLabel = isConfirmed ? 'CONFIRMED' : status;
   const colors: Record<string, string> = {
-    PENDING: 'text-[var(--color-primary)] bg-[var(--color-primary)]/15 font-bold',
+    CONFIRMED: 'text-emerald-500 bg-emerald-500/15 font-bold',
     ACCEPTED: 'text-emerald-500 bg-emerald-500/15 font-bold',
-    REJECTED: 'text-red-500 bg-red-500/15 font-bold',
-    CANCELLED: 'text-[var(--color-muted-text)] bg-[var(--color-surface-raised)] font-medium',
+    PENDING: 'text-emerald-500 bg-emerald-500/15 font-bold',
     COMPLETED: 'text-[var(--color-primary-text)] bg-[var(--color-surface-raised)] font-medium',
+    CANCELLED: 'text-[var(--color-muted-text)] bg-[var(--color-surface-raised)] font-medium',
+    REJECTED: 'text-red-500 bg-red-500/15 font-bold',
   };
   return (
     <span
-      className={`rounded-full px-3 py-1 text-[9px] uppercase tracking-[0.2em] font-sans inline-flex items-center gap-1.5 ${colors[status] || colors.PENDING}`}
+      className={`rounded-full px-3 py-1 text-[9px] uppercase tracking-[0.2em] font-sans inline-flex items-center gap-1.5 ${colors[status] || colors.CONFIRMED}`}
       role="status"
-      aria-label={`Status: ${status.toLowerCase()}`}
+      aria-label={`Status: ${displayLabel.toLowerCase()}`}
     >
-      {status}
+      {displayLabel}
     </span>
   );
 }
@@ -587,7 +590,13 @@ export default function Admin() {
   // --- Filtered & Paginated data ---
   const filteredBookings = useMemo(() => {
     return bookings.filter(b => {
-      if (statusFilter !== 'ALL' && b.status !== statusFilter) return false;
+      if (statusFilter !== 'ALL') {
+        if (statusFilter === 'CONFIRMED') {
+          if (b.status !== 'ACCEPTED' && b.status !== 'CONFIRMED' && b.status !== 'PENDING') return false;
+        } else if (b.status !== statusFilter) {
+          return false;
+        }
+      }
       if (bookingSearch) {
         const q = bookingSearch.toLowerCase();
         const customer = customerMap[b.userId];
@@ -661,8 +670,8 @@ export default function Admin() {
   // --- Analytics ---
   const today = format(new Date(), 'yyyy-MM-dd');
   const weekAgo = subDays(new Date(), 7);
-  const todayBookings = bookings.filter(b => b.bookingDate === today).length;
-  const pendingCount = bookings.filter(b => b.status === 'PENDING').length;
+  const todayBookingsCount = bookings.filter(b => b.bookingDate === today && (b.status === 'ACCEPTED' || b.status === 'CONFIRMED' || b.status === 'PENDING')).length;
+  const activeUpcomingBookings = bookings.filter(b => b.status === 'ACCEPTED' || b.status === 'CONFIRMED' || b.status === 'PENDING');
   const completedThisWeek = bookings.filter(b => b.status === 'COMPLETED' && isAfter(parseISO(b.createdAt), weekAgo)).length;
   const totalCustomers = customers.filter(c => c.role !== 'ADMIN').length;
 
@@ -734,11 +743,6 @@ export default function Admin() {
                   )}
                   {tab.icon}
                   {tab.label}
-                  {tab.key === 'bookings' && pendingCount > 0 && (
-                    <span className="ml-auto px-2 py-0.5 text-[9px] bg-red-500/20 text-red-500 border border-red-500/30 rounded-full font-bold">
-                      {pendingCount}
-                    </span>
-                  )}
                 </button>
               );
             })}
@@ -791,7 +795,7 @@ export default function Admin() {
 
                       <motion.div variants={listVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 md:gap-6">
                         <StatCard label="Total Bookings" value={bookings.length} icon={<CalendarDays size={16} />} pathData={sparkline1} />
-                        <StatCard label="Pending Approval" value={pendingCount} icon={<LayoutDashboard size={16} />} accent={pendingCount > 0} pathData={sparkline2} />
+                        <StatCard label="Today's Bookings" value={todayBookingsCount} icon={<Clock size={16} />} accent={todayBookingsCount > 0} pathData={sparkline2} />
                         <StatCard label="Total Customers" value={totalCustomers} icon={<Users size={16} />} pathData={sparkline3} />
                         <StatCard label="Completed Week" value={completedThisWeek} icon={<Scissors size={16} />} pathData={sparkline4} />
                       </motion.div>
@@ -834,15 +838,20 @@ export default function Admin() {
                         </div>
                       </motion.div>
 
-                      {/* Quick pending list */}
-                      {pendingCount > 0 && (
+                      {/* Upcoming Schedule list */}
+                      {activeUpcomingBookings.length > 0 && (
                         <motion.div variants={itemVariants} className="mt-4 sm:mt-8">
-                          <h2 className="font-sans text-[9px] sm:text-[10px] uppercase tracking-widest text-[var(--color-secondary-text)] mb-3 sm:mb-6 font-semibold">
-                            Awaiting Approval
-                          </h2>
+                          <div className="flex items-center justify-between mb-3 sm:mb-6">
+                            <h2 className="font-sans text-[9px] sm:text-[10px] uppercase tracking-widest text-[var(--color-secondary-text)] font-semibold flex items-center gap-2">
+                              <Clock size={12} className="text-[var(--color-primary)]" />
+                              <span>Upcoming Schedule</span>
+                            </h2>
+                            <span className="text-[10px] text-[var(--color-secondary-text)] font-sans font-semibold">
+                              {activeUpcomingBookings.length} Active
+                            </span>
+                          </div>
                           <motion.div variants={listVariants} className="space-y-2 sm:space-y-4">
-                            {bookings
-                              .filter(b => b.status === 'PENDING')
+                            {activeUpcomingBookings
                               .slice(0, 5)
                               .map(b => (
                                 <motion.div
@@ -867,29 +876,29 @@ export default function Admin() {
                                   <div className="flex items-center gap-2 w-full sm:w-auto">
                                     <motion.button
                                       whileTap={{ scale: 0.96 }}
-                                      onClick={() => handleBookingAction(b.id, 'accept')}
-                                      className="flex-1 sm:flex-none px-4 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl bg-[var(--color-primary)] text-black font-sans text-[9px] sm:text-[10px] uppercase tracking-wider hover:bg-[var(--color-primary-hover)] transition-colors shadow-sm font-bold cursor-pointer"
+                                      onClick={() => handleBookingAction(b.id, 'complete')}
+                                      className="flex-1 sm:flex-none px-4 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl bg-emerald-500 text-white font-sans text-[9px] sm:text-[10px] uppercase tracking-wider hover:bg-emerald-600 transition-colors shadow-sm font-bold cursor-pointer"
                                     >
-                                      Accept
+                                      Complete
                                     </motion.button>
                                     <motion.button
                                       whileTap={{ scale: 0.96 }}
-                                      onClick={() => handleBookingAction(b.id, 'reject')}
+                                      onClick={() => handleBookingAction(b.id, 'cancel')}
                                       className="flex-1 sm:flex-none px-4 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)] font-sans text-[9px] sm:text-[10px] uppercase tracking-wider hover:bg-red-500/10 hover:text-red-500 transition-colors cursor-pointer"
                                     >
-                                      Reject
+                                      Cancel
                                     </motion.button>
                                   </div>
                                 </motion.div>
                               ))}
-                            {pendingCount > 5 && (
+                            {activeUpcomingBookings.length > 5 && (
                               <motion.button
                                 variants={listItemVariants}
                                 whileHover={{ scale: 1.01 }}
-                                onClick={() => { setActiveTab('bookings'); setStatusFilter('PENDING'); }}
+                                onClick={() => { setActiveTab('bookings'); setStatusFilter('CONFIRMED'); }}
                                 className="w-full py-2.5 sm:py-4 rounded-xl sm:rounded-2xl bg-[var(--color-card-bg)] text-[var(--color-primary)] font-sans text-[10px] sm:text-[11px] uppercase tracking-wider hover:bg-[var(--color-surface-raised)] transition-colors cursor-pointer shadow-sm font-semibold"
                               >
-                                View all {pendingCount} pending bookings →
+                                View all {activeUpcomingBookings.length} upcoming bookings →
                               </motion.button>
                             )}
                           </motion.div>
@@ -912,7 +921,11 @@ export default function Admin() {
                               className="w-full appearance-none px-3.5 py-2 pr-8 rounded-xl bg-[var(--color-card-bg)] text-[var(--color-primary-text)] font-sans text-xs uppercase tracking-wider font-semibold focus:outline-none cursor-pointer shadow-sm"
                             >
                               {STATUS_FILTERS.map(sf => {
-                                const count = sf === 'ALL' ? bookings.length : bookings.filter(b => b.status === sf).length;
+                                const count = sf === 'ALL'
+                                  ? bookings.length
+                                  : sf === 'CONFIRMED'
+                                    ? bookings.filter(b => b.status === 'ACCEPTED' || b.status === 'CONFIRMED' || b.status === 'PENDING').length
+                                    : bookings.filter(b => b.status === sf).length;
                                 return (
                                   <option key={sf} value={sf} className="bg-[var(--color-surface-raised)] text-[var(--color-primary-text)]">
                                     Status: {sf} ({count})
@@ -926,7 +939,11 @@ export default function Admin() {
                           {/* Desktop Status Filter Pills */}
                           <div className="hidden sm:flex flex-wrap gap-1 bg-[var(--color-card-bg)] p-1 rounded-xl shadow-sm" role="group" aria-label="Filter bookings by status">
                             {STATUS_FILTERS.map(sf => {
-                              const countForFilter = sf === 'ALL' ? bookings.length : bookings.filter(b => b.status === sf).length;
+                              const countForFilter = sf === 'ALL'
+                                ? bookings.length
+                                : sf === 'CONFIRMED'
+                                  ? bookings.filter(b => b.status === 'ACCEPTED' || b.status === 'CONFIRMED' || b.status === 'PENDING').length
+                                  : bookings.filter(b => b.status === sf).length;
                               return (
                                 <button
                                   key={sf}
@@ -989,6 +1006,7 @@ export default function Admin() {
                           ) : (
                             paginatedBookings.map((b, i) => {
                               const customer = customerMap[b.userId];
+                              const isActive = b.status === 'ACCEPTED' || b.status === 'CONFIRMED' || b.status === 'PENDING';
                               return (
                                 <motion.div
                                   key={b.id}
@@ -1018,40 +1036,20 @@ export default function Admin() {
                                     </span>
                                   </div>
 
-                                  {(b.status === 'PENDING' || b.status === 'ACCEPTED') && (
+                                  {isActive && (
                                     <div className="flex items-center gap-2 pt-1">
-                                      {b.status === 'PENDING' && (
-                                        <>
-                                          <button
-                                            onClick={() => handleBookingAction(b.id, 'accept')}
-                                            className="flex-1 py-1.5 rounded-lg bg-[var(--color-primary)] text-black text-[9px] uppercase tracking-wider font-bold cursor-pointer"
-                                          >
-                                            Accept
-                                          </button>
-                                          <button
-                                            onClick={() => handleBookingAction(b.id, 'reject')}
-                                            className="flex-1 py-1.5 rounded-lg bg-[var(--color-surface)] text-red-400 hover:text-red-500 text-[9px] uppercase tracking-wider font-semibold cursor-pointer"
-                                          >
-                                            Reject
-                                          </button>
-                                        </>
-                                      )}
-                                      {b.status === 'ACCEPTED' && (
-                                        <>
-                                          <button
-                                            onClick={() => handleBookingAction(b.id, 'complete')}
-                                            className="flex-1 py-1.5 rounded-lg bg-emerald-500 text-white text-[9px] uppercase tracking-wider font-bold cursor-pointer"
-                                          >
-                                            Complete
-                                          </button>
-                                          <button
-                                            onClick={() => handleBookingAction(b.id, 'cancel')}
-                                            className="flex-1 py-1.5 rounded-lg bg-[var(--color-surface)] text-[var(--color-secondary-text)] text-[9px] uppercase tracking-wider font-semibold cursor-pointer"
-                                          >
-                                            Cancel
-                                          </button>
-                                        </>
-                                      )}
+                                      <button
+                                        onClick={() => handleBookingAction(b.id, 'complete')}
+                                        className="flex-1 py-1.5 rounded-lg bg-emerald-500 text-white text-[9px] uppercase tracking-wider font-bold cursor-pointer"
+                                      >
+                                        Complete
+                                      </button>
+                                      <button
+                                        onClick={() => handleBookingAction(b.id, 'cancel')}
+                                        className="flex-1 py-1.5 rounded-lg bg-[var(--color-surface)] text-[var(--color-secondary-text)] hover:text-red-400 text-[9px] uppercase tracking-wider font-semibold cursor-pointer"
+                                      >
+                                        Cancel
+                                      </button>
                                     </div>
                                   )}
                                 </motion.div>
@@ -1081,6 +1079,7 @@ export default function Admin() {
                                 </tr>
                               ) : paginatedBookings.map((b, i) => {
                                 const customer = customerMap[b.userId];
+                                const isActive = b.status === 'ACCEPTED' || b.status === 'CONFIRMED' || b.status === 'PENDING';
                                 return (
                                   <motion.tr 
                                     initial={{ opacity: 0, y: 8 }}
@@ -1101,13 +1100,7 @@ export default function Admin() {
                                     <td className="px-6 py-4"><StatusBadge status={b.status} /></td>
                                     <td className="px-6 py-4 text-right">
                                       <div className="flex items-center justify-end gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
-                                        {b.status === 'PENDING' && (
-                                          <>
-                                            <button onClick={() => handleBookingAction(b.id, 'accept')} className="px-3.5 py-1.5 rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-black text-[10px] uppercase tracking-widest transition-all font-semibold cursor-pointer">Accept</button>
-                                            <button onClick={() => handleBookingAction(b.id, 'reject')} className="px-3.5 py-1.5 rounded-lg text-[var(--color-secondary-text)] hover:bg-red-500/10 hover:text-red-500 text-[10px] uppercase tracking-widest transition-all cursor-pointer">Reject</button>
-                                          </>
-                                        )}
-                                        {b.status === 'ACCEPTED' && (
+                                        {isActive && (
                                           <>
                                             <button onClick={() => handleBookingAction(b.id, 'complete')} className="px-3.5 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 border border-emerald-500/30 hover:bg-emerald-500 hover:text-white text-[10px] uppercase tracking-widest transition-all font-semibold cursor-pointer">Complete</button>
                                             <button onClick={() => handleBookingAction(b.id, 'cancel')} className="px-3.5 py-1.5 rounded-lg text-[var(--color-secondary-text)] hover:bg-red-500/10 hover:text-red-500 text-[10px] uppercase tracking-widest transition-all cursor-pointer">Cancel</button>
@@ -1843,11 +1836,6 @@ export default function Admin() {
                 <span className={`text-[8px] uppercase tracking-wider font-sans font-medium transition-all duration-200 ${isActive ? 'opacity-100' : 'opacity-70'}`}>
                   {tab.label}
                 </span>
-                {tab.key === 'bookings' && pendingCount > 0 && (
-                  <span className="absolute top-1 right-2.5 flex h-3 w-3 items-center justify-center rounded-full bg-red-500 text-[7px] font-bold text-white shadow-sm">
-                    {pendingCount}
-                  </span>
-                )}
                 {/* Active Indicator Dot */}
                 {isActive && (
                   <motion.div
