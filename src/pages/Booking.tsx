@@ -330,56 +330,57 @@ export default function Booking() {
           {/* ──────────────────────────────────────
               STEP 01: SELECT SERVICE
              ────────────────────────────────────── */}
-          <div className="space-y-3.5 sm:space-y-5">
+          <div className="space-y-3 sm:space-y-5">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg sm:text-2xl font-serif text-[var(--color-primary-text)] font-medium tracking-wide">
+              <h2 className="text-base sm:text-2xl font-serif text-[var(--color-primary-text)] font-medium tracking-wide">
                 Step 01: <span className="text-[var(--color-primary)] font-normal">Select Service</span>
               </h2>
               <span className="font-sans text-[9px] sm:text-[10px] uppercase tracking-widest text-[var(--color-secondary-text)]">
-                {services.length} services available
+                {services.length} services
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4">
+            {/* List View on mobile, Grid on desktop */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
               {services.map((service, idx) => {
                 const isSelected = selectedService?.id === service.id;
                 const price = getServicePrice(service.name, service.durationMinutes);
 
                 return (
-                  <BlurFade key={service.id} delay={0.04 * idx} inView>
+                  <BlurFade key={service.id} delay={0.03 * idx} inView>
                     <motion.div
                       whileHover={{ y: -2 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => setSelectedService(service)}
-                      className={`relative overflow-hidden rounded-2xl p-3.5 sm:p-5 flex sm:flex-col items-center sm:items-stretch justify-between gap-3 text-left sm:text-center transition-all cursor-pointer select-none ${
+                      className={`relative overflow-hidden rounded-xl sm:rounded-2xl p-2.5 sm:p-5 flex sm:flex-col items-center sm:items-stretch justify-between gap-2.5 sm:gap-3 text-left sm:text-center transition-all cursor-pointer select-none ${
                         isSelected
-                          ? 'bg-[var(--color-primary)]/10 shadow-[0_0_25px_rgba(229,195,120,0.18)]'
-                          : 'bg-[var(--color-card-bg)] hover:bg-[var(--color-surface-hover)] shadow-md'
+                          ? 'bg-[var(--color-primary)]/10 shadow-[0_0_20px_rgba(229,195,120,0.18)]'
+                          : 'bg-[var(--color-card-bg)] hover:bg-[var(--color-surface-hover)] shadow-sm sm:shadow-md'
                       }`}
                     >
                       {isSelected && (
-                        <BorderBeam size={140} duration={8} colorFrom="var(--color-primary)" borderWidth={1.5} />
+                        <BorderBeam size={100} duration={8} colorFrom="var(--color-primary)" borderWidth={1.5} />
                       )}
 
-                      <div className="flex sm:flex-col items-center sm:items-stretch gap-3 sm:gap-0 flex-1 min-w-0">
+                      <div className="flex sm:flex-col items-center sm:items-stretch gap-2.5 sm:gap-0 flex-1 min-w-0">
                         {/* Icon */}
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-full shrink-0 flex items-center justify-center sm:mx-auto sm:mb-3 bg-[var(--color-surface-raised)]">
+                        <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-full shrink-0 flex items-center justify-center sm:mx-auto sm:mb-3 bg-[var(--color-surface-raised)]">
                           {getServiceIcon(service.name)}
                         </div>
 
                         {/* Details */}
                         <div className="flex-1 sm:text-center min-w-0">
-                          <div className="flex sm:flex-col items-center sm:justify-center gap-2 sm:gap-0 mb-0.5 sm:mb-1">
-                            <h3 className="font-sans text-xs font-semibold uppercase tracking-wider text-[var(--color-primary-text)] truncate">
+                          <div className="flex sm:flex-col items-center sm:justify-center gap-1.5 sm:gap-0 mb-0.5 sm:mb-1">
+                            <h3 className="font-sans text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-[var(--color-primary-text)] truncate">
                               {service.name}
                             </h3>
-                            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[var(--color-surface-raised)] text-[9px] sm:text-[10px] text-[var(--color-secondary-text)] font-sans tracking-wider sm:my-1.5 shrink-0">
+                            <div className="inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded-full bg-[var(--color-surface-raised)] text-[8px] sm:text-[10px] text-[var(--color-secondary-text)] font-sans tracking-wider sm:my-1.5 shrink-0">
                               <span>{service.durationMinutes}m</span>
                               <span>•</span>
                               <span className="text-[var(--color-primary)] font-semibold">${price}</span>
                             </div>
                           </div>
-                          <p className="text-[10px] sm:text-[11px] text-[var(--color-secondary-text)] font-sans line-clamp-1 sm:line-clamp-2 leading-relaxed">
+                          <p className="text-[9px] sm:text-[11px] text-[var(--color-secondary-text)] font-sans line-clamp-1 sm:line-clamp-2 leading-tight sm:leading-relaxed">
                             {getServiceDescription(service.name)}
                           </p>
                         </div>
@@ -392,7 +393,7 @@ export default function Booking() {
                           e.stopPropagation();
                           setSelectedService(service);
                         }}
-                        className={`shrink-0 px-3.5 py-2 sm:w-full sm:py-2.5 rounded-xl font-sans text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold transition-all cursor-pointer ${
+                        className={`shrink-0 px-3 py-1.5 sm:w-full sm:py-2.5 rounded-lg sm:rounded-xl font-sans text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold transition-all cursor-pointer ${
                           isSelected
                             ? 'bg-[var(--color-primary)] text-black shadow-md'
                             : 'bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-primary-text)]'
@@ -410,36 +411,36 @@ export default function Booking() {
           {/* ──────────────────────────────────────
               STEP 02: CHOOSE DATE
              ────────────────────────────────────── */}
-          <div className="space-y-4 sm:space-y-5">
+          <div className="space-y-3 sm:space-y-5">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <h2 className="text-lg sm:text-2xl font-serif text-[var(--color-primary-text)] font-medium tracking-wide">
+              <h2 className="text-base sm:text-2xl font-serif text-[var(--color-primary-text)] font-medium tracking-wide">
                 Step 02: <span className="text-[var(--color-primary)] font-normal">Choose Date</span>
               </h2>
-              <div className="font-sans text-[11px] sm:text-xs tracking-wider">
+              <div className="font-sans text-[10px] sm:text-xs tracking-wider">
                 <span className="text-[var(--color-secondary-text)]">Selected: </span>
                 <span className="text-[var(--color-primary)] font-semibold font-serif">{formattedSelectedDate}</span>
               </div>
             </div>
 
             {/* MONTH CALENDAR CONTAINER */}
-            <div className="bg-[var(--color-card-bg)] rounded-2xl p-3.5 sm:p-6 shadow-xl transition-colors">
+            <div className="bg-[var(--color-card-bg)] rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-md sm:shadow-xl transition-colors">
               {/* Calendar Month Navigation */}
-              <div className="flex items-center justify-between mb-4 sm:mb-6 pb-3 sm:pb-4">
+              <div className="flex items-center justify-between mb-2.5 sm:mb-6 pb-2 sm:pb-4 border-b border-[var(--color-surface-raised)]">
                 <button
                   type="button"
                   onClick={handlePrevMonth}
-                  className="p-1.5 sm:p-2 rounded-lg text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-raised)] transition-colors cursor-pointer"
+                  className="p-1 sm:p-2 rounded-lg text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-raised)] transition-colors cursor-pointer"
                   aria-label="Previous month"
                 >
                   <ChevronLeft size={16} />
                 </button>
-                <div className="font-sans text-xs font-semibold uppercase tracking-[0.2em] sm:tracking-[0.25em] text-[var(--color-primary-text)]">
+                <div className="font-sans text-[11px] sm:text-xs font-semibold uppercase tracking-[0.15em] sm:tracking-[0.25em] text-[var(--color-primary-text)]">
                   {format(currentMonth, 'MMMM yyyy')}
                 </div>
                 <button
                   type="button"
                   onClick={handleNextMonth}
-                  className="p-1.5 sm:p-2 rounded-lg text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-raised)] transition-colors cursor-pointer"
+                  className="p-1 sm:p-2 rounded-lg text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-raised)] transition-colors cursor-pointer"
                   aria-label="Next month"
                 >
                   <ChevronRight size={16} />
@@ -447,7 +448,7 @@ export default function Booking() {
               </div>
 
               {/* Day of Week Headers */}
-              <div className="grid grid-cols-7 gap-2 mb-3 text-center font-sans text-[10px] uppercase tracking-[0.2em] text-[var(--color-muted-text)] font-semibold">
+              <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-1.5 sm:mb-3 text-center font-sans text-[9px] sm:text-[10px] uppercase tracking-wider text-[var(--color-muted-text)] font-semibold">
                 <div>SUN</div>
                 <div>MON</div>
                 <div>TUE</div>
@@ -458,7 +459,7 @@ export default function Booking() {
               </div>
 
               {/* Calendar Days Grid */}
-              <div className="grid grid-cols-7 gap-2 text-center">
+              <div className="grid grid-cols-7 gap-1 sm:gap-2 text-center">
                 {calendarDays.map((day, idx) => {
                   const isCurrentMonth = isSameMonth(day, currentMonth);
                   const isDayPast = isBefore(day, startOfDay(new Date()));
@@ -466,14 +467,14 @@ export default function Booking() {
                   const isSelected = selectedDate === dateStr;
 
                   if (!isCurrentMonth) {
-                    return <div key={idx} className="py-3 text-xs opacity-0 pointer-events-none" />;
+                    return <div key={idx} className="py-1.5 sm:py-3 text-xs opacity-0 pointer-events-none" />;
                   }
 
                   if (isDayPast) {
                     return (
                       <div
                         key={idx}
-                        className="py-2 sm:py-3 font-sans text-xs text-[var(--color-muted-text)] opacity-35 cursor-not-allowed select-none rounded-lg"
+                        className="py-1.5 sm:py-3 font-sans text-[11px] sm:text-xs text-[var(--color-muted-text)] opacity-35 cursor-not-allowed select-none rounded-lg"
                       >
                         {format(day, 'd')}
                       </div>
@@ -487,7 +488,7 @@ export default function Booking() {
                       whileTap={{ scale: 0.95 }}
                       type="button"
                       onClick={() => setSelectedDate(dateStr)}
-                      className={`py-2 sm:py-3 rounded-xl font-sans text-xs font-semibold transition-all duration-150 cursor-pointer ${
+                      className={`py-1.5 sm:py-3 rounded-lg sm:rounded-xl font-sans text-[11px] sm:text-xs font-semibold transition-all duration-150 cursor-pointer ${
                         isSelected
                           ? 'bg-[var(--color-primary)] text-black font-bold shadow-[0_0_15px_rgba(229,195,120,0.4)]'
                           : 'text-[var(--color-body-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-raised)]'
@@ -504,28 +505,28 @@ export default function Booking() {
 
         {/* RIGHT COLUMN: STEP 03 (AVAILABLE SLOTS + CONFIRMATION) */}
         <div className="lg:col-span-4">
-          <div className="relative overflow-hidden bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-2xl p-6 flex flex-col justify-between min-h-[560px] shadow-2xl sticky top-8 transition-colors">
+          <div className="relative overflow-hidden bg-[var(--color-card-bg)] rounded-xl sm:rounded-2xl p-3.5 sm:p-6 flex flex-col justify-between min-h-0 sm:min-h-[560px] shadow-lg sm:shadow-2xl sticky top-8 transition-colors">
             {selectedService && selectedDate && selectedTime && (
-              <BorderBeam size={180} duration={10} colorFrom="var(--color-primary)" borderWidth={1.5} />
+              <BorderBeam size={140} duration={10} colorFrom="var(--color-primary)" borderWidth={1.5} />
             )}
-            <div className="space-y-5">
-              <div className="flex items-center justify-between pb-3 border-b border-[var(--color-border)]">
-                <h2 className="text-xl font-serif text-[var(--color-primary-text)] font-medium tracking-wide">
+            <div className="space-y-3 sm:space-y-5">
+              <div className="flex items-center justify-between pb-2 sm:pb-3 border-b border-[var(--color-surface-raised)]">
+                <h2 className="text-base sm:text-xl font-serif text-[var(--color-primary-text)] font-medium tracking-wide">
                   Step 03: <span className="text-[var(--color-primary)] font-normal">Available Slots</span>
                 </h2>
-                <span className="font-sans text-[10px] uppercase tracking-widest text-[var(--color-secondary-text)]">
+                <span className="font-sans text-[9px] sm:text-[10px] uppercase tracking-widest text-[var(--color-secondary-text)]">
                   {slots.length} open
                 </span>
               </div>
 
               {/* Summary of Active Choice */}
               {selectedService && (
-                <div className="p-3.5 rounded-xl bg-[var(--color-surface-raised)] border border-[var(--color-border)] text-xs space-y-1">
+                <div className="p-2.5 sm:p-3.5 rounded-xl bg-[var(--color-surface-raised)] text-xs space-y-1">
                   <div className="flex items-center justify-between font-semibold text-[var(--color-primary-text)]">
-                    <span>{selectedService.name}</span>
-                    <span className="text-[var(--color-primary)] font-serif">${getServicePrice(selectedService.name, selectedService.durationMinutes)}</span>
+                    <span className="truncate">{selectedService.name}</span>
+                    <span className="text-[var(--color-primary)] font-serif shrink-0">${getServicePrice(selectedService.name, selectedService.durationMinutes)}</span>
                   </div>
-                  <div className="flex items-center gap-3 text-[10px] text-[var(--color-secondary-text)] font-sans tracking-wide">
+                  <div className="flex items-center gap-2.5 text-[10px] text-[var(--color-secondary-text)] font-sans tracking-wide">
                     <span className="flex items-center gap-1"><Clock size={11} /> {selectedService.durationMinutes} min</span>
                     <span>•</span>
                     <span className="flex items-center gap-1"><CalendarDays size={11} /> {format(parseISO(selectedDate), 'MMM d')}</span>
@@ -533,20 +534,20 @@ export default function Booking() {
                 </div>
               )}
 
-              {/* Time Slots Grid */}
+              {/* Time Slots Grid (3 columns on mobile chips, 2 on desktop) */}
               {loadingSlots ? (
-                <div className="py-20 flex flex-col items-center justify-center gap-3">
+                <div className="py-6 sm:py-20 flex flex-col items-center justify-center gap-2.5">
                   <div className="w-3 h-3 rounded-full bg-[var(--color-primary)] animate-ping" />
-                  <span className="font-sans text-[10px] uppercase tracking-widest text-[var(--color-secondary-text)]">
+                  <span className="font-sans text-[9px] sm:text-[10px] uppercase tracking-widest text-[var(--color-secondary-text)]">
                     Checking availability...
                   </span>
                 </div>
               ) : slots.length === 0 ? (
-                <div className="py-16 text-center font-sans text-xs uppercase tracking-widest text-[var(--color-secondary-text)] bg-[var(--color-surface-raised)] rounded-xl border border-[var(--color-border)] p-4">
+                <div className="py-4 sm:py-16 text-center font-sans text-[11px] sm:text-xs uppercase tracking-widest text-[var(--color-secondary-text)] bg-[var(--color-surface-raised)] rounded-xl p-3 sm:p-4">
                   No slots available for this date.
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-2.5">
+                <div className="grid grid-cols-3 sm:grid-cols-2 gap-1.5 sm:gap-2.5">
                   {slots.map((timeStr) => {
                     const isSelected = selectedTime === timeStr;
                     const formatted = formatTime12(timeStr);
@@ -558,7 +559,7 @@ export default function Booking() {
                         whileTap={{ scale: 0.98 }}
                         type="button"
                         onClick={() => setSelectedTime(timeStr)}
-                        className={`py-3.5 px-2 rounded-xl font-sans text-xs uppercase tracking-wider font-semibold transition-all text-center cursor-pointer ${
+                        className={`py-2 sm:py-3.5 px-1.5 sm:px-2 rounded-lg sm:rounded-xl font-sans text-[11px] sm:text-xs uppercase tracking-wider font-semibold transition-all text-center cursor-pointer ${
                           isSelected
                             ? 'bg-[var(--color-primary)] text-black shadow-[0_0_15px_rgba(229,195,120,0.35)]'
                             : 'bg-[var(--color-surface-raised)] text-[var(--color-body-text)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-primary-text)]'
@@ -573,7 +574,7 @@ export default function Booking() {
             </div>
 
             {/* Bottom Action Area */}
-            <div className="pt-6 mt-6 border-t border-[var(--color-border)] space-y-4">
+            <div className="pt-3 sm:pt-6 mt-3 sm:mt-6 border-t border-[var(--color-surface-raised)] space-y-3 sm:space-y-4">
               {/* Error Message */}
               <AnimatePresence>
                 {error && (
@@ -581,9 +582,9 @@ export default function Booking() {
                     initial={{ opacity: 0, y: -5 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
-                    className="p-3 bg-red-950/20 border border-red-500/30 text-red-500 font-sans text-[10px] uppercase tracking-wider text-center rounded-xl flex items-center justify-center gap-2"
+                    className="p-2.5 bg-red-950/20 border border-red-500/30 text-red-500 font-sans text-[10px] uppercase tracking-wider text-center rounded-xl flex items-center justify-center gap-1.5"
                   >
-                    <AlertCircle size={14} className="shrink-0" />
+                    <AlertCircle size={13} className="shrink-0" />
                     <span>{error}</span>
                   </motion.div>
                 )}
@@ -594,22 +595,22 @@ export default function Booking() {
                 type="button"
                 onClick={handleBooking}
                 disabled={!selectedService || !selectedDate || !selectedTime || bookingLoading}
-                className="w-full py-4 px-6 font-sans text-xs font-bold uppercase tracking-[0.2em] disabled:opacity-40 disabled:pointer-events-none"
+                className="w-full py-3 sm:py-4 px-4 sm:px-6 font-sans text-[11px] sm:text-xs font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] disabled:opacity-40 disabled:pointer-events-none"
                 shimmerColor="var(--color-primary)"
                 background="var(--color-surface-raised)"
               >
                 {bookingLoading ? (
-                  <span className="text-[var(--color-primary-text)]">Reserving Appointment...</span>
+                  <span className="text-[var(--color-primary-text)]">Reserving...</span>
                 ) : (
                   <div className="flex items-center justify-center gap-2 text-[var(--color-primary)] font-bold">
                     <span>Confirm Booking</span>
-                    <ArrowRight size={14} />
+                    <ArrowRight size={13} />
                   </div>
                 )}
               </ShimmerButton>
 
-              <div className="flex items-center justify-center gap-2 text-[9px] text-[var(--color-secondary-text)] font-sans uppercase tracking-widest text-center">
-                <ShieldCheck size={12} className="text-emerald-500" />
+              <div className="flex items-center justify-center gap-1.5 text-[8px] sm:text-[9px] text-[var(--color-secondary-text)] font-sans uppercase tracking-widest text-center">
+                <ShieldCheck size={11} className="text-emerald-500" />
                 <span>Instant Confirmation & Zero Delay</span>
               </div>
             </div>
