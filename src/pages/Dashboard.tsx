@@ -53,33 +53,26 @@ function getGreeting(): string {
   return 'Good evening';
 }
 
-// --- StatusBadge (Block UI) ---
-function StatusBadge({ status }: { status: string }) {
-  const isConfirmed = status === 'ACCEPTED' || status === 'CONFIRMED' || status === 'PENDING';
-  const displayLabel = isConfirmed ? 'CONFIRMED' : status;
+// --- Status Badge Component (Memoized) ---
+const StatusBadge = React.memo(function StatusBadge({ status }: { status: string }) {
+  const displayLabel = status === 'ACCEPTED' ? 'CONFIRMED' : status;
   const colors: Record<string, string> = {
-    CONFIRMED: 'text-emerald-500 bg-emerald-500/15',
-    ACCEPTED: 'text-emerald-500 bg-emerald-500/15',
-    PENDING: 'text-emerald-500 bg-emerald-500/15',
-    REJECTED: 'text-red-500 bg-red-500/15',
-    CANCELLED: 'text-[var(--color-muted-text)] bg-[var(--color-surface-raised)]',
-    COMPLETED: 'text-[var(--color-primary-text)] bg-[var(--color-surface-raised)]',
+    CONFIRMED: 'text-emerald-500 bg-emerald-500/10 font-bold',
+    PENDING: 'text-[var(--color-primary)] bg-[var(--color-primary)]/10 font-bold',
+    COMPLETED: 'text-[var(--color-primary-text)] bg-[var(--color-surface-raised)] font-medium',
+    CANCELLED: 'text-[var(--color-muted-text)] bg-[var(--color-surface-raised)] font-medium',
+    REJECTED: 'text-red-500 bg-red-500/10 font-bold',
   };
-  const isPulse = isConfirmed;
-  const dotColor = 'bg-emerald-500';
-
   return (
-    <span className={`rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.15em] font-sans inline-flex items-center gap-1.5 font-semibold ${colors[status] || colors.CONFIRMED}`}>
-      {isPulse && (
-        <span className="relative flex h-1.5 w-1.5">
-          <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${dotColor}`}></span>
-          <span className={`relative inline-flex rounded-full h-1.5 w-1.5 ${dotColor}`}></span>
-        </span>
-      )}
+    <span
+      className={`rounded-full px-2 py-0.5 text-[8.5px] uppercase tracking-wider font-sans inline-flex items-center gap-1 ${colors[status] || colors.CONFIRMED}`}
+      role="status"
+      aria-label={`Status: ${displayLabel.toLowerCase()}`}
+    >
       {displayLabel}
     </span>
   );
-}
+});
 
 // --- Toast (Geist Minimal) ---
 function Toast({ message, type, onDone }: { message: string; type: 'success' | 'error'; onDone: () => void }) {
@@ -100,8 +93,8 @@ function Toast({ message, type, onDone }: { message: string; type: 'success' | '
   );
 }
 
-// --- Stat Card with Sparkline & Magic UI ---
-function StatCard({ label, value, subtext, icon, accent = false, pathData }: {
+// --- Stat Card with Sparkline & Magic UI (Memoized) ---
+const StatCard = React.memo(function StatCard({ label, value, subtext, icon, accent = false, pathData }: {
   label: string; value: string | number; subtext?: string; icon: React.ReactNode; accent?: boolean; pathData: string;
 }) {
   const isNum = typeof value === 'number' || (!isNaN(Number(value)) && typeof value === 'string' && !value.includes('%') && !value.includes('m') && !value.includes('★'));
@@ -140,7 +133,7 @@ function StatCard({ label, value, subtext, icon, accent = false, pathData }: {
       </div>
     </motion.div>
   );
-}
+});
 
 // ========================
 // Main Dashboard Component
@@ -176,17 +169,17 @@ export default function Dashboard() {
 
   useEffect(() => { fetchData(true); }, [fetchData]);
 
-  const handleCancel = async (id: string) => {
+  const handleCancel = useCallback(async (id: string) => {
     const res = await fetch(`/api/bookings/${id}`, { method: 'DELETE' });
     if (res.ok) {
-      setBookings(bookings.map(b => b.id === id ? { ...b, status: 'CANCELLED' } : b));
+      setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'CANCELLED' } : b));
       setToast({ message: 'Appointment cancelled', type: 'success' });
     } else {
       const data = await res.json().catch(() => ({}));
       setToast({ message: data.error || 'Failed to cancel appointment', type: 'error' });
     }
     setConfirmingCancel(null);
-  };
+  }, []);
 
   // --- Derived Data ---
   const upcoming = useMemo(() =>

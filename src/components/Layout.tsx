@@ -7,11 +7,12 @@ import { Particles } from './magicui/particles';
 import { ThemeToggle } from './magicui/theme-toggle';
 import { Badge } from './ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar';
+import { Skeleton } from './ui/skeleton';
 
 const AUTH_PAGES = ['/login', '/register', '/forgot-password', '/reset-password'];
 
 export default function Layout() {
-  const { data: sessionData } = authClient.useSession();
+  const { data: sessionData, isPending } = authClient.useSession();
   const session = sessionData as any;
   const navigate = useNavigate();
   const location = useLocation();
@@ -104,7 +105,13 @@ export default function Layout() {
           </Link>
         </div>
         <nav className="flex-1 flex flex-col gap-1.5 p-3.5 sm:p-4 overflow-y-auto">
-          {session?.user ? (
+          {isPending ? (
+            <div className="space-y-2 py-1">
+              <Skeleton className="w-full h-10 rounded-xl" />
+              <Skeleton className="w-full h-10 rounded-xl" />
+              <Skeleton className="w-full h-10 rounded-xl" />
+            </div>
+          ) : session?.user ? (
             <>
               <Link
                 to="/dashboard"
@@ -159,7 +166,15 @@ export default function Layout() {
             </Link>
           )}
         </nav>
-        {session?.user && (
+        {isPending ? (
+          <div className="p-3.5 border-t border-[var(--color-border)] shrink-0 flex items-center gap-2.5">
+            <Skeleton className="w-8 h-8 rounded-lg shrink-0" />
+            <div className="space-y-1.5 flex-1">
+              <Skeleton className="w-20 h-3 rounded-md" />
+              <Skeleton className="w-28 h-2.5 rounded-md" />
+            </div>
+          </div>
+        ) : session?.user ? (
           <div className="p-3.5 border-t border-[var(--color-border)] shrink-0 flex flex-col gap-2.5">
             <div className="flex items-center gap-2.5 p-2 rounded-xl bg-[var(--color-surface-raised)]/60 border border-[var(--color-border)]">
               <div className="w-8 h-8 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center overflow-hidden shrink-0">
@@ -188,7 +203,7 @@ export default function Layout() {
               </button>
             </div>
           </div>
-        )}
+        ) : null}
       </motion.aside>
 
       {/* Main Content Area */}
@@ -209,8 +224,14 @@ export default function Layout() {
       </main>
 
       {/* Mobile Bottom Nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-14 bg-[var(--color-sidebar-bg)] z-50 flex items-center justify-around px-2 pb-1 shadow-lg">
-        {session?.user ? (
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-14 bg-[var(--color-sidebar-bg)] z-50 flex items-center justify-around px-2 pb-1 shadow-lg border-t border-[var(--color-border)]">
+        {isPending ? (
+          <div className="flex items-center justify-around w-full h-full px-4 gap-4">
+            <Skeleton className="flex-1 h-8 rounded-lg" />
+            <Skeleton className="flex-1 h-8 rounded-lg" />
+            <Skeleton className="flex-1 h-8 rounded-lg" />
+          </div>
+        ) : session?.user ? (
           <>
             <Link
               to="/dashboard"

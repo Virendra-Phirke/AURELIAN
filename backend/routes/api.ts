@@ -37,13 +37,22 @@ const rateLimit = (prefix: string, limit: number, windowSec: number) => async (r
 
 // --- PUBLIC ROUTES ---
 apiRouter.get("/services", rateLimit("services", 300, 60), async (req, res) => {
+    const cacheKey = "cache:active_services";
+    const cached = await redisClient.get(cacheKey);
+    if (cached) return res.json(JSON.parse(cached));
+
     const data = await db.select().from(services).where(eq(services.active, true));
+    await redisClient.set(cacheKey, JSON.stringify(data), { EX: 300 });
     res.json(data);
 });
 
 apiRouter.get("/shop", rateLimit("shop", 300, 60), async (req, res) => {
+    const cacheKey = "cache:shop_settings";
+    const cached = await redisClient.get(cacheKey);
+    if (cached) return res.json(JSON.parse(cached));
+
     const data = await db.select().from(shopSettings).limit(1);
-    res.json(data[0] || { 
+    const shop = data[0] || { 
         shopName: "Aurelian Salon",
         shopTagline: "Luxury Grooming & Styling",
         phone: "+1 (555) 234-5678",
@@ -57,6 +66,7 @@ apiRouter.get("/shop", rateLimit("shop", 300, 60), async (req, res) => {
         autoConfirmBookings: true,
         allowCancellation: true,
         cancellationCutoffHours: 2,
+        cancellationCutoffMinutes: 120,
         breakStartTime: "13:00",
         breakEndTime: "14:00",
         breakEnabled: false,
@@ -64,7 +74,9 @@ apiRouter.get("/shop", rateLimit("shop", 300, 60), async (req, res) => {
         currencySymbol: "$",
         announcementText: "",
         announcementActive: false
-    });
+    };
+    await redisClient.set(cacheKey, JSON.stringify(shop), { EX: 300 });
+    res.json(shop);
 });
 
 apiRouter.get("/availability", rateLimit("avail", 300, 60), async (req, res) => {
@@ -435,6 +447,7 @@ apiRouter.post("/admin/services", requireAdmin, async (req, res) => {
     const p = schema.safeParse(req.body);
     if (!p.success) return res.status(400).json({ error: "Invalid service data" });
     const svc = await db.insert(services).values(p.data).returning();
+    await redisClient.del("cache:active_services");
     res.json(svc[0]);
 });
 
@@ -466,13 +479,16 @@ apiRouter.patch("/admin/settings", requireAdmin, async (req, res) => {
     if (!parsed.success) return res.status(400).json({ error: "Invalid settings data", details: parsed.error.issues });
 
     const settings = await db.select().from(shopSettings).limit(1);
+    let result;
     if (settings.length) {
         const s = await db.update(shopSettings).set({ ...parsed.data, updatedAt: new Date() }).where(eq(shopSettings.id, settings[0].id)).returning();
-        res.json(s[0]);
+        result = s[0];
     } else {
         const s = await db.insert(shopSettings).values(parsed.data as any).returning();
-        res.json(s[0]);
+        result = s[0];
     }
+    await redisClient.del("cache:shop_settings");
+    res.json(result);
 });
 
 // Admin: Get ALL services (including inactive)
@@ -499,6 +515,7 @@ apiRouter.patch("/admin/services/:id", requireAdmin, async (req, res) => {
     }).where(eq(services.id, serviceId)).returning();
 
     if (!svc.length) return res.status(404).json({ error: "Service not found" });
+    await redisClient.del("cache:active_services");
     res.json(svc[0]);
 });
 
@@ -512,6 +529,7 @@ apiRouter.delete("/admin/services/:id", requireAdmin, async (req, res) => {
         // Delete any associated bookings first to prevent FK constraint issues
         await db.delete(bookings).where(eq(bookings.serviceId, serviceId));
         await db.delete(services).where(eq(services.id, serviceId));
+        await redisClient.del("cache:active_services");
 
         res.json({ success: true, message: "Service deleted successfully" });
     } catch (e: any) {

@@ -168,17 +168,17 @@ export default function Booking() {
     return Array.from({ length: 7 }, (_, i) => addDays(weekStartDate, i));
   }, [weekStartDate]);
 
-  const handlePrevWeek = () => {
+  const handlePrevWeek = useCallback(() => {
     setWeekStartDate((prev) => {
       const target = subDays(prev, 7);
       const today = startOfDay(new Date());
       return isBefore(target, today) ? today : target;
     });
-  };
+  }, []);
 
-  const handleNextWeek = () => {
+  const handleNextWeek = useCallback(() => {
     setWeekStartDate((prev) => addDays(prev, 7));
-  };
+  }, []);
 
   const canGoPrevWeek = useMemo(() => {
     const today = startOfDay(new Date());
@@ -195,7 +195,7 @@ export default function Booking() {
     return `${format(first, 'MMM d')} – ${format(last, 'MMM d, yyyy')}`;
   }, [calendarDays]);
 
-  const handleBooking = async () => {
+  const handleBooking = useCallback(async () => {
     if (!selectedService || !selectedDate || !selectedTime) return;
     setBookingLoading(true);
     setError('');
@@ -222,7 +222,7 @@ export default function Booking() {
     } finally {
       setBookingLoading(false);
     }
-  };
+  }, [selectedService, selectedDate, selectedTime, navigate, fetchAvailability]);
 
   // Formatted date string for header: "Friday, October 20th, 2024"
   const formattedSelectedDate = useMemo(() => {

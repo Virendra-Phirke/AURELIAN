@@ -169,14 +169,12 @@ function ConfirmationModal({
   );
 }
 
-// --- Status Badge (Block UI) ---
-function StatusBadge({ status }: { status: string }) {
-  const isConfirmed = status === 'ACCEPTED' || status === 'CONFIRMED' || status === 'PENDING';
-  const displayLabel = isConfirmed ? 'CONFIRMED' : status;
+// --- Status Badge Component (Memoized) ---
+const StatusBadge = React.memo(function StatusBadge({ status }: { status: string }) {
+  const displayLabel = status === 'ACCEPTED' ? 'CONFIRMED' : status;
   const colors: Record<string, string> = {
     CONFIRMED: 'text-emerald-500 bg-emerald-500/15 font-bold',
-    ACCEPTED: 'text-emerald-500 bg-emerald-500/15 font-bold',
-    PENDING: 'text-emerald-500 bg-emerald-500/15 font-bold',
+    PENDING: 'text-[var(--color-primary)] bg-[var(--color-primary)]/15 font-bold',
     COMPLETED: 'text-[var(--color-primary-text)] bg-[var(--color-surface-raised)] font-medium',
     CANCELLED: 'text-[var(--color-muted-text)] bg-[var(--color-surface-raised)] font-medium',
     REJECTED: 'text-red-500 bg-red-500/15 font-bold',
@@ -190,10 +188,10 @@ function StatusBadge({ status }: { status: string }) {
       {displayLabel}
     </span>
   );
-}
+});
 
-// --- Stat Card with SVG Sparkline & Magic UI ---
-function StatCard({ label, value, icon, accent = false, pathData }: { label: string; value: number | string; icon?: React.ReactNode, accent?: boolean, pathData: string }) {
+// --- Stat Card with SVG Sparkline & Magic UI (Memoized) ---
+const StatCard = React.memo(function StatCard({ label, value, icon, accent = false, pathData }: { label: string; value: number | string; icon?: React.ReactNode, accent?: boolean, pathData: string }) {
   const numValue = typeof value === 'number' ? value : Number(value) || 0;
   return (
     <motion.div
@@ -241,7 +239,7 @@ function StatCard({ label, value, icon, accent = false, pathData }: { label: str
       </div>
     </motion.div>
   );
-}
+});
 
 // --- Toast Notification ---
 function Toast({ message, type = 'success', onDone }: { message: string; type?: 'success' | 'error'; onDone: () => void }) {
@@ -420,7 +418,7 @@ export default function Admin() {
   };
 
   // --- Tab keyboard navigation ---
-  const handleTabKeyDown = (e: KeyboardEvent<HTMLButtonElement>, idx: number) => {
+  const handleTabKeyDown = useCallback((e: KeyboardEvent<HTMLButtonElement>, idx: number) => {
     let next = idx;
     if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = (idx + 1) % TABS.length;
     else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = (idx - 1 + TABS.length) % TABS.length;
@@ -431,7 +429,7 @@ export default function Admin() {
     e.preventDefault();
     tabsRef.current[next]?.focus();
     setActiveTab(TABS[next].key);
-  };
+  }, []);
 
   // --- Data fetching ---
   const fetchAll = useCallback((showSpinner = false) => {
@@ -455,12 +453,15 @@ export default function Admin() {
 
   useEffect(() => { fetchAll(true); }, [fetchAll]);
 
-  // --- Customer map for booking display ---
-  const customerMap: Record<string, Customer> = {};
-  customers.forEach(c => { customerMap[c.id] = c; });
+  // --- Customer map for booking display (Memoized) ---
+  const customerMap = useMemo(() => {
+    const map: Record<string, Customer> = {};
+    customers.forEach(c => { map[c.id] = c; });
+    return map;
+  }, [customers]);
 
   // --- Booking actions ---
-  const handleBookingAction = async (id: string, action: string) => {
+  const handleBookingAction = useCallback(async (id: string, action: string) => {
     const statusMap: Record<string, string> = {
       accept: 'ACCEPTED',
       reject: 'REJECTED',
@@ -480,7 +481,7 @@ export default function Admin() {
       fetchAll(false);
       showToast('Failed to update booking', 'error');
     }
-  };
+  }, [fetchAll, showToast]);
 
   // --- Customer actions ---
   const handleDeleteCustomer = async (id: string) => {
@@ -828,17 +829,24 @@ export default function Admin() {
     showToast('Bookings exported to CSV');
   };
 
-  // --- Analytics ---
-  const today = format(new Date(), 'yyyy-MM-dd');
-  const weekAgo = subDays(new Date(), 7);
-  const todayBookingsCount = bookings.filter(b => b.bookingDate === today && (b.status === 'ACCEPTED' || b.status === 'CONFIRMED' || b.status === 'PENDING')).length;
-  const activeUpcomingBookings = bookings.filter(b => b.status === 'ACCEPTED' || b.status === 'CONFIRMED' || b.status === 'PENDING');
-  const completedThisWeek = bookings.filter(b => b.status === 'COMPLETED' && isAfter(parseISO(b.createdAt), weekAgo)).length;
-  const totalCustomers = customers.filter(c => c.role !== 'ADMIN').length;
+  // --- Analytics (Memoized) ---
+  const { todayBookingsCount, activeUpcomingBookings, completedThisWeek, totalCustomers, weekStartStr, weekEndStr } = useMemo(() => {
+    const today = format(new Date(), 'yyyy-MM-dd');
+    const weekAgo = subDays(new Date(), 7);
+    const todayCount = bookings.filter(b => b.bookingDate === today && (b.status === 'ACCEPTED' || b.status === 'CONFIRMED' || b.status === 'PENDING')).length;
+    const activeBookings = bookings.filter(b => b.status === 'ACCEPTED' || b.status === 'CONFIRMED' || b.status === 'PENDING');
+    const completed = bookings.filter(b => b.status === 'COMPLETED' && isAfter(parseISO(b.createdAt), weekAgo)).length;
+    const totalCust = customers.filter(c => c.role !== 'ADMIN').length;
 
-  // Week range string
-  const weekStartStr = format(weekAgo, 'MMM d');
-  const weekEndStr = format(new Date(), 'MMM d');
+    return {
+      todayBookingsCount: todayCount,
+      activeUpcomingBookings: activeBookings,
+      completedThisWeek: completed,
+      totalCustomers: totalCust,
+      weekStartStr: format(weekAgo, 'MMM d'),
+      weekEndStr: format(new Date(), 'MMM d'),
+    };
+  }, [bookings, customers]);
 
   // Sparkline paths (decorative)
   const sparkline1 = "M0,30 Q10,25 20,30 T40,20 T60,35 T80,10 T100,20";
@@ -1255,17 +1263,6 @@ export default function Admin() {
                 </button>
               );
             })}
-          </div>
-
-          {/* Admin Sidebar Footer */}
-          <div className="p-3.5 border-t border-[var(--color-border)] shrink-0 flex flex-col gap-2">
-            <Link
-              to="/booking"
-              className="flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-[var(--color-surface-raised)] hover:bg-[var(--color-surface-hover)] text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] font-sans text-[10px] uppercase tracking-wider font-semibold transition-all border border-[var(--color-border)]"
-            >
-              <ArrowLeft size={13} />
-              <span>Exit to Client View</span>
-            </Link>
           </div>
         </motion.div>
 

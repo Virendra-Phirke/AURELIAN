@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { User, Shield, AlertCircle, Camera, Check, Key, Lock, Mail, ArrowRight, Sun, Moon, Laptop } from 'lucide-react';
 import { authClient } from '../lib/auth';
@@ -118,7 +118,7 @@ export default function Settings() {
     );
   }
 
-  const handleUpdateProfile = async () => {
+  const handleUpdateProfile = useCallback(async () => {
     if (!isEditingProfile) {
       setIsEditingProfile(true);
       return;
@@ -143,9 +143,9 @@ export default function Settings() {
     } finally {
       setUpdatingProfile(false);
     }
-  };
+  }, [isEditingProfile, newName, newImage]);
 
-  const handleChangePassword = async () => {
+  const handleChangePassword = useCallback(async () => {
     if (hasPassword && !currentPassword) return setToast({ message: 'Current password is required', type: 'error' });
     if (!newPassword) return setToast({ message: 'New password is required', type: 'error' });
     if (newPassword.length < 8) return setToast({ message: 'New password must be at least 8 chars', type: 'error' });
@@ -182,7 +182,7 @@ export default function Settings() {
     } finally {
       setUpdatingPassword(false);
     }
-  };
+  }, [hasPassword, currentPassword, newPassword]);
 
   return (
     <div className="w-full max-w-6xl mx-auto space-y-4 sm:space-y-5 pb-12">
