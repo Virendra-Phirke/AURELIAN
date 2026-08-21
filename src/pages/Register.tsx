@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { User, Mail, Lock, ArrowRight } from 'lucide-react';
 import GoogleOneTap from '../components/GoogleOneTap';
+import { BorderBeam } from '../components/magicui/border-beam';
 import { signInWithOAuthPopup } from '../lib/oauthPopup';
 
 const registerSchema = z.object({
@@ -63,6 +64,7 @@ export default function Register() {
       className="w-full max-w-md"
     >
       <div className="bg-[#0a0a0a] border border-[#ffffff15] rounded-3xl p-8 sm:p-12 shadow-[0_20px_60px_rgba(0,0,0,0.5)] relative overflow-hidden">
+        <BorderBeam size={160} duration={12} colorFrom="#E5C378" borderWidth={1.5} />
         <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#C5A059] to-transparent opacity-60" />
         
         <div className="text-center mb-10">

@@ -6,8 +6,10 @@ import { authClient } from '../lib/auth';
 import { DataPagination } from '../components/ui/pagination';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
+import { Switch } from '../components/ui/switch';
 import { NumberTicker } from '../components/magicui/number-ticker';
 import { BorderBeam } from '../components/magicui/border-beam';
+import { BlurFade } from '../components/magicui/blur-fade';
 
 // --- Types ---
 type Booking = {
@@ -1228,22 +1230,26 @@ export default function Admin() {
                                   ) : <span className="text-[#aaa]">{s.durationMinutes} <span className="text-[#666] text-xs ml-1">MIN</span></span>}
                                 </td>
                                 <td className="px-8 py-5">
-                                  <span className={`px-3 py-1 rounded-full text-[9px] uppercase tracking-widest border ${s.active ? 'text-[#4ade80] border-[#4ade80]/30 bg-[#4ade80]/10 shadow-[0_0_10px_rgba(74,222,128,0.1)]' : 'text-[#555] border-[#ffffff15] bg-[#ffffff05]'}`}>
-                                    {s.active ? 'Active' : 'Inactive'}
-                                  </span>
+                                  <div className="flex items-center gap-3">
+                                    <Switch
+                                      checked={s.active}
+                                      onCheckedChange={() => handleToggleServiceActive(s.id, s.active)}
+                                      aria-label={`Toggle ${s.name} active`}
+                                    />
+                                    <span className={`px-2.5 py-0.5 rounded-full text-[9px] uppercase tracking-widest font-sans font-medium border ${s.active ? 'text-[#4ade80] border-[#4ade80]/30 bg-[#4ade80]/10 shadow-[0_0_8px_rgba(74,222,128,0.1)]' : 'text-[#555] border-[#ffffff15] bg-[#ffffff05]'}`}>
+                                      {s.active ? 'Active' : 'Inactive'}
+                                    </span>
+                                  </div>
                                 </td>
                                 <td className="px-8 py-5 text-right">
-                                  <div className="flex items-center justify-end gap-3 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <div className="flex items-center justify-end gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
                                     {editingServiceId === s.id ? (
                                       <>
-                                        <button onClick={() => handleSaveServiceEdit(s.id)} className="px-4 py-2 rounded-lg bg-[#4ade80] text-black text-[10px] uppercase tracking-widest hover:bg-[#3baf64] transition-all shadow-[0_0_10px_rgba(74,222,128,0.2)]">Save</button>
-                                        <button onClick={() => setEditingServiceId(null)} className="px-4 py-2 rounded-lg text-[#888] hover:bg-[#ffffff10] hover:text-white text-[10px] uppercase tracking-widest transition-all">Cancel</button>
+                                        <button onClick={() => handleSaveServiceEdit(s.id)} className="px-3.5 py-1.5 rounded-lg bg-emerald-500 text-black text-[10px] uppercase tracking-widest hover:bg-emerald-400 transition-all font-semibold shadow-[0_0_10px_rgba(16,185,129,0.3)]">Save</button>
+                                        <button onClick={() => setEditingServiceId(null)} className="px-3.5 py-1.5 rounded-lg text-[#888] hover:bg-[#1a1a1a] hover:text-white text-[10px] uppercase tracking-widest transition-all">Cancel</button>
                                       </>
                                     ) : (
-                                      <>
-                                        <button onClick={() => { setEditingServiceId(s.id); setEditServiceName(s.name); setEditServiceDuration(s.durationMinutes); }} className="px-4 py-2 rounded-lg text-[#C5A059] hover:bg-[#C5A059]/10 text-[10px] uppercase tracking-widest transition-all">Edit</button>
-                                        <button onClick={() => handleToggleServiceActive(s.id, s.active)} className={`px-4 py-2 rounded-lg text-[10px] uppercase tracking-widest transition-all ${s.active ? 'text-[#888] hover:bg-red-500/10 hover:text-red-400' : 'text-[#4ade80] hover:bg-[#4ade80]/10'}`}>{s.active ? 'Deactivate' : 'Activate'}</button>
-                                      </>
+                                      <button onClick={() => { setEditingServiceId(s.id); setEditServiceName(s.name); setEditServiceDuration(s.durationMinutes); }} className="px-3.5 py-1.5 rounded-lg text-[#E5C378] hover:bg-[#E5C378]/10 text-[10px] uppercase tracking-widest transition-all font-medium">Edit</button>
                                     )}
                                   </div>
                                 </td>

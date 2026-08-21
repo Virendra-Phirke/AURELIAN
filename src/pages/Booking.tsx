@@ -33,6 +33,9 @@ import {
 import { BorderBeam } from '../components/magicui/border-beam';
 import { ShimmerButton } from '../components/magicui/shimmer-button';
 import { AnimatedGridPattern } from '../components/magicui/animated-grid-pattern';
+import { WordRotate } from '../components/magicui/word-rotate';
+import { AvatarCircles } from '../components/magicui/avatar-circles';
+import { BlurFade } from '../components/magicui/blur-fade';
 
 type Service = {
   id: string;
@@ -223,23 +226,55 @@ export default function Booking() {
           VERCEL-STYLE HEADER & BRAND
          ════════════════════════════════════════ */}
       <div className="space-y-6 border-b border-[#1a1a1a] pb-6">
-        <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-4">
-          <div className="flex flex-wrap items-baseline gap-3">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-brand font-semibold text-[#E5C378] tracking-[0.25em] uppercase">
-              AURELIAN
-            </h1>
-            <span className="text-lg sm:text-xl font-serif text-[#888888] font-light tracking-wide italic">
-              Luxury Booking Interface V1
-            </span>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+          <div className="flex flex-col gap-1">
+            <div className="flex flex-wrap items-baseline gap-3">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-brand font-semibold text-[#E5C378] tracking-[0.25em] uppercase">
+                AURELIAN
+              </h1>
+              <span className="text-xs uppercase font-sans tracking-[0.25em] text-[#737373]">
+                Salon & Grooming
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-[#525252] uppercase tracking-wider font-sans">Experience:</span>
+              <WordRotate
+                words={[
+                  "Bespoke Hair Styling",
+                  "Artisanal Hot Towel Shaves",
+                  "VIP Grooming Suites",
+                  "Master Precision Cuts"
+                ]}
+                className="text-sm font-serif text-[#E5C378] font-normal tracking-wide italic"
+              />
+            </div>
           </div>
 
-          {/* Instant confirmation badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#141414] border border-[#262626] text-[10px] uppercase font-sans tracking-widest text-[#a1a1a1] shrink-0 self-start sm:self-auto">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#4ade80] opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#4ade80]"></span>
-            </span>
-            <span>Instant Confirmation</span>
+          {/* Social Proof & Instant confirmation badge */}
+          <div className="flex items-center gap-4">
+            <div className="hidden sm:flex items-center gap-3">
+              <AvatarCircles
+                numPeople={40}
+                avatarUrls={[
+                  { name: 'Marcus Sterling' },
+                  { name: 'Alexander Wright' },
+                  { name: 'Julian Hayes' },
+                  { name: 'David Vance' },
+                ]}
+              />
+              <div className="text-left font-sans text-[9px] uppercase tracking-wider text-[#737373]">
+                <span className="text-white font-medium block">VIP Experience</span>
+                <span>Verified Clients</span>
+              </div>
+            </div>
+
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#141414] border border-[#262626] text-[10px] uppercase font-sans tracking-widest text-[#a1a1a1] shrink-0 self-start sm:self-auto shadow-sm">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#4ade80] opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#4ade80]"></span>
+              </span>
+              <span>Instant Confirmation</span>
+            </div>
           </div>
         </div>
 
@@ -306,56 +341,61 @@ export default function Booking() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {services.map((service) => {
+              {services.map((service, idx) => {
                 const isSelected = selectedService?.id === service.id;
                 const price = getServicePrice(service.name, service.durationMinutes);
 
                 return (
-                  <motion.div
-                    key={service.id}
-                    whileHover={{ y: -2 }}
-                    onClick={() => setSelectedService(service)}
-                    className={`relative rounded-xl p-5 flex flex-col justify-between text-center transition-all cursor-pointer min-h-[220px] select-none ${
-                      isSelected
-                        ? 'bg-[#0e0d09] border border-[#E5C378] shadow-[0_0_25px_rgba(229,195,120,0.12)] ring-1 ring-[#E5C378]/30'
-                        : 'bg-[#0a0a0a] border border-[#1f1f1f] hover:border-[#383838]'
-                    }`}
-                  >
-                    {/* Top Icon and Name */}
-                    <div>
-                      <div className="w-12 h-12 rounded-full mx-auto flex items-center justify-center mb-3.5 bg-[#141414] border border-[#222222]">
-                        {getServiceIcon(service.name)}
-                      </div>
-
-                      <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-white mb-1.5">
-                        {service.name}
-                      </h3>
-                      <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#141414] border border-[#262626] text-[10px] text-[#a1a1a1] font-sans tracking-wider mb-3">
-                        <span>{service.durationMinutes} min</span>
-                        <span>•</span>
-                        <span className="text-[#E5C378] font-medium">${price}</span>
-                      </div>
-                      <p className="text-[11px] text-[#666666] font-sans line-clamp-2 leading-relaxed px-1">
-                        {getServiceDescription(service.name)}
-                      </p>
-                    </div>
-
-                    {/* Select / Selected Button */}
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedService(service);
-                      }}
-                      className={`w-full py-2 rounded-lg font-sans text-[10px] uppercase tracking-[0.2em] font-semibold transition-all mt-4 ${
+                  <BlurFade key={service.id} delay={0.04 * idx} inView>
+                    <motion.div
+                      whileHover={{ y: -2 }}
+                      onClick={() => setSelectedService(service)}
+                      className={`relative overflow-hidden rounded-xl p-5 flex flex-col justify-between text-center transition-all cursor-pointer min-h-[220px] select-none ${
                         isSelected
-                          ? 'bg-[#E5C378] text-black shadow-[0_0_15px_rgba(229,195,120,0.3)]'
-                          : 'bg-[#121212] border border-[#262626] text-[#E5C378] hover:border-[#E5C378]/60 hover:bg-[#1a1a1a]'
+                          ? 'bg-[#0e0d09] border border-[#E5C378] shadow-[0_0_25px_rgba(229,195,120,0.12)] ring-1 ring-[#E5C378]/30'
+                          : 'bg-[#0a0a0a] border border-[#1f1f1f] hover:border-[#383838]'
                       }`}
                     >
-                      {isSelected ? 'SELECTED' : 'SELECT'}
-                    </button>
-                  </motion.div>
+                      {isSelected && (
+                        <BorderBeam size={90} duration={8} colorFrom="#E5C378" borderWidth={1.5} />
+                      )}
+
+                      {/* Top Icon and Name */}
+                      <div>
+                        <div className="w-12 h-12 rounded-full mx-auto flex items-center justify-center mb-3.5 bg-[#141414] border border-[#222222]">
+                          {getServiceIcon(service.name)}
+                        </div>
+
+                        <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-white mb-1.5">
+                          {service.name}
+                        </h3>
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#141414] border border-[#262626] text-[10px] text-[#a1a1a1] font-sans tracking-wider mb-3">
+                          <span>{service.durationMinutes} min</span>
+                          <span>•</span>
+                          <span className="text-[#E5C378] font-medium">${price}</span>
+                        </div>
+                        <p className="text-[11px] text-[#666666] font-sans line-clamp-2 leading-relaxed px-1">
+                          {getServiceDescription(service.name)}
+                        </p>
+                      </div>
+
+                      {/* Select / Selected Button */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedService(service);
+                        }}
+                        className={`w-full py-2.5 rounded-lg font-sans text-[10px] uppercase tracking-widest font-semibold transition-all mt-4 ${
+                          isSelected
+                            ? 'bg-[#E5C378] text-black shadow-[0_0_12px_rgba(229,195,120,0.3)]'
+                            : 'bg-[#141414] text-[#888888] hover:bg-[#202020] hover:text-white border border-[#222222]'
+                        }`}
+                      >
+                        {isSelected ? 'Selected' : 'Select'}
+                      </button>
+                    </motion.div>
+                  </BlurFade>
                 );
               })}
             </div>

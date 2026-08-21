@@ -3,6 +3,9 @@ import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { CalendarDays, LayoutDashboard, LogOut, LogIn, Shield, Settings, User } from 'lucide-react';
 import { authClient } from '../lib/auth';
 import { motion, AnimatePresence } from 'motion/react';
+import { Particles } from './magicui/particles';
+import { Badge } from './ui/badge';
+import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar';
 
 const AUTH_PAGES = ['/login', '/register', '/forgot-password', '/reset-password'];
 
@@ -67,7 +70,8 @@ export default function Layout() {
 
   // Regular user pages — PC: Sidebar, Mobile: Top Header + Bottom Nav
   return (
-    <div className="flex h-full bg-[var(--color-bg)] overflow-hidden flex-col md:flex-row">
+    <div className="relative flex h-full bg-[var(--color-bg)] overflow-hidden flex-col md:flex-row">
+      <Particles className="pointer-events-none opacity-20 fixed inset-0 z-0" quantity={35} color="#E5C378" />
 
       {/* Mobile Top Header */}
       <header className="md:hidden shrink-0 h-16 border-b border-[#ffffff15] px-6 flex items-center justify-between z-50 bg-[#0a0a0a]/80 backdrop-blur-xl sticky top-0">
