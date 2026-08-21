@@ -28,8 +28,8 @@ export default function Layout() {
   if (isAuthPage) {
     return (
       <div className="h-full flex flex-col bg-[var(--color-bg)] overflow-y-auto">
-        <header className="shrink-0 h-16 sm:h-20 border-b border-[var(--color-border)] px-6 sm:px-12 flex items-center justify-between">
-          <Link to="/" className="text-xl sm:text-2xl tracking-[0.3em] font-light text-white uppercase">
+        <header className="shrink-0 h-16 sm:h-20 border-b border-[var(--color-border)] px-6 sm:px-12 flex items-center justify-between bg-[var(--color-sidebar-bg)]">
+          <Link to="/" className="text-xl sm:text-2xl tracking-[0.3em] font-semibold text-[var(--color-primary)] uppercase font-brand">
             AURELIAN
           </Link>
           <ThemeToggle />
@@ -46,21 +46,21 @@ export default function Layout() {
     return (
       <div className="h-full flex flex-col bg-[var(--color-bg)] overflow-hidden">
         {/* Admin Header */}
-        <header className="shrink-0 h-16 sm:h-20 border-b border-[var(--color-border)] px-6 sm:px-12 flex items-center justify-between z-20">
-          <Link to="/" className="text-xl sm:text-2xl tracking-[0.3em] font-light text-white uppercase">
+        <header className="shrink-0 h-16 sm:h-20 border-b border-[var(--color-border)] px-6 sm:px-12 flex items-center justify-between z-20 bg-[var(--color-sidebar-bg)]">
+          <Link to="/" className="text-xl sm:text-2xl tracking-[0.3em] font-semibold text-[var(--color-primary)] uppercase font-brand">
             AURELIAN
           </Link>
           <div className="flex items-center gap-3 sm:gap-4">
-            <span className="hidden sm:inline-block font-sans text-[9px] uppercase tracking-widest text-[#C5A059] border border-[#C5A059]/30 bg-[#C5A059]/10 px-3 py-1 rounded-full">
-              <Shield size={10} className="inline mr-1 -mt-0.5" /> Admin
+            <span className="hidden sm:inline-flex items-center gap-1.5 font-sans text-[10px] uppercase tracking-widest text-[var(--color-primary)] border border-[var(--color-primary)]/30 bg-[var(--color-primary)]/10 px-3 py-1.5 rounded-full font-semibold">
+              <Shield size={12} className="text-[var(--color-primary)]" /> Admin
             </span>
             <ThemeToggle />
             <button
               onClick={handleLogout}
-              className="flex items-center gap-2 font-sans text-[11px] uppercase tracking-widest text-[#888] hover:text-white transition-colors"
+              className="flex items-center gap-2 font-sans text-[11px] uppercase tracking-widest text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] transition-colors cursor-pointer"
             >
               <LogOut size={14} />
-              <span className="hidden sm:inline">Logout</span>
+              <span className="hidden sm:inline font-semibold">Logout</span>
             </button>
           </div>
         </header>

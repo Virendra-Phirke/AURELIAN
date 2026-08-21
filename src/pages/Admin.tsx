@@ -172,24 +172,24 @@ function StatCard({ label, value, icon, accent = false, pathData }: { label: str
   return (
     <motion.div
       variants={itemVariants}
-      whileHover={{ y: -4, boxShadow: '0 10px 30px rgba(229,195,120,0.1)' }}
-      className="relative overflow-hidden rounded-2xl bg-[var(--color-card-bg)] border border-[var(--color-border)] p-5 flex flex-col justify-between aspect-[4/3] transition-all group shadow-sm"
+      whileHover={{ y: -4, boxShadow: '0 10px 30px rgba(229,195,120,0.15)' }}
+      className="relative overflow-hidden rounded-2xl bg-[var(--color-card-bg)] border border-[var(--color-border)] p-6 flex flex-col justify-between aspect-[4/3] transition-all group shadow-md"
     >
       {accent && <BorderBeam size={100} duration={8} colorFrom="var(--color-primary)" borderWidth={1.5} />}
-      <div className="flex items-center gap-2 text-[var(--color-secondary-text)] z-10">
-        {icon}
-        <span className="font-sans text-[11px] uppercase tracking-wider font-semibold">{label}</span>
+      <div className="flex items-center gap-2 z-10">
+        <div className="text-[var(--color-primary)]">{icon}</div>
+        <span className="font-sans text-[11px] uppercase tracking-wider font-bold text-[var(--color-secondary-text)]">{label}</span>
       </div>
-      <div className={`text-5xl font-light z-10 font-sans ${accent ? 'text-[var(--color-primary)] font-medium' : 'text-[var(--color-primary-text)]'}`}>
+      <div className={`text-4xl sm:text-5xl font-semibold z-10 font-sans tracking-tight ${accent ? 'text-[var(--color-primary)]' : 'text-[var(--color-primary-text)]'}`}>
         <NumberTicker value={numValue} />
       </div>
       
       {/* Sparkline */}
-      <div className="absolute bottom-0 left-0 right-0 h-16 opacity-40 group-hover:opacity-100 transition-opacity duration-500">
+      <div className="absolute bottom-0 left-0 right-0 h-16 opacity-35 group-hover:opacity-90 transition-opacity duration-500">
         <svg viewBox="0 0 100 40" preserveAspectRatio="none" className="w-full h-full">
           <defs>
             <linearGradient id={`grad-${label.replace(/\s+/g, '')}`} x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor="var(--color-primary)" stopOpacity="0.5" />
+              <stop offset="0%" stopColor="var(--color-primary)" stopOpacity="0.4" />
               <stop offset="100%" stopColor="var(--color-primary)" stopOpacity="0" />
             </linearGradient>
           </defs>
@@ -206,7 +206,7 @@ function StatCard({ label, value, icon, accent = false, pathData }: { label: str
             transition={{ duration: 1.5, ease: "easeInOut" }}
             d={pathData}
             fill="none"
-            stroke="#C5A059"
+            stroke="var(--color-primary)"
             strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -653,7 +653,7 @@ export default function Admin() {
           className="hidden sm:flex flex-col w-64 border-r border-[var(--color-border)] bg-[var(--color-sidebar-bg)] h-full transition-colors"
         >
           <div className="p-8">
-            <h4 className="font-sans text-[9px] uppercase tracking-[0.5em] text-[var(--color-primary)] mb-3 font-semibold">Management</h4>
+            <h4 className="font-sans text-[10px] uppercase tracking-[0.4em] text-[var(--color-primary)] mb-2 font-bold">Management</h4>
             <h1 className="text-3xl font-light text-[var(--color-primary-text)] italic tracking-tight font-serif">Admin</h1>
           </div>
 
@@ -678,7 +678,7 @@ export default function Admin() {
                   className={`relative flex items-center gap-4 px-4 py-3 rounded-xl font-sans text-xs uppercase tracking-widest transition-all duration-300 overflow-hidden outline-none cursor-pointer ${
                     isActive
                       ? 'text-[var(--color-primary)] bg-[var(--color-primary)]/10 font-bold shadow-sm'
-                      : 'text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-raised)]'
+                      : 'text-[var(--color-secondary-text)] font-semibold hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-raised)]'
                   }`}
                 >
                   {isActive && (
@@ -735,7 +735,7 @@ export default function Admin() {
                     <>
                       <motion.div variants={itemVariants} className="mb-8">
                         <h1 className="text-4xl md:text-5xl font-light text-[var(--color-primary-text)] mb-4 tracking-tight">Good day, <span className="text-[var(--color-primary)] italic font-serif">Admin.</span></h1>
-                        <button className="flex items-center gap-2 text-[var(--color-primary)] bg-[var(--color-primary)]/10 px-4 py-2 rounded-full font-sans text-[11px] tracking-widest hover:bg-[var(--color-primary)]/20 transition-colors border border-[var(--color-primary)]/30 shadow-sm cursor-pointer">
+                        <button className="flex items-center gap-2 text-[var(--color-primary)] bg-[var(--color-primary)]/10 px-4 py-2 rounded-full font-sans text-[11px] tracking-widest hover:bg-[var(--color-primary)]/20 transition-colors border border-[var(--color-primary)]/30 shadow-sm cursor-pointer font-bold">
                           <span className="w-6 h-6 rounded-full bg-[var(--color-primary)] text-black flex items-center justify-center font-bold">
                             <ChevronRight size={14} />
                           </span>
@@ -754,7 +754,7 @@ export default function Admin() {
                       <motion.div variants={itemVariants} className="relative overflow-hidden rounded-2xl bg-[var(--color-card-bg)] border border-[var(--color-border)] p-6 md:p-8 shadow-md h-64 group transition-colors">
                         <BorderBeam size={220} duration={14} colorFrom="var(--color-primary)" borderWidth={1} />
                         <div className="flex items-center justify-between z-10 relative">
-                          <div className="text-[var(--color-secondary-text)] font-sans text-[11px] uppercase tracking-widest flex items-center gap-2 font-semibold">
+                          <div className="text-[var(--color-primary-text)] font-sans text-xs uppercase tracking-widest flex items-center gap-2 font-bold">
                             <div className="w-2 h-2 rounded-full bg-[var(--color-primary)]" />
                             Weekly Booking Trends
                           </div>

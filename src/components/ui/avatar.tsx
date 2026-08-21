@@ -9,7 +9,7 @@ export function Avatar({
   return (
     <div
       className={cn(
-        'relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[#262626] bg-[#141414]',
+        'relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-surface-raised)]',
         className
       )}
       {...props}
@@ -48,7 +48,7 @@ export function AvatarFallback({
   return (
     <div
       className={cn(
-        'flex h-full w-full items-center justify-center rounded-full bg-[#171717] font-sans text-xs font-medium uppercase text-[#E5C378]',
+        'flex h-full w-full items-center justify-center rounded-full bg-[var(--color-surface-raised)] font-sans text-xs font-bold uppercase text-[var(--color-primary)]',
         className
       )}
       {...props}

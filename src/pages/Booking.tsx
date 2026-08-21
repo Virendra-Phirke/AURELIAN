@@ -53,9 +53,9 @@ const SERVICE_META: Record<string, { price: number; icon: 'user' | 'scissors' | 
 function getServiceIcon(name: string) {
   const meta = SERVICE_META[name.toLowerCase()];
   const iconType = meta?.icon || (name.toLowerCase().includes('shav') ? 'scissors' : name.toLowerCase().includes('hair') ? 'user' : 'sparkles');
-  if (iconType === 'scissors') return <Scissors size={22} className="text-[#E5C378]" />;
-  if (iconType === 'sparkles') return <Sparkles size={22} className="text-[#E5C378]" />;
-  return <User size={22} className="text-[#E5C378]" />;
+  if (iconType === 'scissors') return <Scissors size={22} className="text-[var(--color-primary)]" />;
+  if (iconType === 'sparkles') return <Sparkles size={22} className="text-[var(--color-primary)]" />;
+  return <User size={22} className="text-[var(--color-primary)]" />;
 }
 
 function getServicePrice(name: string, duration: number): number {

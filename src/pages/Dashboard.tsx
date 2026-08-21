@@ -55,17 +55,17 @@ function getGreeting(): string {
 // --- StatusBadge (Geist Style) ---
 function StatusBadge({ status }: { status: string }) {
   const colors: Record<string, string> = {
-    PENDING: 'text-[#E5C378] border-[#E5C378]/40 bg-[#E5C378]/10',
-    ACCEPTED: 'text-[#4ade80] border-[#4ade80]/40 bg-[#4ade80]/10',
-    REJECTED: 'text-red-400 border-red-400/40 bg-red-400/10',
-    CANCELLED: 'text-[#737373] border-[#2e2e2e] bg-[#141414]',
-    COMPLETED: 'text-[#d4d4d4] border-[#2e2e2e] bg-[#141414]',
+    PENDING: 'text-[var(--color-primary)] border-[var(--color-primary)]/40 bg-[var(--color-primary)]/10',
+    ACCEPTED: 'text-emerald-500 border-emerald-500/40 bg-emerald-500/10',
+    REJECTED: 'text-red-500 border-red-500/40 bg-red-500/10',
+    CANCELLED: 'text-[var(--color-muted-text)] border-[var(--color-border)] bg-[var(--color-surface-raised)]',
+    COMPLETED: 'text-[var(--color-primary-text)] border-[var(--color-border)] bg-[var(--color-surface-raised)]',
   };
   const isPulse = status === 'ACCEPTED' || status === 'PENDING';
-  const dotColor = status === 'ACCEPTED' ? 'bg-[#4ade80]' : 'bg-[#E5C378]';
+  const dotColor = status === 'ACCEPTED' ? 'bg-emerald-500' : 'bg-[var(--color-primary)]';
 
   return (
-    <span className={`border rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.15em] font-sans inline-flex items-center gap-1.5 font-medium ${colors[status] || colors.PENDING}`}>
+    <span className={`border rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.15em] font-sans inline-flex items-center gap-1.5 font-semibold ${colors[status] || colors.PENDING}`}>
       {isPulse && (
         <span className="relative flex h-1.5 w-1.5">
           <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${dotColor}`}></span>
@@ -86,11 +86,11 @@ function Toast({ message, type, onDone }: { message: string; type: 'success' | '
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -15, scale: 0.95 }}
       className={`fixed top-6 right-6 z-50 px-5 py-3.5 rounded-xl border ${
-        type === 'error' ? 'bg-[#1c0808] border-red-500/30 text-red-400' : 'bg-[#111111] border-[#E5C378]/40 text-[#E5C378]'
-      } font-sans text-xs uppercase tracking-widest shadow-2xl flex items-center gap-3`}
+        type === 'error' ? 'bg-red-950/30 border-red-500/30 text-red-500' : 'bg-[var(--color-surface-raised)] border-[var(--color-primary)]/40 text-[var(--color-primary)]'
+      } font-sans text-xs uppercase tracking-widest shadow-2xl flex items-center gap-3 font-semibold`}
       role="alert"
     >
-      <div className={`w-2 h-2 rounded-full ${type === 'error' ? 'bg-red-500' : 'bg-[#E5C378]'}`} />
+      <div className={`w-2 h-2 rounded-full ${type === 'error' ? 'bg-red-500' : 'bg-[var(--color-primary)]'}`} />
       <span>{message}</span>
     </motion.div>
   );
@@ -109,15 +109,15 @@ function StatCard({ label, value, subtext, icon, accent = false, pathData }: {
     >
       {accent && <BorderBeam size={100} duration={8} colorFrom="var(--color-primary)" borderWidth={1.5} />}
       <div className="flex items-center justify-between z-10">
-        <span className="font-sans text-[11px] uppercase tracking-wider text-[var(--color-secondary-text)] font-semibold">{label}</span>
-        <div className="text-[var(--color-muted-text)] group-hover:text-[var(--color-primary)] transition-colors">{icon}</div>
+        <span className="font-sans text-[11px] uppercase tracking-wider text-[var(--color-secondary-text)] font-bold">{label}</span>
+        <div className="text-[var(--color-primary)]">{icon}</div>
       </div>
       <div className="z-10 mt-2">
         <div className={`text-3xl font-sans font-semibold tracking-tight block ${accent ? 'text-[var(--color-primary)]' : 'text-[var(--color-primary-text)]'}`}>
           {isNum ? <NumberTicker value={Number(value)} /> : value}
         </div>
         {subtext && (
-          <span className="font-sans text-[10px] uppercase tracking-wider text-[var(--color-secondary-text)] mt-1 block truncate">{subtext}</span>
+          <span className="font-sans text-[10px] uppercase tracking-wider text-[var(--color-secondary-text)] mt-1 block truncate font-medium">{subtext}</span>
         )}
       </div>
 

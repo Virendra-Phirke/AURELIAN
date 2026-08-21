@@ -38,7 +38,7 @@ export const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonPr
           } as CSSProperties
         }
         className={cn(
-          'group relative z-0 flex cursor-pointer items-center justify-center overflow-hidden whitespace-nowrap border border-[#ffffff15] px-6 py-3 text-white [background:var(--bg)] [border-radius:var(--radius)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(229,195,120,0.3)] active:scale-[0.98]',
+          'group relative z-0 flex cursor-pointer items-center justify-center overflow-hidden whitespace-nowrap border border-[var(--color-border)] px-6 py-3 text-[var(--color-primary-text)] [background:var(--bg)] [border-radius:var(--radius)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(229,195,120,0.3)] active:scale-[0.98]',
           className
         )}
         ref={ref}

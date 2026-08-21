@@ -14,11 +14,11 @@ function Toast({ message, type, onDone }: { message: string; type: 'success' | '
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -15, scale: 0.95 }}
       className={`fixed top-6 right-6 z-50 px-5 py-3.5 rounded-xl border ${
-        type === 'error' ? 'bg-[#1c0808] border-red-500/30 text-red-400' : 'bg-[#111111] border-[#E5C378]/40 text-[#E5C378]'
-      } font-sans text-xs uppercase tracking-widest shadow-2xl flex items-center gap-3`}
+        type === 'error' ? 'bg-red-950/30 border-red-500/30 text-red-500' : 'bg-[var(--color-surface-raised)] border-[var(--color-primary)]/40 text-[var(--color-primary)]'
+      } font-sans text-xs uppercase tracking-widest shadow-2xl flex items-center gap-3 font-semibold`}
       role="alert"
     >
-      <div className={`w-2 h-2 rounded-full ${type === 'error' ? 'bg-red-500' : 'bg-[#E5C378]'}`} />
+      <div className={`w-2 h-2 rounded-full ${type === 'error' ? 'bg-red-500' : 'bg-[var(--color-primary)]'}`} />
       <span>{message}</span>
     </motion.div>
   );
