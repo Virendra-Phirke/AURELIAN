@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo, KeyboardEvent } from 'react';
 import { format, parseISO, subDays, isAfter } from 'date-fns';
 import { motion, AnimatePresence } from 'motion/react';
-import { LayoutDashboard, CalendarDays, Users, Scissors, Settings as SettingsIcon, ChevronRight, ChevronDown, Clock, User, Shield, Lock, AlertCircle, Camera, Download, Search, RefreshCw, X, Check } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, Users, Scissors, Settings as SettingsIcon, ChevronRight, ChevronDown, Clock, User, Shield, Lock, AlertCircle, AlertTriangle, Trash2, Power, Camera, Download, Search, RefreshCw, X, Check } from 'lucide-react';
 import { authClient } from '../lib/auth';
 import { DataPagination } from '../components/ui/pagination';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
 import { Switch } from '../components/ui/switch';
+import { Dialog, DialogContent } from '../components/ui/dialog';
 import { NumberTicker } from '../components/magicui/number-ticker';
 import { BorderBeam } from '../components/magicui/border-beam';
 import { BlurFade } from '../components/magicui/blur-fade';
@@ -76,73 +77,91 @@ const listItemVariants = {
   animate: { opacity: 1, x: 0, transition: { duration: 0.3 } }
 };
 
-// --- Inline Confirm Button ---
-function ConfirmButton({
-  label,
-  confirmLabel = 'Confirm',
-  onConfirm,
-  className,
-  confirmClassName,
-  ariaLabel,
-}: {
-  label: string;
-  confirmLabel?: string;
+// --- Confirmation Modal Types & Component ---
+type ConfirmModalConfig = {
+  isOpen: boolean;
+  title: string;
+  description: string;
+  confirmText?: string;
+  cancelText?: string;
+  variant?: 'danger' | 'warning' | 'primary' | 'success';
+  icon?: 'trash' | 'power' | 'shield' | 'check' | 'alert';
   onConfirm: () => void;
-  className: string;
-  confirmClassName: string;
-  ariaLabel?: string;
+};
+
+function ConfirmationModal({
+  config,
+  onClose,
+}: {
+  config: ConfirmModalConfig | null;
+  onClose: () => void;
 }) {
-  const [confirming, setConfirming] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  if (!config || !config.isOpen) return null;
 
-  useEffect(() => {
-    if (!confirming) return;
-    const handle = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setConfirming(false);
-    };
-    document.addEventListener('mousedown', handle);
-    return () => document.removeEventListener('mousedown', handle);
-  }, [confirming]);
-
-  if (confirming) {
-    return (
-      <motion.div 
-        ref={ref} 
-        initial={{ opacity: 0, scale: 0.9 }} 
-        animate={{ opacity: 1, scale: 1 }} 
-        className="flex items-center gap-2 bg-[#111] p-1 rounded-lg border border-[#ffffff15]" 
-        role="alert" 
-        aria-live="assertive"
-      >
-        <span className="text-[9px] uppercase tracking-widest text-[#888] px-2">Sure?</span>
-        <button
-          onClick={() => { onConfirm(); setConfirming(false); }}
-          className={confirmClassName}
-          aria-label={`Confirm: ${ariaLabel || label}`}
-        >
-          Yes
-        </button>
-        <button
-          onClick={() => setConfirming(false)}
-          className="px-3 py-1.5 rounded-md border border-transparent text-[#888] text-[9px] uppercase tracking-widest hover:text-white hover:bg-[#ffffff10] transition-colors"
-          aria-label="Cancel confirmation"
-        >
-          No
-        </button>
-      </motion.div>
-    );
-  }
+  const variantStyles = {
+    danger: {
+      iconBg: 'bg-red-500/15 text-red-500 border border-red-500/30',
+      btn: 'bg-red-600 hover:bg-red-700 text-white shadow-md shadow-red-600/20',
+    },
+    warning: {
+      iconBg: 'bg-amber-500/15 text-amber-400 border border-amber-500/30',
+      btn: 'bg-amber-500 hover:bg-amber-600 text-black font-bold shadow-md shadow-amber-500/20',
+    },
+    success: {
+      iconBg: 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30',
+      btn: 'bg-emerald-500 hover:bg-emerald-600 text-white font-bold shadow-md shadow-emerald-500/20',
+    },
+    primary: {
+      iconBg: 'bg-[var(--color-primary)]/15 text-[var(--color-primary)] border border-[var(--color-primary)]/30',
+      btn: 'bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-black font-bold shadow-md shadow-[var(--color-primary)]/20',
+    },
+  }[config.variant || 'primary'];
 
   return (
-    <motion.button
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-      onClick={() => setConfirming(true)}
-      className={className}
-      aria-label={ariaLabel || label}
-    >
-      {label}
-    </motion.button>
+    <Dialog open={config.isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogContent onClose={onClose} className="max-w-[92vw] sm:max-w-md p-5 sm:p-6 rounded-2xl bg-[var(--color-card-bg)] shadow-2xl border border-[var(--color-border)]">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3.5 sm:gap-4 text-center sm:text-left pt-1">
+          {/* Icon Badge */}
+          <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 ${variantStyles.iconBg}`}>
+            {config.icon === 'trash' && <Trash2 size={20} className="sm:w-[22px] sm:h-[22px]" />}
+            {config.icon === 'power' && <Power size={20} className="sm:w-[22px] sm:h-[22px]" />}
+            {config.icon === 'shield' && <Shield size={20} className="sm:w-[22px] sm:h-[22px]" />}
+            {config.icon === 'check' && <Check size={20} className="sm:w-[22px] sm:h-[22px]" />}
+            {(!config.icon || config.icon === 'alert') && <AlertTriangle size={20} className="sm:w-[22px] sm:h-[22px]" />}
+          </div>
+
+          <div className="flex-1 space-y-1 min-w-0">
+            <h3 className="font-serif text-base sm:text-lg font-medium text-[var(--color-primary-text)] tracking-tight">
+              {config.title}
+            </h3>
+            <p className="font-sans text-[11px] sm:text-xs text-[var(--color-secondary-text)] leading-relaxed">
+              {config.description}
+            </p>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 pt-4 mt-4 border-t border-[var(--color-surface-raised)]">
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-full sm:w-auto px-4 py-2 sm:py-2.5 rounded-xl bg-[var(--color-surface-raised)] hover:bg-[var(--color-surface-hover)] text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] font-sans text-[10px] sm:text-xs uppercase tracking-wider font-semibold transition-all cursor-pointer text-center"
+          >
+            {config.cancelText || 'Cancel'}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              config.onConfirm();
+              onClose();
+            }}
+            className={`w-full sm:w-auto px-5 py-2 sm:py-2.5 rounded-xl font-sans text-[10px] sm:text-xs uppercase tracking-wider font-bold transition-all cursor-pointer text-center ${variantStyles.btn}`}
+          >
+            {config.confirmText || 'Confirm'}
+          </button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -294,6 +313,9 @@ export default function Admin() {
   const showToast = useCallback((message: string, type: 'success' | 'error' = 'success') => {
     setToast({ message, type });
   }, []);
+
+  // Confirmation Modal State (Responsive Mobile & Desktop)
+  const [confirmModal, setConfirmModal] = useState<ConfirmModalConfig | null>(null);
 
   // --- Profile & Password State ---
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -568,6 +590,74 @@ export default function Admin() {
     }
   };
 
+  // --- Confirmation Trigger Handlers (Responsive Box) ---
+  const requestDeleteCustomer = (c: Customer) => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Delete Customer?',
+      description: `Are you sure you want to permanently delete "${c.name}" (${c.email})? All associated customer data and appointment history will be permanently deleted.`,
+      confirmText: 'Delete Customer',
+      variant: 'danger',
+      icon: 'trash',
+      onConfirm: () => handleDeleteCustomer(c.id),
+    });
+  };
+
+  const requestToggleRole = (c: Customer) => {
+    const isDemoting = c.role === 'ADMIN';
+    setConfirmModal({
+      isOpen: true,
+      title: isDemoting ? `Demote ${c.name}?` : `Promote ${c.name}?`,
+      description: isDemoting
+        ? `Revoke administrator access from "${c.name}". They will lose access to the admin dashboard and management tools.`
+        : `Grant administrator privileges to "${c.name}". They will have full access to manage all bookings, shop services, and customers.`,
+      confirmText: isDemoting ? 'Demote to User' : 'Promote to Admin',
+      variant: isDemoting ? 'warning' : 'primary',
+      icon: 'shield',
+      onConfirm: () => handleToggleRole(c.id),
+    });
+  };
+
+  const requestToggleServiceActive = (s: Service) => {
+    if (s.active) {
+      setConfirmModal({
+        isOpen: true,
+        title: `Deactivate ${s.name}?`,
+        description: `Are you sure you want to deactivate "${s.name}"? Customers will no longer be able to select and book this service.`,
+        confirmText: 'Deactivate Service',
+        variant: 'warning',
+        icon: 'power',
+        onConfirm: () => handleToggleServiceActive(s.id, true),
+      });
+    } else {
+      setConfirmModal({
+        isOpen: true,
+        title: `Activate ${s.name}?`,
+        description: `Are you sure you want to activate "${s.name}"? It will immediately become available for customer bookings.`,
+        confirmText: 'Activate Service',
+        variant: 'success',
+        icon: 'power',
+        onConfirm: () => handleToggleServiceActive(s.id, false),
+      });
+    }
+  };
+
+  const requestCancelBooking = (bookingId: string) => {
+    const b = bookings.find(item => item.id === bookingId);
+    const customerName = b ? customerMap[b.userId]?.name || 'the customer' : 'the customer';
+    const serviceName = b ? serviceMap[b.serviceId] || 'appointment' : 'appointment';
+    const dateStr = b?.bookingDate ? format(parseISO(b.bookingDate), 'MMM d') : '';
+    setConfirmModal({
+      isOpen: true,
+      title: 'Cancel Appointment?',
+      description: `Are you sure you want to cancel the ${serviceName} appointment for ${customerName}${dateStr ? ` on ${dateStr}` : ''}?`,
+      confirmText: 'Cancel Appointment',
+      variant: 'danger',
+      icon: 'trash',
+      onConfirm: () => handleBookingAction(bookingId, 'cancel'),
+    });
+  };
+
   // --- Settings ---
   const [savingSettings, setSavingSettings] = useState(false);
   const handleSettingsSubmit = async (e: React.FormEvent) => {
@@ -695,6 +785,9 @@ export default function Admin() {
       <AnimatePresence>
         {toast && <Toast message={toast.message} type={toast.type} onDone={() => setToast(null)} />}
       </AnimatePresence>
+
+      {/* Responsive Confirmation Box */}
+      <ConfirmationModal config={confirmModal} onClose={() => setConfirmModal(null)} />
 
       <div className="flex-1 flex flex-col sm:flex-row overflow-hidden">
         
@@ -883,7 +976,7 @@ export default function Admin() {
                                     </motion.button>
                                     <motion.button
                                       whileTap={{ scale: 0.96 }}
-                                      onClick={() => handleBookingAction(b.id, 'cancel')}
+                                      onClick={() => requestCancelBooking(b.id)}
                                       className="flex-1 sm:flex-none px-4 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)] font-sans text-[9px] sm:text-[10px] uppercase tracking-wider hover:bg-red-500/10 hover:text-red-500 transition-colors cursor-pointer"
                                     >
                                       Cancel
@@ -1045,7 +1138,7 @@ export default function Admin() {
                                         Complete
                                       </button>
                                       <button
-                                        onClick={() => handleBookingAction(b.id, 'cancel')}
+                                        onClick={() => requestCancelBooking(b.id)}
                                         className="flex-1 py-1.5 rounded-lg bg-[var(--color-surface)] text-[var(--color-secondary-text)] hover:text-red-400 text-[9px] uppercase tracking-wider font-semibold cursor-pointer"
                                       >
                                         Cancel
@@ -1103,7 +1196,7 @@ export default function Admin() {
                                         {isActive && (
                                           <>
                                             <button onClick={() => handleBookingAction(b.id, 'complete')} className="px-3.5 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 border border-emerald-500/30 hover:bg-emerald-500 hover:text-white text-[10px] uppercase tracking-widest transition-all font-semibold cursor-pointer">Complete</button>
-                                            <button onClick={() => handleBookingAction(b.id, 'cancel')} className="px-3.5 py-1.5 rounded-lg text-[var(--color-secondary-text)] hover:bg-red-500/10 hover:text-red-500 text-[10px] uppercase tracking-widest transition-all cursor-pointer">Cancel</button>
+                                            <button onClick={() => requestCancelBooking(b.id)} className="px-3.5 py-1.5 rounded-lg text-[var(--color-secondary-text)] hover:bg-red-500/10 hover:text-red-500 text-[10px] uppercase tracking-widest transition-all cursor-pointer">Cancel</button>
                                           </>
                                         )}
                                       </div>
@@ -1235,25 +1328,24 @@ export default function Admin() {
                                           setEditCustomerName(c.name || '');
                                           setEditCustomerEmail(c.email || '');
                                         }}
-                                        className="flex-1 py-1 rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)] text-[9px] uppercase tracking-wider font-semibold cursor-pointer"
+                                        className="flex-1 py-1 rounded-lg bg-[var(--color-primary)]/10 hover:bg-[var(--color-primary)]/20 text-[var(--color-primary)] text-[9px] uppercase tracking-wider font-semibold transition-all cursor-pointer text-center"
                                       >
                                         Edit
                                       </button>
                                       {c.id !== adminUser?.id && (
                                         <>
-                                          <ConfirmButton
-                                            label={c.role === 'ADMIN' ? 'Demote' : 'Promote'}
-                                            onConfirm={() => handleToggleRole(c.id)}
-                                            className="flex-1 py-1 rounded-lg bg-[var(--color-card-bg)] text-[var(--color-secondary-text)] text-[9px] uppercase tracking-wider font-semibold cursor-pointer"
-                                            confirmClassName="flex-1 py-1 rounded-lg bg-[var(--color-primary)] text-black text-[9px] uppercase tracking-wider font-bold"
-                                          />
-                                          <ConfirmButton
-                                            label="Delete"
-                                            confirmLabel="Sure?"
-                                            onConfirm={() => handleDeleteCustomer(c.id)}
-                                            className="flex-1 py-1 rounded-lg text-red-400 bg-red-500/10 text-[9px] uppercase tracking-wider font-semibold cursor-pointer"
-                                            confirmClassName="flex-1 py-1 rounded-lg bg-red-600 text-white text-[9px] uppercase tracking-wider font-bold"
-                                          />
+                                          <button
+                                            onClick={() => requestToggleRole(c)}
+                                            className="flex-1 py-1 rounded-lg bg-[var(--color-card-bg)] hover:bg-[var(--color-surface-hover)] text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] text-[9px] uppercase tracking-wider font-semibold transition-all cursor-pointer text-center"
+                                          >
+                                            {c.role === 'ADMIN' ? 'Demote' : 'Promote'}
+                                          </button>
+                                          <button
+                                            onClick={() => requestDeleteCustomer(c)}
+                                            className="flex-1 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 text-[9px] uppercase tracking-wider font-semibold transition-all cursor-pointer text-center"
+                                          >
+                                            Delete
+                                          </button>
                                         </>
                                       )}
                                     </div>
@@ -1359,19 +1451,18 @@ export default function Admin() {
                                           </button>
                                           {c.id !== adminUser?.id && (
                                             <>
-                                              <ConfirmButton
-                                                label={c.role === 'ADMIN' ? 'Demote' : 'Promote'}
-                                                onConfirm={() => handleToggleRole(c.id)}
-                                                className="px-3 py-1.5 rounded-lg text-[var(--color-secondary-text)] hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-primary-text)] text-[10px] uppercase tracking-widest transition-all cursor-pointer"
-                                                confirmClassName="px-3 py-1.5 rounded-lg bg-[var(--color-primary)] text-black text-[10px] uppercase tracking-widest hover:bg-[var(--color-primary-hover)] transition-all font-bold"
-                                              />
-                                              <ConfirmButton
-                                                label="Delete"
-                                                confirmLabel="Confirm?"
-                                                onConfirm={() => handleDeleteCustomer(c.id)}
-                                                className="px-3 py-1.5 rounded-lg text-red-500 hover:bg-red-500/10 text-[10px] uppercase tracking-widest transition-all cursor-pointer"
-                                                confirmClassName="px-3 py-1.5 rounded-lg bg-red-600 text-white text-[10px] uppercase tracking-widest hover:bg-red-700 transition-all shadow-sm font-bold"
-                                              />
+                                              <button
+                                                onClick={() => requestToggleRole(c)}
+                                                className="px-3 py-1.5 rounded-lg text-[var(--color-secondary-text)] hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-primary-text)] text-[10px] uppercase tracking-widest transition-all cursor-pointer font-semibold"
+                                              >
+                                                {c.role === 'ADMIN' ? 'Demote' : 'Promote'}
+                                              </button>
+                                              <button
+                                                onClick={() => requestDeleteCustomer(c)}
+                                                className="px-3 py-1.5 rounded-lg text-red-500 hover:bg-red-500/10 text-[10px] uppercase tracking-widest transition-all cursor-pointer font-semibold"
+                                              >
+                                                Delete
+                                              </button>
                                             </>
                                           )}
                                         </>
@@ -1420,20 +1511,26 @@ export default function Admin() {
                             />
                           </div>
                           <div className="w-full md:w-48">
-                            <input
-                              type="number"
-                              min={5}
-                              value={newServiceDuration}
-                              onChange={e => setNewServiceDuration(parseInt(e.target.value) || 30)}
-                              placeholder="Duration (min)"
-                              required
-                              className="w-full px-3.5 sm:px-5 py-2 sm:py-3.5 rounded-lg sm:rounded-xl bg-[var(--color-surface-raised)] text-[var(--color-primary-text)] focus:outline-none font-sans text-xs sm:text-sm transition-all"
-                            />
+                            <div className="relative">
+                              <input
+                                type="number"
+                                min={5}
+                                max={480}
+                                step={5}
+                                value={newServiceDuration}
+                                onChange={e => setNewServiceDuration(parseInt(e.target.value) || 30)}
+                                required
+                                className="w-full px-3.5 sm:px-5 py-2 sm:py-3.5 rounded-lg sm:rounded-xl bg-[var(--color-surface-raised)] text-[var(--color-primary-text)] focus:outline-none font-sans text-xs sm:text-sm transition-all"
+                              />
+                              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-muted-text)] font-sans text-[10px] sm:text-xs uppercase tracking-wider font-semibold">
+                                Mins
+                              </span>
+                            </div>
                           </div>
                           <motion.button
                             whileTap={{ scale: 0.98 }}
                             type="submit"
-                            className="px-4 sm:px-8 py-2 sm:py-3.5 rounded-lg sm:rounded-xl bg-[var(--color-primary)] text-black font-sans text-[10px] sm:text-[11px] uppercase tracking-wider font-bold hover:bg-[var(--color-primary-hover)] transition-all shadow-sm cursor-pointer"
+                            className="px-6 sm:px-8 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-black font-sans text-xs sm:text-sm uppercase tracking-wider transition-all shadow-md font-bold cursor-pointer"
                           >
                             Add Service
                           </motion.button>
@@ -1495,7 +1592,7 @@ export default function Admin() {
                                   <div className="flex items-center gap-2 shrink-0">
                                     <Switch
                                       checked={s.active}
-                                      onCheckedChange={() => handleToggleServiceActive(s.id, s.active)}
+                                      onCheckedChange={() => requestToggleServiceActive(s)}
                                       aria-label={`Toggle ${s.name} active`}
                                     />
                                     <button
@@ -1549,7 +1646,7 @@ export default function Admin() {
                                   <div className="flex items-center gap-3">
                                     <Switch
                                       checked={s.active}
-                                      onCheckedChange={() => handleToggleServiceActive(s.id, s.active)}
+                                      onCheckedChange={() => requestToggleServiceActive(s)}
                                       aria-label={`Toggle ${s.name} active`}
                                     />
                                     <span className={`px-2.5 py-0.5 rounded-full text-[9px] uppercase tracking-widest font-sans font-semibold border ${s.active ? 'text-emerald-500 border-emerald-500/30 bg-emerald-500/10' : 'text-[var(--color-muted-text)] border-[var(--color-border)] bg-[var(--color-surface-raised)]'}`}>
