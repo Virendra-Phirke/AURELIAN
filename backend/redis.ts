@@ -1,4 +1,5 @@
 import { createClient } from "redis";
+import { Redis as UpstashRedis } from "@upstash/redis";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -54,10 +55,25 @@ class RedisMock {
 
 const mock = new RedisMock();
 
-let client: any = null;
-let isConnected = false;
+// Check for Upstash REST credentials (injected automatically by Vercel Upstash integration)
+const upstashUrl = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
+const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
 
-if (process.env.REDIS_URL) {
+let upstashClient: UpstashRedis | null = null;
+let nodeRedisClient: any = null;
+let nodeRedisConnected = false;
+
+if (upstashUrl && upstashToken) {
+  try {
+    upstashClient = new UpstashRedis({
+      url: upstashUrl,
+      token: upstashToken,
+    });
+    console.log("[Redis] Using Upstash HTTP REST Client for serverless edge.");
+  } catch (err: any) {
+    console.warn("[Redis] Failed to initialize Upstash REST client:", err.message);
+  }
+} else if (process.env.REDIS_URL) {
   try {
     const realClient = createClient({
       url: process.env.REDIS_URL,
@@ -70,72 +86,132 @@ if (process.env.REDIS_URL) {
     });
 
     realClient.on("error", (err) => {
-      if (isConnected) {
+      if (nodeRedisConnected) {
         console.warn("[Redis] Connection error, using memory fallback:", err.message);
       }
-      isConnected = false;
+      nodeRedisConnected = false;
     });
 
     realClient.on("ready", () => {
-      isConnected = true;
+      nodeRedisConnected = true;
       console.log("[Redis] Connected to real Redis instance:", process.env.REDIS_URL?.replace(/:[^:@]+@/, ":***@"));
     });
 
     realClient.connect().catch((err) => {
-      console.warn("[Redis] Failed to connect to real Redis, using in-memory cache fallback:", err.message);
-      isConnected = false;
+      console.warn("[Redis] Failed to connect to real Redis, using in-memory fallback:", err.message);
+      nodeRedisConnected = false;
     });
 
-    client = realClient;
+    nodeRedisClient = realClient;
   } catch (err: any) {
     console.warn("[Redis] Initialization error, falling back to memory:", err.message);
   }
 } else {
-  console.log("[Redis] No REDIS_URL provided, using in-memory cache.");
+  console.log("[Redis] No REDIS_URL or Upstash config provided, using in-memory cache.");
 }
 
 const redisWrapper = {
-  async get(key: string) {
-    if (isConnected && client) {
-      try { return await client.get(key); } catch { return await mock.get(key); }
+  async get(key: string): Promise<string | null> {
+    if (upstashClient) {
+      try {
+        const res = await upstashClient.get<any>(key);
+        if (res === null || res === undefined) return null;
+        return typeof res === 'string' ? res : JSON.stringify(res);
+      } catch {
+        return await mock.get(key);
+      }
+    }
+    if (nodeRedisConnected && nodeRedisClient) {
+      try { return await nodeRedisClient.get(key); } catch { return await mock.get(key); }
     }
     return await mock.get(key);
   },
-  async set(key: string, value: string, options?: { EX?: number; NX?: boolean }) {
-    if (isConnected && client) {
-      try { return await client.set(key, value, options); } catch { return await mock.set(key, value, options); }
+  async set(key: string, value: string, options?: { EX?: number; NX?: boolean }): Promise<string | null> {
+    if (upstashClient) {
+      try {
+        const upstashOpts: any = {};
+        if (options?.EX) upstashOpts.ex = options.EX;
+        if (options?.NX) upstashOpts.nx = true;
+        const res = await upstashClient.set(key, value, upstashOpts);
+        return res ? "OK" : null;
+      } catch {
+        return await mock.set(key, value, options);
+      }
+    }
+    if (nodeRedisConnected && nodeRedisClient) {
+      try { return await nodeRedisClient.set(key, value, options); } catch { return await mock.set(key, value, options); }
     }
     return await mock.set(key, value, options);
   },
-  async del(...keys: string[]) {
-    if (isConnected && client && keys.length > 0) {
-      try { return await client.del(keys); } catch { return await mock.del(...keys); }
+  async del(...keys: string[]): Promise<void> {
+    if (keys.length === 0) return;
+    if (upstashClient) {
+      try {
+        await upstashClient.del(...keys);
+        return;
+      } catch {
+        await mock.del(...keys);
+        return;
+      }
     }
-    return await mock.del(...keys);
+    if (nodeRedisConnected && nodeRedisClient) {
+      try { await nodeRedisClient.del(keys); return; } catch { await mock.del(...keys); return; }
+    }
+    await mock.del(...keys);
   },
-  async keys(pattern?: string) {
-    if (isConnected && client) {
-      try { return await client.keys(pattern || '*'); } catch { return await mock.keys(pattern); }
+  async keys(pattern?: string): Promise<string[]> {
+    if (upstashClient) {
+      try {
+        return await upstashClient.keys(pattern || '*');
+      } catch {
+        return await mock.keys(pattern);
+      }
+    }
+    if (nodeRedisConnected && nodeRedisClient) {
+      try { return await nodeRedisClient.keys(pattern || '*'); } catch { return await mock.keys(pattern); }
     }
     return await mock.keys(pattern);
   },
-  async incr(key: string) {
-    if (isConnected && client) {
-      try { return await client.incr(key); } catch { return await mock.incr(key); }
+  async incr(key: string): Promise<number> {
+    if (upstashClient) {
+      try {
+        return await upstashClient.incr(key);
+      } catch {
+        return await mock.incr(key);
+      }
+    }
+    if (nodeRedisConnected && nodeRedisClient) {
+      try { return await nodeRedisClient.incr(key); } catch { return await mock.incr(key); }
     }
     return await mock.incr(key);
   },
-  async expire(key: string, seconds: number) {
-    if (isConnected && client) {
-      try { return await client.expire(key, seconds); } catch { return await mock.expire(key, seconds); }
+  async expire(key: string, seconds: number): Promise<number> {
+    if (upstashClient) {
+      try {
+        return await upstashClient.expire(key, seconds);
+      } catch {
+        return await mock.expire(key, seconds);
+      }
+    }
+    if (nodeRedisConnected && nodeRedisClient) {
+      try { return await nodeRedisClient.expire(key, seconds); } catch { return await mock.expire(key, seconds); }
     }
     return await mock.expire(key, seconds);
   },
-  async flushall() {
-    if (isConnected && client) {
-      try { return await client.flushAll(); } catch { return await mock.flushall(); }
+  async flushall(): Promise<void> {
+    if (upstashClient) {
+      try {
+        await upstashClient.flushdb();
+        return;
+      } catch {
+        await mock.flushall();
+        return;
+      }
     }
-    return await mock.flushall();
+    if (nodeRedisConnected && nodeRedisClient) {
+      try { await nodeRedisClient.flushAll(); return; } catch { await mock.flushall(); return; }
+    }
+    await mock.flushall();
   }
 };
 
