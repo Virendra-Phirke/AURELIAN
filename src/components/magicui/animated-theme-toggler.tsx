@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useRef } from 'react';
 import { flushSync } from 'react-dom';
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from '../../lib/theme';
@@ -17,7 +17,7 @@ export function AnimatedThemeToggler({
   className,
   theme: controlledTheme,
   onThemeChange,
-  duration = 450,
+  duration = 500,
   showLabel = false,
   ...props
 }: AnimatedThemeTogglerProps) {
@@ -27,73 +27,65 @@ export function AnimatedThemeToggler({
   const currentTheme = controlledTheme || themeContext.resolvedTheme;
   const isDark = currentTheme === 'dark';
 
-  const toggleTheme = useCallback(
-    async (event?: React.MouseEvent<HTMLButtonElement>) => {
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    let clientX = e.clientX;
+    let clientY = e.clientY;
+
+    if ((!clientX || !clientY) && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      clientX = rect.left + rect.width / 2;
+      clientY = rect.top + rect.height / 2;
+    }
+
+    if (onThemeChange) {
+      const next = currentTheme === 'dark' ? 'light' : 'dark';
       const isAppearanceTransition =
         typeof document !== 'undefined' &&
         'startViewTransition' in document &&
         !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      if (isAppearanceTransition) {
+        const x = clientX || window.innerWidth / 2;
+        const y = clientY || window.innerHeight / 2;
+        const endRadius = Math.hypot(
+          Math.max(x, window.innerWidth - x),
+          Math.max(y, window.innerHeight - y)
+        );
 
-      if (!isAppearanceTransition || !buttonRef.current) {
-        if (onThemeChange) {
-          onThemeChange(nextTheme);
-        } else {
-          themeContext.setTheme(nextTheme);
-        }
-        return;
-      }
-
-      const rect = buttonRef.current.getBoundingClientRect();
-      const x = event?.clientX && event.clientX > 0 ? event.clientX : rect.left + rect.width / 2;
-      const y = event?.clientY && event.clientY > 0 ? event.clientY : rect.top + rect.height / 2;
-
-      const endRadius = Math.hypot(
-        Math.max(x, window.innerWidth - x),
-        Math.max(y, window.innerHeight - y)
-      );
-
-      const isCurrentDark = currentTheme === 'dark';
-
-      const transition = (document as any).startViewTransition(async () => {
-        flushSync(() => {
-          if (onThemeChange) {
-            onThemeChange(nextTheme);
-          } else {
-            themeContext.setTheme(nextTheme);
-          }
+        const transition = (document as any).startViewTransition(() => {
+          flushSync(() => {
+            onThemeChange(next);
+          });
         });
-      });
 
-      await transition.ready;
-
-      const clipPath = [
-        `circle(0px at ${x}px ${y}px)`,
-        `circle(${endRadius}px at ${x}px ${y}px)`,
-      ];
-
-      document.documentElement.animate(
-        {
-          clipPath: isCurrentDark ? [...clipPath].reverse() : clipPath,
-        },
-        {
-          duration,
-          easing: 'ease-in-out',
-          pseudoElement: isCurrentDark
-            ? '::view-transition-old(root)'
-            : '::view-transition-new(root)',
-        }
-      );
-    },
-    [currentTheme, onThemeChange, themeContext, duration]
-  );
+        transition.ready.then(() => {
+          document.documentElement.animate(
+            {
+              clipPath: [
+                `circle(0px at ${x}px ${y}px)`,
+                `circle(${endRadius}px at ${x}px ${y}px)`,
+              ],
+            },
+            {
+              duration,
+              easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+              pseudoElement: '::view-transition-new(root)',
+            }
+          );
+        });
+      } else {
+        onThemeChange(next);
+      }
+    } else {
+      themeContext.toggleTheme({ clientX, clientY });
+    }
+  };
 
   return (
     <button
       ref={buttonRef}
       type="button"
-      onClick={(e) => toggleTheme(e)}
+      onClick={handleClick}
       aria-label={`Switch to ${isDark ? 'light' : 'dark'} theme`}
       className={cn(
         'group relative inline-flex items-center justify-center gap-2 rounded-xl p-2.5 transition-all duration-300 select-none cursor-pointer',

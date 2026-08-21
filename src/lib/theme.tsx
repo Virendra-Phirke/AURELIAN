@@ -12,7 +12,7 @@ interface ThemeProviderProps {
 interface ThemeProviderState {
   theme: Theme;
   resolvedTheme: 'dark' | 'light';
-  setTheme: (theme: Theme, event?: React.MouseEvent | MouseEvent | { clientX?: number; clientY?: number }) => void;
+  setTheme: (theme: Theme) => void;
   toggleTheme: (event?: React.MouseEvent | MouseEvent | { clientX?: number; clientY?: number }) => void;
 }
 
@@ -73,22 +73,26 @@ export function ThemeProvider({
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, [theme]);
 
-  const setTheme = (
-    newTheme: Theme,
+  const setTheme = (newTheme: Theme) => {
+    localStorage.setItem(storageKey, newTheme);
+    setThemeState(newTheme);
+  };
+
+  const toggleTheme = (
     event?: React.MouseEvent | MouseEvent | { clientX?: number; clientY?: number }
   ) => {
-    const isAppearanceTransitionSupported =
+    const nextTheme: Theme = resolvedTheme === 'dark' ? 'light' : 'dark';
+
+    const isAppearanceTransition =
       typeof document !== 'undefined' &&
       'startViewTransition' in document &&
       !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    if (!isAppearanceTransitionSupported) {
-      localStorage.setItem(storageKey, newTheme);
-      setThemeState(newTheme);
+    if (!isAppearanceTransition) {
+      setTheme(nextTheme);
       return;
     }
 
-    // Determine coordinates for the circular expansion effect
     let x = window.innerWidth / 2;
     let y = window.innerHeight / 2;
 
@@ -110,9 +114,8 @@ export function ThemeProvider({
 
     const transition = (document as any).startViewTransition(() => {
       flushSync(() => {
-        localStorage.setItem(storageKey, newTheme);
-        setThemeState(newTheme);
-        applyThemeClasses(newTheme);
+        setTheme(nextTheme);
+        applyThemeClasses(nextTheme);
       });
     });
 
@@ -133,13 +136,6 @@ export function ThemeProvider({
         }
       );
     });
-  };
-
-  const toggleTheme = (
-    event?: React.MouseEvent | MouseEvent | { clientX?: number; clientY?: number }
-  ) => {
-    const nextTheme = resolvedTheme === 'dark' ? 'light' : 'dark';
-    setTheme(nextTheme, event);
   };
 
   const value = {

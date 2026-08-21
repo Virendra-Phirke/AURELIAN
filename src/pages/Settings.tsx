@@ -339,7 +339,7 @@ export default function Settings() {
             <div className="grid grid-cols-3 gap-3 pt-2">
               <button
                 type="button"
-                onClick={(e) => setTheme('dark', e)}
+                onClick={() => setTheme('dark')}
                 className={`p-3.5 rounded-xl border flex flex-col items-center gap-2 transition-all cursor-pointer ${
                   theme === 'dark'
                     ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/10 text-[var(--color-primary)] shadow-sm font-semibold'
@@ -352,7 +352,7 @@ export default function Settings() {
 
               <button
                 type="button"
-                onClick={(e) => setTheme('light', e)}
+                onClick={() => setTheme('light')}
                 className={`p-3.5 rounded-xl border flex flex-col items-center gap-2 transition-all cursor-pointer ${
                   theme === 'light'
                     ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/10 text-[var(--color-primary)] shadow-sm font-semibold'
@@ -365,7 +365,7 @@ export default function Settings() {
 
               <button
                 type="button"
-                onClick={(e) => setTheme('system', e)}
+                onClick={() => setTheme('system')}
                 className={`p-3.5 rounded-xl border flex flex-col items-center gap-2 transition-all cursor-pointer ${
                   theme === 'system'
                     ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/10 text-[var(--color-primary)] shadow-sm font-semibold'
