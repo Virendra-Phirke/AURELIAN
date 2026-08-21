@@ -140,68 +140,68 @@ export default function Settings() {
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto space-y-8 pb-16">
+    <div className="w-full max-w-6xl mx-auto space-y-4 sm:space-y-8 pb-16">
       <AnimatePresence>
         {toast && <Toast message={toast.message} type={toast.type} onDone={() => setToast(null)} />}
       </AnimatePresence>
 
       {/* Top Banner (Geist Style) */}
-      <div className="p-4 sm:p-8 bg-[var(--color-card-bg)] rounded-2xl flex flex-col sm:flex-row items-center sm:items-start justify-between gap-4 sm:gap-6 shadow-xl transition-colors">
-        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-5 text-center sm:text-left">
+      <div className="p-3.5 sm:p-8 bg-[var(--color-card-bg)] rounded-xl sm:rounded-2xl flex flex-col sm:flex-row items-center sm:items-start justify-between gap-3 sm:gap-6 shadow-md sm:shadow-xl transition-colors">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-5 text-center sm:text-left w-full sm:w-auto">
           <div className="relative group shrink-0">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full p-1 bg-[var(--color-surface-raised)]">
+            <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full p-1 bg-[var(--color-surface-raised)]">
               <div className="w-full h-full rounded-full bg-[var(--color-surface)] flex items-center justify-center overflow-hidden relative">
                 {newImage || user.image ? (
                   <img src={newImage || user.image} alt={user.name} className="w-full h-full object-cover" />
                 ) : (
-                  <User size={26} className="text-[var(--color-secondary-text)] sm:w-8 sm:h-8" />
+                  <User size={22} className="text-[var(--color-secondary-text)] sm:w-8 sm:h-8" />
                 )}
                 {isEditingProfile && (
                   <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                    <Camera size={16} className="text-white" />
+                    <Camera size={14} className="text-white" />
                   </div>
                 )}
               </div>
             </div>
           </div>
 
-          <div>
-            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-1">
-              <h1 className="text-xl sm:text-2xl font-serif text-[var(--color-primary-text)] font-medium">{user.name}</h1>
-              <span className="px-2.5 py-0.5 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-sans text-[9px] sm:text-[10px] uppercase tracking-widest font-semibold">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
+              <h1 className="text-lg sm:text-2xl font-serif text-[var(--color-primary-text)] font-medium truncate">{user.name}</h1>
+              <span className="px-2 py-0.5 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-sans text-[8px] sm:text-[10px] uppercase tracking-wider font-semibold">
                 {user.role === 'ADMIN' ? 'Administrator' : 'Client Member'}
               </span>
             </div>
-            <p className="text-[var(--color-secondary-text)] font-sans text-xs">{user.email}</p>
+            <p className="text-[var(--color-secondary-text)] font-sans text-[11px] sm:text-xs truncate">{user.email}</p>
           </div>
         </div>
 
         <button
           onClick={handleUpdateProfile}
           disabled={updatingProfile}
-          className={`w-full sm:w-auto px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl font-sans text-[11px] sm:text-xs uppercase tracking-wider font-semibold transition-all inline-flex items-center justify-center gap-2 cursor-pointer ${
+          className={`w-full sm:w-auto px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl font-sans text-[10px] sm:text-xs uppercase tracking-wider font-semibold transition-all inline-flex items-center justify-center gap-1.5 cursor-pointer ${
             isEditingProfile
               ? 'bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-black shadow-[0_0_15px_rgba(229,195,120,0.3)]'
               : 'bg-[var(--color-surface-raised)] hover:bg-[var(--color-surface-hover)] text-[var(--color-primary-text)]'
           }`}
         >
-          {updatingProfile ? 'Saving...' : isEditingProfile ? <><Check size={14} /> Save Profile</> : 'Edit Profile'}
+          {updatingProfile ? 'Saving...' : isEditingProfile ? <><Check size={13} /> Save Profile</> : 'Edit Profile'}
         </button>
       </div>
 
       {/* Main Grid Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6">
         {/* Left Column: Account Details */}
-        <div className="bg-[var(--color-card-bg)] rounded-2xl p-4 sm:p-8 flex flex-col justify-between shadow-xl transition-colors">
-          <div className="space-y-4 sm:space-y-6">
-            <div className="flex items-center gap-2.5 pb-3 sm:pb-4 border-b border-[var(--color-border)]">
-              <User size={16} className="text-[var(--color-primary)]" />
-              <h2 className="text-[var(--color-primary-text)] font-sans text-xs uppercase tracking-[0.2em] font-semibold">Account Details</h2>
+        <div className="bg-[var(--color-card-bg)] rounded-xl sm:rounded-2xl p-3.5 sm:p-8 flex flex-col justify-between shadow-md sm:shadow-xl transition-colors">
+          <div className="space-y-3 sm:space-y-6">
+            <div className="flex items-center gap-2 pb-2.5 sm:pb-4 border-b border-[var(--color-surface-raised)]">
+              <User size={14} className="text-[var(--color-primary)] sm:w-4 sm:h-4" />
+              <h2 className="text-[var(--color-primary-text)] font-sans text-[11px] sm:text-xs uppercase tracking-wider font-semibold">Account Details</h2>
             </div>
 
-            <div className="space-y-3 sm:space-y-4">
+            <div className="space-y-2.5 sm:space-y-4">
               <div>
-                <label className="block font-sans text-[9px] sm:text-[10px] uppercase tracking-[0.15em] text-[var(--color-secondary-text)] mb-1 font-medium">
+                <label className="block font-sans text-[9px] sm:text-[10px] uppercase tracking-wider text-[var(--color-secondary-text)] mb-1 font-medium">
                   Full Name
                 </label>
                 <input
@@ -209,19 +209,19 @@ export default function Settings() {
                   value={isEditingProfile ? newName : user.name}
                   onChange={(e) => setNewName(e.target.value)}
                   disabled={!isEditingProfile}
-                  className="w-full bg-[var(--color-surface-raised)] rounded-xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-[var(--color-primary-text)] focus:outline-none transition-colors disabled:opacity-60"
+                  className="w-full bg-[var(--color-surface-raised)] rounded-lg sm:rounded-xl px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-[var(--color-primary-text)] focus:outline-none transition-colors disabled:opacity-60"
                 />
               </div>
 
               <div>
-                <label className="block font-sans text-[9px] sm:text-[10px] uppercase tracking-[0.15em] text-[var(--color-secondary-text)] mb-1 font-medium">
+                <label className="block font-sans text-[9px] sm:text-[10px] uppercase tracking-wider text-[var(--color-secondary-text)] mb-1 font-medium">
                   Email Address
                 </label>
                 <input
                   type="email"
                   value={user.email}
                   disabled
-                  className="w-full bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-xl px-4 py-3 text-sm text-[var(--color-secondary-text)] focus:outline-none cursor-not-allowed opacity-80"
+                  className="w-full bg-[var(--color-surface-raised)] rounded-lg sm:rounded-xl px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-[var(--color-secondary-text)] focus:outline-none cursor-not-allowed opacity-80"
                 />
               </div>
 
@@ -232,7 +232,7 @@ export default function Settings() {
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
                   >
-                    <label className="block font-sans text-[10px] uppercase tracking-[0.15em] text-[var(--color-secondary-text)] mb-1.5 mt-2 font-medium">
+                    <label className="block font-sans text-[9px] sm:text-[10px] uppercase tracking-wider text-[var(--color-secondary-text)] mb-1 mt-2 font-medium">
                       Avatar URL (Optional)
                     </label>
                     <input
@@ -240,7 +240,7 @@ export default function Settings() {
                       value={newImage}
                       onChange={(e) => setNewImage(e.target.value)}
                       placeholder="https://example.com/avatar.jpg"
-                      className="w-full bg-[var(--color-surface-raised)] border border-[var(--color-border)] focus:border-[var(--color-primary)] rounded-xl px-4 py-3 text-sm text-[var(--color-primary-text)] focus:outline-none transition-colors"
+                      className="w-full bg-[var(--color-surface-raised)] rounded-lg sm:rounded-xl px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-[var(--color-primary-text)] focus:outline-none transition-colors"
                     />
                   </motion.div>
                 )}
@@ -249,14 +249,14 @@ export default function Settings() {
           </div>
 
           {isEditingProfile && (
-            <div className="pt-6 mt-6 border-t border-[var(--color-border)] flex gap-3">
+            <div className="pt-3 sm:pt-6 mt-3 sm:mt-6 border-t border-[var(--color-surface-raised)] flex gap-2">
               <button
                 onClick={() => {
                   setIsEditingProfile(false);
                   setNewName(user.name || '');
                   setNewImage(user.image || '');
                 }}
-                className="px-4 py-2 bg-[var(--color-surface-raised)] hover:bg-[var(--color-surface-hover)] text-[var(--color-secondary-text)] font-sans text-xs uppercase tracking-wider rounded-xl border border-[var(--color-border)] transition-colors cursor-pointer"
+                className="px-3.5 py-1.5 bg-[var(--color-surface-raised)] hover:bg-[var(--color-surface-hover)] text-[var(--color-secondary-text)] font-sans text-[10px] uppercase tracking-wider rounded-lg transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -265,29 +265,30 @@ export default function Settings() {
         </div>
 
         {/* Right Column: Security & Theme */}
-        <div className="space-y-6 flex flex-col">
-          <div className="bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-2xl p-6 sm:p-8 flex-1 shadow-xl transition-colors">
-            <div className="flex items-center gap-2.5 pb-4 mb-6 border-b border-[var(--color-border)]">
-              <Shield size={16} className="text-[var(--color-primary)]" />
-              <h2 className="text-[var(--color-primary-text)] font-sans text-xs uppercase tracking-[0.2em] font-semibold">Security & Password</h2>
+        <div className="space-y-3 sm:space-y-6 flex flex-col">
+          {/* Security & Password */}
+          <div className="bg-[var(--color-card-bg)] rounded-xl sm:rounded-2xl p-3.5 sm:p-8 flex-1 shadow-md sm:shadow-xl transition-colors">
+            <div className="flex items-center gap-2 pb-2.5 sm:pb-4 mb-3 sm:mb-6 border-b border-[var(--color-surface-raised)]">
+              <Shield size={14} className="text-[var(--color-primary)] sm:w-4 sm:h-4" />
+              <h2 className="text-[var(--color-primary-text)] font-sans text-[11px] sm:text-xs uppercase tracking-wider font-semibold">Security & Password</h2>
             </div>
 
             {checkingPassword ? (
-              <div className="py-8 text-center font-sans text-xs text-[var(--color-secondary-text)] uppercase tracking-wider">
-                Checking security status...
+              <div className="py-4 text-center font-sans text-xs text-[var(--color-secondary-text)] uppercase tracking-wider">
+                Checking status...
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-2.5 sm:space-y-4">
                 {!hasPassword && (
-                  <div className="p-3.5 rounded-xl bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/30 text-[var(--color-primary)] font-sans text-xs flex items-center gap-2.5">
-                    <AlertCircle size={14} className="shrink-0" />
-                    <span>No password is currently set for this account.</span>
+                  <div className="p-2.5 rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-sans text-[11px] flex items-center gap-2">
+                    <AlertCircle size={13} className="shrink-0" />
+                    <span>No password set for this account.</span>
                   </div>
                 )}
 
                 {hasPassword && (
                   <div>
-                    <label className="block font-sans text-[10px] uppercase tracking-[0.15em] text-[var(--color-secondary-text)] mb-1.5 font-medium">
+                    <label className="block font-sans text-[9px] sm:text-[10px] uppercase tracking-wider text-[var(--color-secondary-text)] mb-1 font-medium">
                       Current Password
                     </label>
                     <input
@@ -295,13 +296,13 @@ export default function Settings() {
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full bg-[var(--color-surface-raised)] border border-[var(--color-border)] focus:border-[var(--color-primary)] rounded-xl px-4 py-3 text-sm text-[var(--color-primary-text)] focus:outline-none transition-colors placeholder:text-[var(--color-muted-text)]"
+                      className="w-full bg-[var(--color-surface-raised)] rounded-lg sm:rounded-xl px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-[var(--color-primary-text)] focus:outline-none transition-colors placeholder:text-[var(--color-muted-text)]"
                     />
                   </div>
                 )}
 
                 <div>
-                  <label className="block font-sans text-[10px] uppercase tracking-[0.15em] text-[var(--color-secondary-text)] mb-1.5 font-medium">
+                  <label className="block font-sans text-[9px] sm:text-[10px] uppercase tracking-wider text-[var(--color-secondary-text)] mb-1 font-medium">
                     New Password
                   </label>
                   <input
@@ -309,15 +310,15 @@ export default function Settings() {
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full bg-[var(--color-surface-raised)] border border-[var(--color-border)] focus:border-[var(--color-primary)] rounded-xl px-4 py-3 text-sm text-[var(--color-primary-text)] focus:outline-none transition-colors placeholder:text-[var(--color-muted-text)]"
+                    className="w-full bg-[var(--color-surface-raised)] rounded-lg sm:rounded-xl px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-[var(--color-primary-text)] focus:outline-none transition-colors placeholder:text-[var(--color-muted-text)]"
                   />
                 </div>
 
-                <div className="pt-4">
+                <div className="pt-2">
                   <button
                     onClick={handleChangePassword}
                     disabled={updatingPassword}
-                    className="px-5 py-2.5 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-black font-sans text-xs font-semibold uppercase tracking-wider rounded-xl transition-all shadow-[0_0_15px_rgba(229,195,120,0.25)] disabled:opacity-50 cursor-pointer"
+                    className="px-4 py-2 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-black font-sans text-[10px] sm:text-xs font-semibold uppercase tracking-wider rounded-lg sm:rounded-xl transition-all shadow-md disabled:opacity-50 cursor-pointer"
                   >
                     {updatingPassword ? 'Updating...' : hasPassword ? 'Update Password' : 'Set Password'}
                   </button>
@@ -327,65 +328,66 @@ export default function Settings() {
           </div>
 
           {/* Theme & Appearance */}
-          <div className="bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-2xl p-6 sm:p-8 shadow-xl space-y-4 transition-colors">
-            <div className="flex items-center justify-between pb-4 border-b border-[var(--color-border)]">
-              <div className="flex items-center gap-2.5">
-                <Sun size={16} className="text-[var(--color-primary)]" />
-                <h2 className="text-[var(--color-primary-text)] font-sans text-xs uppercase tracking-[0.2em] font-semibold">Appearance & Theme</h2>
+          <div className="bg-[var(--color-card-bg)] rounded-xl sm:rounded-2xl p-3.5 sm:p-6 shadow-md sm:shadow-xl space-y-2.5 sm:space-y-4 transition-colors">
+            <div className="flex items-center justify-between pb-2.5 sm:pb-4 border-b border-[var(--color-surface-raised)]">
+              <div className="flex items-center gap-2">
+                <Sun size={14} className="text-[var(--color-primary)] sm:w-4 sm:h-4" />
+                <h2 className="text-[var(--color-primary-text)] font-sans text-[11px] sm:text-xs uppercase tracking-wider font-semibold">Appearance & Theme</h2>
               </div>
               <ThemeToggle showLabel />
             </div>
 
-            <div className="grid grid-cols-3 gap-3 pt-2">
+            <div className="grid grid-cols-3 gap-2 pt-1">
               <button
                 type="button"
                 onClick={() => setTheme('dark')}
-                className={`p-3.5 rounded-xl border flex flex-col items-center gap-2 transition-all cursor-pointer ${
+                className={`py-2 px-2 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                   theme === 'dark'
-                    ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/10 text-[var(--color-primary)] shadow-sm font-semibold'
-                    : 'border-[var(--color-border)] bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:border-[var(--color-primary)]/30'
+                    ? 'bg-[var(--color-primary)] text-black font-bold shadow-sm'
+                    : 'bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)]'
                 }`}
               >
-                <Moon size={18} />
-                <span className="font-sans text-[10px] uppercase tracking-wider font-semibold">Dark</span>
+                <Moon size={14} />
+                <span className="font-sans text-[10px] uppercase tracking-wider">Dark</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setTheme('light')}
-                className={`p-3.5 rounded-xl border flex flex-col items-center gap-2 transition-all cursor-pointer ${
+                className={`py-2 px-2 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                   theme === 'light'
-                    ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/10 text-[var(--color-primary)] shadow-sm font-semibold'
-                    : 'border-[var(--color-border)] bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:border-[var(--color-primary)]/30'
+                    ? 'bg-[var(--color-primary)] text-black font-bold shadow-sm'
+                    : 'bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)]'
                 }`}
               >
-                <Sun size={18} />
-                <span className="font-sans text-[10px] uppercase tracking-wider font-semibold">Light</span>
+                <Sun size={14} />
+                <span className="font-sans text-[10px] uppercase tracking-wider">Light</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setTheme('system')}
-                className={`p-3.5 rounded-xl border flex flex-col items-center gap-2 transition-all cursor-pointer ${
+                className={`py-2 px-2 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                   theme === 'system'
-                    ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/10 text-[var(--color-primary)] shadow-sm font-semibold'
-                    : 'border-[var(--color-border)] bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:border-[var(--color-primary)]/30'
+                    ? 'bg-[var(--color-primary)] text-black font-bold shadow-sm'
+                    : 'bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)]'
                 }`}
               >
-                <Laptop size={18} />
-                <span className="font-sans text-[10px] uppercase tracking-wider font-semibold">System</span>
+                <Laptop size={14} />
+                <span className="font-sans text-[10px] uppercase tracking-wider">System</span>
               </button>
             </div>
           </div>
 
-          <div className="bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-2xl p-5 flex items-center justify-between gap-4 shadow-xl transition-colors">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[var(--color-surface-raised)] border border-[var(--color-border)] flex items-center justify-center shrink-0">
-                <Lock size={16} className="text-[var(--color-primary)]" />
+          {/* Two-Factor Authentication */}
+          <div className="bg-[var(--color-card-bg)] rounded-xl sm:rounded-2xl p-3.5 sm:p-5 flex items-center justify-between gap-3 shadow-md sm:shadow-xl transition-colors">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-[var(--color-surface-raised)] flex items-center justify-center shrink-0">
+                <Lock size={14} className="text-[var(--color-primary)]" />
               </div>
               <div>
-                <h3 className="text-[var(--color-primary-text)] text-xs font-semibold uppercase tracking-wider">Two-Factor Authentication</h3>
-                <p className="text-[var(--color-secondary-text)] font-sans text-[11px]">Enhanced account protection</p>
+                <h3 className="text-[var(--color-primary-text)] text-[11px] sm:text-xs font-semibold uppercase tracking-wider">Two-Factor Authentication</h3>
+                <p className="text-[var(--color-secondary-text)] font-sans text-[10px] sm:text-[11px]">Enhanced account protection</p>
               </div>
             </div>
 
@@ -394,13 +396,13 @@ export default function Settings() {
                 setTwoFactorEnabled(!twoFactorEnabled);
                 setToast({ message: !twoFactorEnabled ? '2FA Enabled' : '2FA Disabled', type: 'success' });
               }}
-              className={`w-12 h-6 rounded-full transition-colors relative cursor-pointer ${
-                twoFactorEnabled ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-surface-raised)] border border-[var(--color-border)]'
+              className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer ${
+                twoFactorEnabled ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-surface-raised)]'
               }`}
             >
               <div
-                className={`w-4 h-4 rounded-full bg-black transition-transform absolute top-1 ${
-                  twoFactorEnabled ? 'left-7 bg-black' : 'left-1 bg-[var(--color-secondary-text)]'
+                className={`w-4 h-4 rounded-full transition-transform absolute top-1 ${
+                  twoFactorEnabled ? 'left-6 bg-black' : 'left-1 bg-[var(--color-secondary-text)]'
                 }`}
               />
             </button>
