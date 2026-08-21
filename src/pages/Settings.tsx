@@ -47,7 +47,7 @@ export default function Settings() {
     if (user) {
       setNewName(user.name || '');
       setNewImage(user.image || '');
-      
+
       setCheckingPassword(true);
       authClient.listUserAccounts().then((res) => {
         setCheckingPassword(false);
@@ -92,7 +92,7 @@ export default function Settings() {
     if (hasPassword && !currentPassword) return setToast({ message: 'Current password is required', type: 'error' });
     if (!newPassword) return setToast({ message: 'New password is required', type: 'error' });
     if (newPassword.length < 8) return setToast({ message: 'New password must be at least 8 chars', type: 'error' });
-    
+
     setUpdatingPassword(true);
     let error;
 
@@ -110,7 +110,7 @@ export default function Settings() {
         });
         error = res.error;
       }
-      
+
       if (error) {
         setToast({ message: error.message || 'Failed to update password', type: 'error' });
       } else {
@@ -133,13 +133,13 @@ export default function Settings() {
       </AnimatePresence>
 
       {/* Top Banner (Avatar & Basic Info) */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="bg-[#0a0a0a] border border-[#ffffff10] rounded-3xl p-8 sm:p-10 relative overflow-hidden flex flex-col sm:flex-row items-center sm:items-start gap-8"
       >
         <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-[#C5A059]/10 to-transparent blur-3xl pointer-events-none rounded-full" />
-        
+
         <div className="relative group shrink-0">
           <div className="w-32 h-32 rounded-full p-1 bg-gradient-to-b from-[#C5A059] to-[#C5A059]/20 flex items-center justify-center">
             <div className="w-full h-full rounded-full bg-[#111] flex items-center justify-center overflow-hidden relative">
@@ -160,7 +160,7 @@ export default function Settings() {
         <div className="flex-1 text-center sm:text-left z-10">
           <h1 className="text-3xl sm:text-4xl font-serif text-white mb-2">{user.name}</h1>
           <p className="text-[#888] font-sans text-[11px] uppercase tracking-[0.2em] mb-4">{user.email}</p>
-          
+
           <div className="inline-flex px-4 py-1.5 rounded-full border border-[#C5A059]/30 bg-[#C5A059]/10 text-[#C5A059] font-sans text-[9px] uppercase tracking-[0.2em]">
             {user.role === 'ADMIN' ? 'Administrator' : 'Client'}
           </div>
@@ -169,9 +169,9 @@ export default function Settings() {
 
       {/* Main Grid Content */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
+
         {/* Left Column: Account Details */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
@@ -181,23 +181,23 @@ export default function Settings() {
             <User size={16} className="text-[#C5A059]" />
             <h2 className="text-[#C5A059] font-sans text-[10px] uppercase tracking-[0.3em]">Account Details</h2>
           </div>
-          
+
           <div className="space-y-6 flex-1">
             <div>
               <label className="block font-sans text-[9px] uppercase tracking-[0.2em] text-[#555] mb-2 ml-1">Full Name</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 value={isEditingProfile ? newName : user.name}
                 onChange={e => setNewName(e.target.value)}
                 disabled={!isEditingProfile}
                 className="w-full bg-[#111] border border-[#ffffff10] rounded-2xl px-5 py-4 text-[#D4D4D4] focus:outline-none focus:border-[#C5A059]/50 transition-colors font-light disabled:opacity-70"
               />
             </div>
-            
+
             <div>
               <label className="block font-sans text-[9px] uppercase tracking-[0.2em] text-[#555] mb-2 ml-1">Email Address</label>
-              <input 
-                type="email" 
+              <input
+                type="email"
                 value={user.email}
                 disabled
                 className="w-full bg-[#111] border border-[#ffffff10] rounded-2xl px-5 py-4 text-[#888] focus:outline-none transition-colors font-light disabled:opacity-50"
@@ -212,8 +212,8 @@ export default function Settings() {
                   exit={{ opacity: 0, height: 0 }}
                 >
                   <label className="block font-sans text-[9px] uppercase tracking-[0.2em] text-[#555] mb-2 ml-1 mt-6">Avatar URL (Optional)</label>
-                  <input 
-                    type="url" 
+                  <input
+                    type="url"
                     value={newImage}
                     onChange={e => setNewImage(e.target.value)}
                     placeholder="https://example.com/avatar.jpg"
@@ -225,20 +225,19 @@ export default function Settings() {
           </div>
 
           <div className="mt-8 pt-8 border-t border-[#ffffff10] flex gap-4">
-            <button 
+            <button
               onClick={handleUpdateProfile}
               disabled={updatingProfile}
-              className={`px-8 py-3 rounded-2xl font-sans text-[10px] uppercase tracking-[0.2em] transition-all flex items-center gap-2 ${
-                isEditingProfile 
-                  ? 'bg-[#C5A059] text-black hover:bg-[#d4b06a] shadow-[0_0_20px_rgba(197,160,89,0.2)]' 
+              className={`px-8 py-3 rounded-2xl font-sans text-[10px] uppercase tracking-[0.2em] transition-all flex items-center gap-2 ${isEditingProfile
+                  ? 'bg-[#C5A059] text-black hover:bg-[#d4b06a] shadow-[0_0_20px_rgba(197,160,89,0.2)]'
                   : 'bg-transparent border border-[#ffffff20] text-[#D4D4D4] hover:bg-[#ffffff05]'
-              }`}
+                }`}
             >
               {updatingProfile ? 'Saving...' : isEditingProfile ? <><Check size={14} /> Save Profile</> : 'Edit Profile'}
             </button>
-            
+
             {isEditingProfile && (
-              <button 
+              <button
                 onClick={() => {
                   setIsEditingProfile(false);
                   setNewName(user.name || '');
@@ -254,7 +253,7 @@ export default function Settings() {
 
         {/* Right Column: Security */}
         <div className="space-y-6 flex flex-col">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
@@ -274,12 +273,12 @@ export default function Settings() {
                     <AlertCircle size={16} /> No password is set for this account.
                   </div>
                 )}
-                
+
                 {hasPassword && (
                   <div>
                     <label className="block font-sans text-[9px] uppercase tracking-[0.2em] text-[#555] mb-2 ml-1">Current Password</label>
-                    <input 
-                      type="password" 
+                    <input
+                      type="password"
                       value={currentPassword}
                       onChange={e => setCurrentPassword(e.target.value)}
                       placeholder="••••••••"
@@ -289,8 +288,8 @@ export default function Settings() {
                 )}
                 <div>
                   <label className="block font-sans text-[9px] uppercase tracking-[0.2em] text-[#555] mb-2 ml-1">New Password</label>
-                  <input 
-                    type="password" 
+                  <input
+                    type="password"
                     value={newPassword}
                     onChange={e => setNewPassword(e.target.value)}
                     placeholder="••••••••"
@@ -299,7 +298,7 @@ export default function Settings() {
                 </div>
 
                 <div className="mt-8 pt-6">
-                  <button 
+                  <button
                     onClick={handleChangePassword}
                     disabled={updatingPassword}
                     className="px-8 py-3 bg-[#C5A059] text-black font-sans text-[10px] uppercase tracking-[0.2em] rounded-2xl hover:bg-[#d4b06a] transition-all shadow-[0_0_20px_rgba(197,160,89,0.15)] disabled:opacity-70"
@@ -311,7 +310,7 @@ export default function Settings() {
             )}
           </motion.div>
 
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
@@ -326,8 +325,8 @@ export default function Settings() {
                 <p className="text-[#555] font-sans text-[9px] uppercase tracking-[0.2em]">Add an extra layer of security</p>
               </div>
             </div>
-            
-            <button 
+
+            <button
               onClick={() => setTwoFactorEnabled(!twoFactorEnabled)}
               className={`w-12 h-6 rounded-full transition-colors relative ${twoFactorEnabled ? 'bg-[#C5A059]' : 'bg-[#333]'}`}
             >

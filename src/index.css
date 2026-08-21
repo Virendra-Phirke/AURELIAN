@@ -12,6 +12,21 @@
   --color-muted-text: #555555;
   --color-border: #ffffff15;
   --color-border-light: #ffffff08;
+  --font-brand: 'Cinzel', serif;
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.font-brand {
+  font-family: var(--font-brand);
+}
+
+.font-serif {
+  font-family: var(--font-serif);
+}
+
+.font-sans {
+  font-family: var(--font-sans);
 }
 
 *,
@@ -73,7 +88,10 @@ body {
 }
 
 /* Smooth transitions */
-input, button, select, textarea {
+input,
+button,
+select,
+textarea {
   transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
 }
 
@@ -81,6 +99,7 @@ input, button, select, textarea {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;

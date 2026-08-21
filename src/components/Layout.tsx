@@ -68,96 +68,96 @@ export default function Layout() {
   // Regular user pages — PC: Sidebar, Mobile: Top Header + Bottom Nav
   return (
     <div className="flex h-full bg-[var(--color-bg)] overflow-hidden flex-col md:flex-row">
-      
+
       {/* Mobile Top Header */}
       <header className="md:hidden shrink-0 h-16 border-b border-[#ffffff15] px-6 flex items-center justify-between z-50 bg-[#0a0a0a]/80 backdrop-blur-xl sticky top-0">
         <Link to="/" className="text-lg tracking-[0.3em] font-light text-white uppercase">
           AURELIAN
         </Link>
         {session?.user && (
-           <button onClick={handleLogout} className="text-[#888] hover:text-[#C5A059] transition-colors p-2">
-             <LogOut size={18} />
-           </button>
+          <button onClick={handleLogout} className="text-[#888] hover:text-[#C5A059] transition-colors p-2">
+            <LogOut size={18} />
+          </button>
         )}
       </header>
 
       {/* Desktop Sidebar */}
-      <motion.aside 
+      <motion.aside
         initial={{ x: -20, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="hidden md:flex shrink-0 w-64 flex-col border-r border-[#ffffff15] bg-[#0a0a0a] z-20"
+        className="hidden md:flex shrink-0 w-64 flex-col border-r border-[#1a1a1a] bg-[#0a0a0a] z-20"
       >
-        <div className="h-20 flex items-center px-8 border-b border-[var(--color-border)] shrink-0">
-          <Link to="/" className="text-xl tracking-[0.3em] font-light text-white uppercase">
+        <div className="h-24 flex items-center px-8 border-b border-[#1a1a1a] shrink-0">
+          <Link to="/" className="text-2xl tracking-[0.35em] font-brand font-semibold text-[#E5C378] uppercase">
             AURELIAN
           </Link>
         </div>
         <nav className="flex-1 flex flex-col gap-2 p-6 overflow-y-auto">
           {session?.user ? (
             <>
-              <Link 
-                to="/booking" 
-                className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${
-                  location.pathname === '/booking' 
-                    ? 'bg-[#C5A059]/10 text-[#C5A059] border border-[#C5A059]/30' 
-                    : 'text-[#888] hover:text-white hover:bg-[#ffffff08] border border-transparent'
+              <Link
+                to="/booking"
+                className={`flex items-center gap-4 px-4 py-3.5 rounded-lg transition-all ${
+                  location.pathname === '/booking'
+                    ? 'border-l-4 border-[#E5C378] bg-[#E5C378]/10 text-[#E5C378] font-medium'
+                    : 'text-[#777] hover:text-white hover:bg-[#ffffff06] border-l-4 border-transparent'
                 }`}
               >
-                <CalendarDays size={18} />
-                <span className="font-sans text-[11px] uppercase tracking-widest">Book</span>
+                <CalendarDays size={18} className={location.pathname === '/booking' ? 'text-[#E5C378]' : 'text-[#777]'} />
+                <span className="font-sans text-[11px] uppercase tracking-[0.2em]">Book</span>
               </Link>
-              <Link 
-                to="/dashboard" 
-                className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${
-                  location.pathname === '/dashboard' 
-                    ? 'bg-[#C5A059]/10 text-[#C5A059] border border-[#C5A059]/30' 
-                    : 'text-[#888] hover:text-white hover:bg-[#ffffff08] border border-transparent'
+              <Link
+                to="/dashboard"
+                className={`flex items-center gap-4 px-4 py-3.5 rounded-lg transition-all ${
+                  location.pathname === '/dashboard'
+                    ? 'border-l-4 border-[#E5C378] bg-[#E5C378]/10 text-[#E5C378] font-medium'
+                    : 'text-[#777] hover:text-white hover:bg-[#ffffff06] border-l-4 border-transparent'
                 }`}
               >
-                <LayoutDashboard size={18} />
-                <span className="font-sans text-[11px] uppercase tracking-widest">Dashboard</span>
+                <LayoutDashboard size={18} className={location.pathname === '/dashboard' ? 'text-[#E5C378]' : 'text-[#777]'} />
+                <span className="font-sans text-[11px] uppercase tracking-[0.2em]">Dashboard</span>
               </Link>
-              <Link 
-                to="/settings" 
-                className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${
-                  location.pathname === '/settings' 
-                    ? 'bg-[#C5A059]/10 text-[#C5A059] border border-[#C5A059]/30' 
-                    : 'text-[#888] hover:text-white hover:bg-[#ffffff08] border border-transparent'
+              <Link
+                to="/settings"
+                className={`flex items-center gap-4 px-4 py-3.5 rounded-lg transition-all ${
+                  location.pathname === '/settings'
+                    ? 'border-l-4 border-[#E5C378] bg-[#E5C378]/10 text-[#E5C378] font-medium'
+                    : 'text-[#777] hover:text-white hover:bg-[#ffffff06] border-l-4 border-transparent'
                 }`}
               >
-                <Settings size={18} />
-                <span className="font-sans text-[11px] uppercase tracking-widest">Settings</span>
+                <Settings size={18} className={location.pathname === '/settings' ? 'text-[#E5C378]' : 'text-[#777]'} />
+                <span className="font-sans text-[11px] uppercase tracking-[0.2em]">Settings</span>
               </Link>
             </>
           ) : (
-            <Link to="/login" className="flex items-center gap-4 px-4 py-3 rounded-xl text-[#888] hover:text-white hover:bg-[#ffffff08] border border-transparent transition-colors">
+            <Link to="/login" className="flex items-center gap-4 px-4 py-3.5 rounded-lg text-[#777] hover:text-white hover:bg-[#ffffff06] border-l-4 border-transparent transition-colors">
               <LogIn size={18} />
-              <span className="font-sans text-[11px] uppercase tracking-widest">Sign In</span>
+              <span className="font-sans text-[11px] uppercase tracking-[0.2em]">Sign In</span>
             </Link>
           )}
         </nav>
         {session?.user && (
-          <div className="p-6 border-t border-[#ffffff15] shrink-0 space-y-4">
-            <div className="flex items-center gap-3">
-              {session.user.image ? (
-                <img src={session.user.image} alt={session.user.name} className="w-10 h-10 rounded-full border border-[#ffffff15] object-cover" />
-              ) : (
-                <div className="w-10 h-10 rounded-full bg-[#111] border border-[#ffffff15] flex items-center justify-center">
-                  <User size={16} className="text-[#888]" />
-                </div>
-              )}
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-light text-white truncate">{session.user.name}</div>
-                <div className="text-[9px] font-sans text-[#555] uppercase tracking-wider truncate">{session.user.email}</div>
+          <div className="p-6 border-t border-[#1a1a1a] shrink-0 flex flex-col items-center gap-4">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-16 h-16 rounded-xl border border-[#E5C378] p-1 bg-[#111] shadow-[0_0_20px_rgba(229,195,120,0.25)] flex items-center justify-center overflow-hidden mb-2.5">
+                {session.user.image ? (
+                  <img src={session.user.image} alt={session.user.name} className="w-full h-full rounded-lg object-cover" />
+                ) : (
+                  <div className="w-full h-full rounded-lg bg-[#181818] flex items-center justify-center">
+                    <User size={26} className="text-[#E5C378]" />
+                  </div>
+                )}
+              </div>
+              <div className="text-sm font-light text-white tracking-wide truncate max-w-[190px]">
+                {session.user.name || 'Vishal Patil'}
               </div>
             </div>
-            <button 
-              onClick={handleLogout} 
-              className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl text-[#888] bg-[#111] hover:text-red-400 hover:bg-red-500/10 border border-[#ffffff15] hover:border-red-500/30 transition-all"
+            <button
+              onClick={handleLogout}
+              className="w-full py-2.5 rounded-lg text-[#777] hover:text-white hover:border-[#E5C378] border border-[#262626] bg-[#0e0e0e] font-sans text-[10px] uppercase tracking-[0.25em] transition-all"
             >
-              <LogOut size={16} />
-              <span className="font-sans text-[10px] uppercase tracking-widest">Logout</span>
+              Logout
             </button>
           </div>
         )}
@@ -184,29 +184,26 @@ export default function Layout() {
       <nav className="md:hidden fixed bottom-0 left-0 right-0 h-20 border-t border-[#ffffff15] bg-[#0a0a0a]/80 backdrop-blur-xl z-50 flex items-center justify-around px-2 pb-2">
         {session?.user ? (
           <>
-            <Link 
-              to="/booking" 
-              className={`flex flex-col items-center justify-center w-full h-full gap-1.5 transition-colors ${
-                location.pathname === '/booking' ? 'text-[#C5A059]' : 'text-[#555] hover:text-[#888]'
-              }`}
+            <Link
+              to="/booking"
+              className={`flex flex-col items-center justify-center w-full h-full gap-1.5 transition-colors ${location.pathname === '/booking' ? 'text-[#C5A059]' : 'text-[#555] hover:text-[#888]'
+                }`}
             >
               <CalendarDays size={20} />
               <span className="font-sans text-[9px] uppercase tracking-widest">Book</span>
             </Link>
-            <Link 
-              to="/dashboard" 
-              className={`flex flex-col items-center justify-center w-full h-full gap-1.5 transition-colors ${
-                location.pathname === '/dashboard' ? 'text-[#C5A059]' : 'text-[#555] hover:text-[#888]'
-              }`}
+            <Link
+              to="/dashboard"
+              className={`flex flex-col items-center justify-center w-full h-full gap-1.5 transition-colors ${location.pathname === '/dashboard' ? 'text-[#C5A059]' : 'text-[#555] hover:text-[#888]'
+                }`}
             >
               <LayoutDashboard size={20} />
               <span className="font-sans text-[9px] uppercase tracking-widest">Dashboard</span>
             </Link>
-            <Link 
-              to="/settings" 
-              className={`flex flex-col items-center justify-center w-full h-full gap-1.5 transition-colors ${
-                location.pathname === '/settings' ? 'text-[#C5A059]' : 'text-[#555] hover:text-[#888]'
-              }`}
+            <Link
+              to="/settings"
+              className={`flex flex-col items-center justify-center w-full h-full gap-1.5 transition-colors ${location.pathname === '/settings' ? 'text-[#C5A059]' : 'text-[#555] hover:text-[#888]'
+                }`}
             >
               <Settings size={20} />
               <span className="font-sans text-[9px] uppercase tracking-widest">Settings</span>

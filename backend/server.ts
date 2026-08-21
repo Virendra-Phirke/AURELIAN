@@ -65,9 +65,14 @@ async function startServer() {
       if (existingServices.length === 0) {
         await db.insert(services).values([
           { name: 'Haircut', durationMinutes: 30 },
-          { name: 'Shaving', durationMinutes: 20 }
+          { name: 'Shaving', durationMinutes: 20 },
+          { name: 'Zat Ke Bal', durationMinutes: 30 }
         ]);
         console.log("Seeded default services.");
+      } else if (existingServices.length === 2 && !existingServices.some(s => s.name.toLowerCase() === 'zat ke bal')) {
+        await db.insert(services).values([
+          { name: 'Zat Ke Bal', durationMinutes: 30 }
+        ]);
       }
     } catch (e) {
       console.log("Could not seed DB, perhaps migrations are not run yet.");
