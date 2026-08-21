@@ -11,6 +11,7 @@ import { Dialog, DialogContent } from '../components/ui/dialog';
 import { NumberTicker } from '../components/magicui/number-ticker';
 import { BorderBeam } from '../components/magicui/border-beam';
 import { BlurFade } from '../components/magicui/blur-fade';
+import { AnimatedList } from '../components/magicui/animated-list';
 
 // --- Types ---
 type Booking = {
@@ -931,72 +932,93 @@ export default function Admin() {
                         </div>
                       </motion.div>
 
-                      {/* Upcoming Schedule list */}
-                      {activeUpcomingBookings.length > 0 && (
-                        <motion.div variants={itemVariants} className="mt-4 sm:mt-8">
-                          <div className="flex items-center justify-between mb-3 sm:mb-6">
-                            <h2 className="font-sans text-[9px] sm:text-[10px] uppercase tracking-widest text-[var(--color-secondary-text)] font-semibold flex items-center gap-2">
-                              <Clock size={12} className="text-[var(--color-primary)]" />
-                              <span>Upcoming Schedule</span>
-                            </h2>
-                            <span className="text-[10px] text-[var(--color-secondary-text)] font-sans font-semibold">
-                              {activeUpcomingBookings.length} Active
-                            </span>
+                      {/* ======================== UPCOMING APPOINTMENTS ANIMATED LIST ======================== */}
+                      <motion.div variants={itemVariants} className="mt-4 sm:mt-8 space-y-3 sm:space-y-4">
+                        <div className="flex items-center justify-between">
+                          <h2 className="font-sans text-[9px] sm:text-[10px] uppercase tracking-widest text-[var(--color-secondary-text)] font-semibold flex items-center gap-2">
+                            <Clock size={12} className="text-[var(--color-primary)]" />
+                            <span>Upcoming Appointments</span>
+                          </h2>
+                          <span className="text-[10px] text-[var(--color-secondary-text)] font-sans font-semibold">
+                            {activeUpcomingBookings.length} Scheduled
+                          </span>
+                        </div>
+
+                        {activeUpcomingBookings.length === 0 ? (
+                          <div className="p-6 sm:p-8 rounded-2xl bg-[var(--color-card-bg)] border border-[var(--color-border)] text-center space-y-2">
+                            <div className="w-10 h-10 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] mx-auto flex items-center justify-center">
+                              <CalendarDays size={18} />
+                            </div>
+                            <h3 className="font-serif text-sm sm:text-base font-medium text-[var(--color-primary-text)]">
+                              No upcoming appointments
+                            </h3>
+                            <p className="font-sans text-xs text-[var(--color-secondary-text)] max-w-xs mx-auto">
+                              New customer bookings will automatically appear here in real-time.
+                            </p>
                           </div>
-                          <motion.div variants={listVariants} className="space-y-2 sm:space-y-4">
-                            {activeUpcomingBookings
-                              .slice(0, 5)
-                              .map(b => (
-                                <motion.div
-                                  variants={listItemVariants}
-                                  whileHover={{ x: 3 }}
-                                  key={b.id}
-                                  className="p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-[var(--color-card-bg)] flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-6 shadow-sm sm:shadow-md transition-colors"
-                                >
-                                  <div>
-                                    <div className="flex items-center gap-2.5 sm:gap-4 mb-1 sm:mb-2">
-                                      <span className="text-[var(--color-primary-text)] font-medium text-sm sm:text-lg">{serviceMap[b.serviceId] || 'Service'}</span>
+                        ) : (
+                          <>
+                            <AnimatedList delay={400}>
+                              {activeUpcomingBookings.slice(0, 5).map((b) => {
+                                const customer = customerMap[b.userId];
+                                return (
+                                  <div
+                                    key={b.id}
+                                    className="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-[var(--color-card-bg)] border border-[var(--color-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm hover:shadow-md transition-all duration-200"
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center shrink-0">
+                                        <Scissors size={18} />
+                                      </div>
+                                      <div className="min-w-0">
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-[var(--color-primary-text)] font-semibold text-xs sm:text-sm truncate">
+                                            {customer?.name || 'Unknown'}
+                                          </span>
+                                          <span className="text-[var(--color-secondary-text)] text-xs">·</span>
+                                          <span className="text-[10px] text-[var(--color-primary)] font-medium">
+                                            {serviceMap[b.serviceId] || 'Service'}
+                                          </span>
+                                        </div>
+                                        <div className="font-sans text-[10px] text-[var(--color-secondary-text)] flex items-center gap-1.5 pt-0.5">
+                                          <span>{format(parseISO(b.bookingDate), 'MMM d, yyyy')}</span>
+                                          <span>•</span>
+                                          <span className="font-medium text-[var(--color-primary-text)]">{b.startTime}</span>
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-2 shrink-0">
                                       <StatusBadge status={b.status} />
-                                    </div>
-                                    <div className="font-sans text-[10px] sm:text-[11px] text-[var(--color-secondary-text)] uppercase tracking-wider flex items-center gap-2 sm:gap-3">
-                                      <span className="text-[var(--color-primary)] font-semibold">{customerMap[b.userId]?.name || 'Unknown'}</span>
-                                      <span className="w-1 h-1 rounded-full bg-[var(--color-surface-raised)]" />
-                                      {format(parseISO(b.bookingDate), 'MMM d')}
-                                      <span className="w-1 h-1 rounded-full bg-[var(--color-surface-raised)]" />
-                                      {b.startTime}
+                                      <button
+                                        onClick={() => handleBookingAction(b.id, 'complete')}
+                                        className="px-3 py-1.5 rounded-lg bg-emerald-500 text-white font-sans text-[9px] uppercase tracking-wider hover:bg-emerald-600 transition-colors shadow-sm font-bold cursor-pointer"
+                                      >
+                                        Complete
+                                      </button>
+                                      <button
+                                        onClick={() => requestCancelBooking(b.id)}
+                                        className="px-3 py-1.5 rounded-lg bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)] font-sans text-[9px] uppercase tracking-wider hover:bg-red-500/10 hover:text-red-500 transition-colors cursor-pointer"
+                                      >
+                                        Cancel
+                                      </button>
                                     </div>
                                   </div>
-                                  <div className="flex items-center gap-2 w-full sm:w-auto">
-                                    <motion.button
-                                      whileTap={{ scale: 0.96 }}
-                                      onClick={() => handleBookingAction(b.id, 'complete')}
-                                      className="flex-1 sm:flex-none px-4 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl bg-emerald-500 text-white font-sans text-[9px] sm:text-[10px] uppercase tracking-wider hover:bg-emerald-600 transition-colors shadow-sm font-bold cursor-pointer"
-                                    >
-                                      Complete
-                                    </motion.button>
-                                    <motion.button
-                                      whileTap={{ scale: 0.96 }}
-                                      onClick={() => requestCancelBooking(b.id)}
-                                      className="flex-1 sm:flex-none px-4 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)] font-sans text-[9px] sm:text-[10px] uppercase tracking-wider hover:bg-red-500/10 hover:text-red-500 transition-colors cursor-pointer"
-                                    >
-                                      Cancel
-                                    </motion.button>
-                                  </div>
-                                </motion.div>
-                              ))}
+                                );
+                              })}
+                            </AnimatedList>
+
                             {activeUpcomingBookings.length > 5 && (
-                              <motion.button
-                                variants={listItemVariants}
-                                whileHover={{ scale: 1.01 }}
+                              <button
                                 onClick={() => { setActiveTab('bookings'); setStatusFilter('CONFIRMED'); }}
-                                className="w-full py-2.5 sm:py-4 rounded-xl sm:rounded-2xl bg-[var(--color-card-bg)] text-[var(--color-primary)] font-sans text-[10px] sm:text-[11px] uppercase tracking-wider hover:bg-[var(--color-surface-raised)] transition-colors cursor-pointer shadow-sm font-semibold"
+                                className="w-full py-2.5 sm:py-3 rounded-xl bg-[var(--color-card-bg)] border border-[var(--color-border)] text-[var(--color-primary)] font-sans text-[10px] sm:text-[11px] uppercase tracking-wider hover:bg-[var(--color-surface-raised)] transition-colors cursor-pointer shadow-sm font-semibold text-center"
                               >
                                 View all {activeUpcomingBookings.length} upcoming bookings →
-                              </motion.button>
+                              </button>
                             )}
-                          </motion.div>
-                        </motion.div>
-                      )}
+                          </>
+                        )}
+                      </motion.div>
                     </>
                   )}
 
@@ -1090,64 +1112,68 @@ export default function Admin() {
 
                       <motion.div variants={itemVariants} className="flex-1 flex flex-col overflow-hidden rounded-xl sm:rounded-2xl bg-[var(--color-card-bg)] shadow-md sm:shadow-xl min-h-[350px] transition-colors">
                         
-                        {/* Mobile High-Density List View */}
-                        <div className="sm:hidden flex-1 overflow-y-auto p-2 space-y-2">
+                        {/* Mobile High-Density List View with AnimatedList */}
+                        <div className="sm:hidden flex-1 overflow-y-auto p-2">
                           {filteredBookings.length === 0 ? (
                             <div className="py-12 text-center text-[var(--color-secondary-text)] font-sans text-[11px] uppercase tracking-wider">
                               {bookingSearch || statusFilter !== 'ALL' ? 'No bookings match your filters' : 'No bookings found'}
                             </div>
                           ) : (
-                            paginatedBookings.map((b, i) => {
-                              const customer = customerMap[b.userId];
-                              const isActive = b.status === 'ACCEPTED' || b.status === 'CONFIRMED' || b.status === 'PENDING';
-                              return (
-                                <motion.div
-                                  key={b.id}
-                                  initial={{ opacity: 0, y: 6 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  transition={{ delay: i * 0.02 }}
-                                  className="p-3 bg-[var(--color-surface-raised)] rounded-xl space-y-2"
-                                >
-                                  <div className="flex items-center justify-between gap-2">
-                                    <div className="min-w-0">
-                                      <span className="text-[var(--color-primary)] font-semibold text-xs truncate block">
-                                        {customer?.name || 'Unknown'}
+                            <AnimatedList delay={100}>
+                              {paginatedBookings.map((b) => {
+                                const customer = customerMap[b.userId];
+                                const isActive = b.status === 'ACCEPTED' || b.status === 'CONFIRMED' || b.status === 'PENDING';
+                                return (
+                                  <div
+                                    key={b.id}
+                                    className="p-3.5 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-xl space-y-2 shadow-sm"
+                                  >
+                                    <div className="flex items-center justify-between gap-2">
+                                      <div className="flex items-center gap-2.5 min-w-0">
+                                        <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)]/15 text-[var(--color-primary)] flex items-center justify-center shrink-0">
+                                          <CalendarDays size={14} />
+                                        </div>
+                                        <div className="min-w-0">
+                                          <span className="text-[var(--color-primary)] font-semibold text-xs truncate block">
+                                            {customer?.name || 'Unknown'}
+                                          </span>
+                                          <span className="text-[10px] text-[var(--color-secondary-text)] truncate block">
+                                            {customer?.email || ''}
+                                          </span>
+                                        </div>
+                                      </div>
+                                      <StatusBadge status={b.status} />
+                                    </div>
+
+                                    <div className="flex items-center justify-between text-[11px] pt-1.5 border-t border-[var(--color-surface)]">
+                                      <span className="font-medium text-[var(--color-primary-text)]">
+                                        {serviceMap[b.serviceId] || 'Service'}
                                       </span>
-                                      <span className="text-[10px] text-[var(--color-secondary-text)] truncate block">
-                                        {customer?.email || ''}
+                                      <span className="text-[var(--color-secondary-text)] font-sans text-[10px]">
+                                        {format(parseISO(b.bookingDate), 'MMM d')} • {b.startTime}
                                       </span>
                                     </div>
-                                    <StatusBadge status={b.status} />
-                                  </div>
 
-                                  <div className="flex items-center justify-between text-[11px] pt-1.5 border-t border-[var(--color-surface)]">
-                                    <span className="font-medium text-[var(--color-primary-text)]">
-                                      {serviceMap[b.serviceId] || 'Service'}
-                                    </span>
-                                    <span className="text-[var(--color-secondary-text)] font-sans text-[10px]">
-                                      {format(parseISO(b.bookingDate), 'MMM d')} • {b.startTime}
-                                    </span>
+                                    {isActive && (
+                                      <div className="flex items-center gap-2 pt-1">
+                                        <button
+                                          onClick={() => handleBookingAction(b.id, 'complete')}
+                                          className="flex-1 py-1.5 rounded-lg bg-emerald-500 text-white text-[9px] uppercase tracking-wider font-bold cursor-pointer"
+                                        >
+                                          Complete
+                                        </button>
+                                        <button
+                                          onClick={() => requestCancelBooking(b.id)}
+                                          className="flex-1 py-1.5 rounded-lg bg-[var(--color-surface)] text-[var(--color-secondary-text)] hover:text-red-400 text-[9px] uppercase tracking-wider font-semibold cursor-pointer"
+                                        >
+                                          Cancel
+                                        </button>
+                                      </div>
+                                    )}
                                   </div>
-
-                                  {isActive && (
-                                    <div className="flex items-center gap-2 pt-1">
-                                      <button
-                                        onClick={() => handleBookingAction(b.id, 'complete')}
-                                        className="flex-1 py-1.5 rounded-lg bg-emerald-500 text-white text-[9px] uppercase tracking-wider font-bold cursor-pointer"
-                                      >
-                                        Complete
-                                      </button>
-                                      <button
-                                        onClick={() => requestCancelBooking(b.id)}
-                                        className="flex-1 py-1.5 rounded-lg bg-[var(--color-surface)] text-[var(--color-secondary-text)] hover:text-red-400 text-[9px] uppercase tracking-wider font-semibold cursor-pointer"
-                                      >
-                                        Cancel
-                                      </button>
-                                    </div>
-                                  )}
-                                </motion.div>
-                              );
-                            })
+                                );
+                              })}
+                            </AnimatedList>
                           )}
                         </div>
 
@@ -1255,104 +1281,108 @@ export default function Admin() {
 
                       <motion.div variants={itemVariants} className="flex-1 flex flex-col overflow-hidden rounded-xl sm:rounded-2xl bg-[var(--color-card-bg)] shadow-md sm:shadow-xl min-h-[350px] transition-colors">
                         
-                        {/* Mobile High-Density List View */}
-                        <div className="sm:hidden flex-1 overflow-y-auto p-2 space-y-2">
+                        {/* Mobile High-Density List View with AnimatedList */}
+                        <div className="sm:hidden flex-1 overflow-y-auto p-2">
                           {filteredCustomers.length === 0 ? (
                             <div className="py-12 text-center text-[var(--color-secondary-text)] font-sans text-[11px] uppercase tracking-wider">
                               {customerSearch ? 'No customers match search' : 'No registered customers found'}
                             </div>
                           ) : (
-                            paginatedCustomers.map((c, i) => (
-                              <motion.div
-                                key={c.id}
-                                initial={{ opacity: 0, y: 6 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: i * 0.02 }}
-                                className="p-3 bg-[var(--color-surface-raised)] rounded-xl space-y-2"
-                              >
-                                {editingCustomerId === c.id ? (
-                                  <div className="space-y-2">
-                                    <input
-                                      type="text"
-                                      value={editCustomerName}
-                                      onChange={e => setEditCustomerName(e.target.value)}
-                                      placeholder="Customer Name"
-                                      className="w-full px-3 py-1.5 rounded-lg bg-[var(--color-card-bg)] text-[var(--color-primary-text)] text-xs outline-none"
-                                      autoFocus
-                                    />
-                                    <input
-                                      type="email"
-                                      value={editCustomerEmail}
-                                      onChange={e => setEditCustomerEmail(e.target.value)}
-                                      placeholder="Customer Email"
-                                      className="w-full px-3 py-1.5 rounded-lg bg-[var(--color-card-bg)] text-[var(--color-secondary-text)] text-xs outline-none"
-                                    />
-                                    <div className="flex gap-2 pt-1">
-                                      <button
-                                        onClick={() => handleSaveCustomerEdit(c.id)}
-                                        className="flex-1 py-1.5 rounded-lg bg-emerald-500 text-white text-[9px] uppercase tracking-wider font-bold cursor-pointer"
-                                      >
-                                        Save
-                                      </button>
-                                      <button
-                                        onClick={() => setEditingCustomerId(null)}
-                                        className="flex-1 py-1.5 rounded-lg bg-[var(--color-surface)] text-[var(--color-secondary-text)] text-[9px] uppercase tracking-wider font-semibold cursor-pointer"
-                                      >
-                                        Cancel
-                                      </button>
-                                    </div>
-                                  </div>
-                                ) : (
-                                  <>
-                                    <div className="flex items-center justify-between gap-2">
-                                      <div className="min-w-0">
-                                        <div className="text-[var(--color-primary-text)] font-semibold text-xs truncate">{c.name}</div>
-                                        <div className="text-[var(--color-secondary-text)] text-[10px] truncate">{c.email}</div>
+                            <AnimatedList delay={100}>
+                              {paginatedCustomers.map((c) => (
+                                <div
+                                  key={c.id}
+                                  className="p-3.5 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-xl space-y-2 shadow-sm"
+                                >
+                                  {editingCustomerId === c.id ? (
+                                    <div className="space-y-2">
+                                      <input
+                                        type="text"
+                                        value={editCustomerName}
+                                        onChange={e => setEditCustomerName(e.target.value)}
+                                        placeholder="Customer Name"
+                                        className="w-full px-3 py-1.5 rounded-lg bg-[var(--color-card-bg)] text-[var(--color-primary-text)] text-xs outline-none"
+                                        autoFocus
+                                      />
+                                      <input
+                                        type="email"
+                                        value={editCustomerEmail}
+                                        onChange={e => setEditCustomerEmail(e.target.value)}
+                                        placeholder="Customer Email"
+                                        className="w-full px-3 py-1.5 rounded-lg bg-[var(--color-card-bg)] text-[var(--color-secondary-text)] text-xs outline-none"
+                                      />
+                                      <div className="flex gap-2 pt-1">
+                                        <button
+                                          onClick={() => handleSaveCustomerEdit(c.id)}
+                                          className="flex-1 py-1.5 rounded-lg bg-emerald-500 text-white text-[9px] uppercase tracking-wider font-bold cursor-pointer"
+                                        >
+                                          Save
+                                        </button>
+                                        <button
+                                          onClick={() => setEditingCustomerId(null)}
+                                          className="flex-1 py-1.5 rounded-lg bg-[var(--color-surface)] text-[var(--color-secondary-text)] text-[9px] uppercase tracking-wider font-semibold cursor-pointer"
+                                        >
+                                          Cancel
+                                        </button>
                                       </div>
-                                      <span className={`px-2 py-0.5 rounded-full text-[8px] uppercase tracking-wider font-sans font-semibold shrink-0 ${
-                                        c.role === 'ADMIN' ? 'text-[var(--color-primary)] bg-[var(--color-primary)]/10' : 'text-[var(--color-secondary-text)] bg-[var(--color-card-bg)]'
-                                      }`}>
-                                        {c.role}
-                                      </span>
                                     </div>
+                                  ) : (
+                                    <>
+                                      <div className="flex items-center justify-between gap-2">
+                                        <div className="flex items-center gap-2.5 min-w-0">
+                                          <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)]/15 text-[var(--color-primary)] flex items-center justify-center font-bold text-xs shrink-0">
+                                            {(c.name || 'U').charAt(0).toUpperCase()}
+                                          </div>
+                                          <div className="min-w-0">
+                                            <div className="text-[var(--color-primary-text)] font-semibold text-xs truncate">{c.name}</div>
+                                            <div className="text-[var(--color-secondary-text)] text-[10px] truncate">{c.email}</div>
+                                          </div>
+                                        </div>
+                                        <span className={`px-2 py-0.5 rounded-full text-[8px] uppercase tracking-wider font-sans font-semibold shrink-0 ${
+                                          c.role === 'ADMIN' ? 'text-[var(--color-primary)] bg-[var(--color-primary)]/10' : 'text-[var(--color-secondary-text)] bg-[var(--color-card-bg)]'
+                                        }`}>
+                                          {c.role}
+                                        </span>
+                                      </div>
 
-                                    <div className="flex items-center justify-between text-[10px] pt-1.5 border-t border-[var(--color-surface)] text-[var(--color-secondary-text)]">
-                                      <span>Bookings: <strong className="text-[var(--color-primary-text)]">{c.bookingCount}</strong></span>
-                                      <span>Joined: {c.createdAt ? format(new Date(c.createdAt), 'MMM d, yyyy') : 'Unknown'}</span>
-                                    </div>
+                                      <div className="flex items-center justify-between text-[10px] pt-1.5 border-t border-[var(--color-surface)] text-[var(--color-secondary-text)]">
+                                        <span>Bookings: <strong className="text-[var(--color-primary-text)]">{c.bookingCount}</strong></span>
+                                        <span>Joined: {c.createdAt ? format(new Date(c.createdAt), 'MMM d, yyyy') : 'Unknown'}</span>
+                                      </div>
 
-                                    <div className="flex items-center gap-1.5 pt-1">
-                                      <button
-                                        onClick={() => {
-                                          setEditingCustomerId(c.id);
-                                          setEditCustomerName(c.name || '');
-                                          setEditCustomerEmail(c.email || '');
-                                        }}
-                                        className="flex-1 py-1 rounded-lg bg-[var(--color-primary)]/10 hover:bg-[var(--color-primary)]/20 text-[var(--color-primary)] text-[9px] uppercase tracking-wider font-semibold transition-all cursor-pointer text-center"
-                                      >
-                                        Edit
-                                      </button>
-                                      {c.id !== adminUser?.id && (
-                                        <>
-                                          <button
-                                            onClick={() => requestToggleRole(c)}
-                                            className="flex-1 py-1 rounded-lg bg-[var(--color-card-bg)] hover:bg-[var(--color-surface-hover)] text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] text-[9px] uppercase tracking-wider font-semibold transition-all cursor-pointer text-center"
-                                          >
-                                            {c.role === 'ADMIN' ? 'Demote' : 'Promote'}
-                                          </button>
-                                          <button
-                                            onClick={() => requestDeleteCustomer(c)}
-                                            className="flex-1 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 text-[9px] uppercase tracking-wider font-semibold transition-all cursor-pointer text-center"
-                                          >
-                                            Delete
-                                          </button>
-                                        </>
-                                      )}
-                                    </div>
-                                  </>
-                                )}
-                              </motion.div>
-                            ))
+                                      <div className="flex items-center gap-1.5 pt-1">
+                                        <button
+                                          onClick={() => {
+                                            setEditingCustomerId(c.id);
+                                            setEditCustomerName(c.name || '');
+                                            setEditCustomerEmail(c.email || '');
+                                          }}
+                                          className="flex-1 py-1 rounded-lg bg-[var(--color-primary)]/10 hover:bg-[var(--color-primary)]/20 text-[var(--color-primary)] text-[9px] uppercase tracking-wider font-semibold transition-all cursor-pointer text-center"
+                                        >
+                                          Edit
+                                        </button>
+                                        {c.id !== adminUser?.id && (
+                                          <>
+                                            <button
+                                              onClick={() => requestToggleRole(c)}
+                                              className="flex-1 py-1 rounded-lg bg-[var(--color-card-bg)] hover:bg-[var(--color-surface-hover)] text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] text-[9px] uppercase tracking-wider font-semibold transition-all cursor-pointer text-center"
+                                            >
+                                              {c.role === 'ADMIN' ? 'Demote' : 'Promote'}
+                                            </button>
+                                            <button
+                                              onClick={() => requestDeleteCustomer(c)}
+                                              className="flex-1 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 text-[9px] uppercase tracking-wider font-semibold transition-all cursor-pointer text-center"
+                                            >
+                                              Delete
+                                            </button>
+                                          </>
+                                        )}
+                                      </div>
+                                    </>
+                                  )}
+                                </div>
+                              ))}
+                            </AnimatedList>
                           )}
                         </div>
 
@@ -1539,77 +1569,81 @@ export default function Admin() {
 
                       <motion.div variants={itemVariants} className="flex-1 flex flex-col overflow-hidden rounded-xl sm:rounded-2xl bg-[var(--color-card-bg)] shadow-md sm:shadow-xl min-h-[350px] transition-colors">
                         
-                        {/* Mobile High-Density List View */}
-                        <div className="sm:hidden flex-1 overflow-y-auto p-2 space-y-2">
-                          {allServices.map((s, i) => (
-                            <motion.div
-                              key={s.id}
-                              initial={{ opacity: 0, y: 6 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ delay: i * 0.02 }}
-                              className={`p-3 bg-[var(--color-surface-raised)] rounded-xl space-y-2 ${!s.active ? 'opacity-40 grayscale' : ''}`}
-                            >
-                              {editingServiceId === s.id ? (
-                                <div className="space-y-2">
-                                  <input
-                                    value={editServiceName}
-                                    onChange={e => setEditServiceName(e.target.value)}
-                                    placeholder="Service Name"
-                                    className="w-full px-3 py-1.5 rounded-lg bg-[var(--color-card-bg)] text-[var(--color-primary-text)] text-xs outline-none"
-                                    autoFocus
-                                  />
-                                  <input
-                                    type="number"
-                                    min={5}
-                                    value={editServiceDuration}
-                                    onChange={e => setEditServiceDuration(parseInt(e.target.value) || 30)}
-                                    className="w-full px-3 py-1.5 rounded-lg bg-[var(--color-card-bg)] text-[var(--color-primary-text)] text-xs outline-none"
-                                  />
-                                  <div className="flex gap-2 pt-1">
-                                    <button
-                                      onClick={() => handleSaveServiceEdit(s.id)}
-                                      className="flex-1 py-1.5 rounded-lg bg-emerald-500 text-white text-[9px] uppercase tracking-wider font-bold cursor-pointer"
-                                    >
-                                      Save
-                                    </button>
-                                    <button
-                                      onClick={() => setEditingServiceId(null)}
-                                      className="flex-1 py-1.5 rounded-lg bg-[var(--color-surface)] text-[var(--color-secondary-text)] text-[9px] uppercase tracking-wider font-semibold cursor-pointer"
-                                    >
-                                      Cancel
-                                    </button>
-                                  </div>
-                                </div>
-                              ) : (
-                                <div className="flex items-center justify-between gap-3">
-                                  <div className="min-w-0">
-                                    <div className="text-[var(--color-primary-text)] font-semibold text-xs truncate">{s.name}</div>
-                                    <div className="text-[var(--color-secondary-text)] text-[10px] font-sans">
-                                      {s.durationMinutes} <span className="text-[9px]">MIN</span>
+                        {/* Mobile High-Density List View with AnimatedList */}
+                        <div className="sm:hidden flex-1 overflow-y-auto p-2">
+                          <AnimatedList delay={100}>
+                            {allServices.map((s) => (
+                              <div
+                                key={s.id}
+                                className={`p-3.5 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-xl space-y-2 shadow-sm ${!s.active ? 'opacity-40 grayscale' : ''}`}
+                              >
+                                {editingServiceId === s.id ? (
+                                  <div className="space-y-2">
+                                    <input
+                                      value={editServiceName}
+                                      onChange={e => setEditServiceName(e.target.value)}
+                                      placeholder="Service Name"
+                                      className="w-full px-3 py-1.5 rounded-lg bg-[var(--color-card-bg)] text-[var(--color-primary-text)] text-xs outline-none"
+                                      autoFocus
+                                    />
+                                    <input
+                                      type="number"
+                                      min={5}
+                                      value={editServiceDuration}
+                                      onChange={e => setEditServiceDuration(parseInt(e.target.value) || 30)}
+                                      className="w-full px-3 py-1.5 rounded-lg bg-[var(--color-card-bg)] text-[var(--color-primary-text)] text-xs outline-none"
+                                    />
+                                    <div className="flex gap-2 pt-1">
+                                      <button
+                                        onClick={() => handleSaveServiceEdit(s.id)}
+                                        className="flex-1 py-1.5 rounded-lg bg-emerald-500 text-white text-[9px] uppercase tracking-wider font-bold cursor-pointer"
+                                      >
+                                        Save
+                                      </button>
+                                      <button
+                                        onClick={() => setEditingServiceId(null)}
+                                        className="flex-1 py-1.5 rounded-lg bg-[var(--color-surface)] text-[var(--color-secondary-text)] text-[9px] uppercase tracking-wider font-semibold cursor-pointer"
+                                      >
+                                        Cancel
+                                      </button>
                                     </div>
                                   </div>
+                                ) : (
+                                  <div className="flex items-center justify-between gap-3">
+                                    <div className="flex items-center gap-2.5 min-w-0">
+                                      <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)]/15 text-[var(--color-primary)] flex items-center justify-center shrink-0">
+                                        <Scissors size={14} />
+                                      </div>
+                                      <div className="min-w-0">
+                                        <div className="text-[var(--color-primary-text)] font-semibold text-xs truncate">{s.name}</div>
+                                        <div className="text-[var(--color-secondary-text)] text-[10px] font-sans">
+                                          {s.durationMinutes} <span className="text-[9px]">MIN</span>
+                                        </div>
+                                      </div>
+                                    </div>
 
-                                  <div className="flex items-center gap-2 shrink-0">
-                                    <Switch
-                                      checked={s.active}
-                                      onCheckedChange={() => requestToggleServiceActive(s)}
-                                      aria-label={`Toggle ${s.name} active`}
-                                    />
-                                    <button
-                                      onClick={() => {
-                                        setEditingServiceId(s.id);
-                                        setEditServiceName(s.name);
-                                        setEditServiceDuration(s.durationMinutes);
-                                      }}
-                                      className="px-2.5 py-1 rounded-lg text-[var(--color-primary)] bg-[var(--color-primary)]/10 text-[9px] uppercase tracking-wider font-semibold cursor-pointer"
-                                    >
-                                      Edit
-                                    </button>
+                                    <div className="flex items-center gap-2 shrink-0">
+                                      <Switch
+                                        checked={s.active}
+                                        onCheckedChange={() => requestToggleServiceActive(s)}
+                                        aria-label={`Toggle ${s.name} active`}
+                                      />
+                                      <button
+                                        onClick={() => {
+                                          setEditingServiceId(s.id);
+                                          setEditServiceName(s.name);
+                                          setEditServiceDuration(s.durationMinutes);
+                                        }}
+                                        className="px-2.5 py-1 rounded-lg text-[var(--color-primary)] bg-[var(--color-primary)]/10 text-[9px] uppercase tracking-wider font-semibold cursor-pointer"
+                                      >
+                                        Edit
+                                      </button>
+                                    </div>
                                   </div>
-                                </div>
-                              )}
-                            </motion.div>
-                          ))}
+                                )}
+                              </div>
+                            ))}
+                          </AnimatedList>
                         </div>
 
                         {/* Desktop Table View */}
