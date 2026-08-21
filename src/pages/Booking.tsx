@@ -2,17 +2,12 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   format,
   parseISO,
-  startOfMonth,
-  endOfMonth,
-  startOfWeek,
-  endOfWeek,
-  eachDayOfInterval,
   isSameMonth,
   isBefore,
   startOfDay,
-  addMonths,
-  subMonths,
-  parse,
+  addDays,
+  subDays,
+  isToday,
 } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
@@ -58,23 +53,23 @@ function getServiceIcon(name: string) {
   return <User size={22} className="text-[var(--color-primary)]" />;
 }
 
-function getServicePrice(name: string, duration: number): number {
+function getServiceDescription(name: string) {
+  const meta = SERVICE_META[name.toLowerCase()];
+  return meta?.desc || 'Exclusive grooming tailored to your distinct style & silhouette';
+}
+
+function getServicePrice(name: string, duration: number) {
   const meta = SERVICE_META[name.toLowerCase()];
   if (meta) return meta.price;
-  return duration >= 30 ? 75 : 50;
+  return duration >= 45 ? 90 : duration >= 30 ? 75 : 50;
 }
 
-function getServiceDescription(name: string): string {
-  const meta = SERVICE_META[name.toLowerCase()];
-  if (meta) return meta.desc;
-  return 'Premium salon service with dedicated stylist';
-}
-
-// Convert 24-hr time '10:00' to '10:00 AM'
-function formatTime12(time24: string): string {
+function formatTime12(time24: string) {
   try {
-    const parsed = parse(time24, 'HH:mm', new Date());
-    return format(parsed, 'h:mm a');
+    const [h, m] = time24.split(':').map(Number);
+    const period = h >= 12 ? 'PM' : 'AM';
+    const hour12 = h % 12 || 12;
+    return `${hour12}:${String(m).padStart(2, '0')} ${period}`;
   } catch {
     return time24;
   }
@@ -88,8 +83,8 @@ export default function Booking() {
 
   // Selected date (YYYY-MM-DD)
   const [selectedDate, setSelectedDate] = useState<string>(format(new Date(), 'yyyy-MM-dd'));
-  // Month currently viewed in the calendar
-  const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
+  // Week start date (defaults to today)
+  const [weekStartDate, setWeekStartDate] = useState<Date>(() => startOfDay(new Date()));
 
   const [slots, setSlots] = useState<string[]>([]);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
@@ -168,18 +163,37 @@ export default function Booking() {
     };
   }, [fetchAvailability]);
 
-  // 3. Month calendar dates generation
+  // 3. 7-Day Week dates generation starting from weekStartDate (today)
   const calendarDays = useMemo(() => {
-    const monthStart = startOfMonth(currentMonth);
-    const monthEnd = endOfMonth(monthStart);
-    const calendarStart = startOfWeek(monthStart);
-    const calendarEnd = endOfWeek(monthEnd);
+    return Array.from({ length: 7 }, (_, i) => addDays(weekStartDate, i));
+  }, [weekStartDate]);
 
-    return eachDayOfInterval({ start: calendarStart, end: calendarEnd });
-  }, [currentMonth]);
+  const handlePrevWeek = () => {
+    setWeekStartDate((prev) => {
+      const target = subDays(prev, 7);
+      const today = startOfDay(new Date());
+      return isBefore(target, today) ? today : target;
+    });
+  };
 
-  const handlePrevMonth = () => setCurrentMonth((prev) => subMonths(prev, 1));
-  const handleNextMonth = () => setCurrentMonth((prev) => addMonths(prev, 1));
+  const handleNextWeek = () => {
+    setWeekStartDate((prev) => addDays(prev, 7));
+  };
+
+  const canGoPrevWeek = useMemo(() => {
+    const today = startOfDay(new Date());
+    return !isBefore(weekStartDate, addDays(today, 1));
+  }, [weekStartDate]);
+
+  const weekRangeLabel = useMemo(() => {
+    if (calendarDays.length === 0) return '';
+    const first = calendarDays[0];
+    const last = calendarDays[calendarDays.length - 1];
+    if (isSameMonth(first, last)) {
+      return `${format(first, 'MMMM d')} – ${format(last, 'd, yyyy')}`;
+    }
+    return `${format(first, 'MMM d')} – ${format(last, 'MMM d, yyyy')}`;
+  }, [calendarDays]);
 
   const handleBooking = async () => {
     if (!selectedService || !selectedDate || !selectedTime) return;
@@ -446,79 +460,71 @@ export default function Booking() {
               </div>
             </div>
 
-            {/* MONTH CALENDAR CONTAINER */}
-            <div className="bg-[var(--color-card-bg)] rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-md sm:shadow-xl transition-colors">
-              {/* Calendar Month Navigation */}
-              <div className="flex items-center justify-between mb-2.5 sm:mb-6 pb-2 sm:pb-4 border-b border-[var(--color-surface-raised)]">
+            {/* 7-DAY WEEK CALENDAR CONTAINER */}
+            <div className="bg-[var(--color-card-bg)] rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-md sm:shadow-xl transition-colors">
+              {/* Week Navigation Header */}
+              <div className="flex items-center justify-between mb-2.5 sm:mb-4 pb-2 sm:pb-3 border-b border-[var(--color-surface-raised)]">
                 <button
                   type="button"
-                  onClick={handlePrevMonth}
-                  className="p-1 sm:p-2 rounded-lg text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-raised)] transition-colors cursor-pointer"
-                  aria-label="Previous month"
+                  onClick={handlePrevWeek}
+                  disabled={!canGoPrevWeek}
+                  className={`p-1 sm:p-1.5 rounded-lg transition-colors cursor-pointer ${
+                    canGoPrevWeek
+                      ? 'text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-raised)]'
+                      : 'text-[var(--color-muted-text)] opacity-25 cursor-not-allowed'
+                  }`}
+                  aria-label="Previous week"
                 >
                   <ChevronLeft size={16} />
                 </button>
-                <div className="font-sans text-[11px] sm:text-xs font-semibold uppercase tracking-[0.15em] sm:tracking-[0.25em] text-[var(--color-primary-text)]">
-                  {format(currentMonth, 'MMMM yyyy')}
+                <div className="font-sans text-[11px] sm:text-xs font-semibold uppercase tracking-[0.15em] sm:tracking-[0.2em] text-[var(--color-primary-text)]">
+                  {weekRangeLabel}
                 </div>
                 <button
                   type="button"
-                  onClick={handleNextMonth}
-                  className="p-1 sm:p-2 rounded-lg text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-raised)] transition-colors cursor-pointer"
-                  aria-label="Next month"
+                  onClick={handleNextWeek}
+                  className="p-1 sm:p-1.5 rounded-lg text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-raised)] transition-colors cursor-pointer"
+                  aria-label="Next week"
                 >
                   <ChevronRight size={16} />
                 </button>
               </div>
 
-              {/* Day of Week Headers */}
-              <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-1.5 sm:mb-3 text-center font-sans text-[9px] sm:text-[10px] uppercase tracking-wider text-[var(--color-muted-text)] font-semibold">
-                <div>SUN</div>
-                <div>MON</div>
-                <div>TUE</div>
-                <div>WED</div>
-                <div>THU</div>
-                <div>FRI</div>
-                <div>SAT</div>
-              </div>
-
-              {/* Calendar Days Grid */}
-              <div className="grid grid-cols-7 gap-1 sm:gap-2 text-center">
+              {/* 7-Day Grid */}
+              <div className="grid grid-cols-7 gap-1.5 sm:gap-2.5 text-center">
                 {calendarDays.map((day, idx) => {
-                  const isCurrentMonth = isSameMonth(day, currentMonth);
-                  const isDayPast = isBefore(day, startOfDay(new Date()));
                   const dateStr = format(day, 'yyyy-MM-dd');
                   const isSelected = selectedDate === dateStr;
-
-                  if (!isCurrentMonth) {
-                    return <div key={idx} className="py-1.5 sm:py-3 text-xs opacity-0 pointer-events-none" />;
-                  }
-
-                  if (isDayPast) {
-                    return (
-                      <div
-                        key={idx}
-                        className="py-1.5 sm:py-3 font-sans text-[11px] sm:text-xs text-[var(--color-muted-text)] opacity-35 cursor-not-allowed select-none rounded-lg"
-                      >
-                        {format(day, 'd')}
-                      </div>
-                    );
-                  }
+                  const isDayToday = isToday(day);
 
                   return (
                     <motion.button
                       key={idx}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.97 }}
                       type="button"
                       onClick={() => setSelectedDate(dateStr)}
-                      className={`py-1.5 sm:py-3 rounded-lg sm:rounded-xl font-sans text-[11px] sm:text-xs font-semibold transition-all duration-150 cursor-pointer ${
+                      className={`relative flex flex-col items-center justify-center py-2 sm:py-3.5 px-1 rounded-xl transition-all duration-150 cursor-pointer ${
                         isSelected
-                          ? 'bg-[var(--color-primary)] text-black font-bold shadow-[0_0_15px_rgba(229,195,120,0.4)]'
-                          : 'text-[var(--color-body-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-raised)]'
+                          ? 'bg-[var(--color-primary)] text-black font-bold shadow-[0_0_18px_rgba(229,195,120,0.45)]'
+                          : 'bg-[var(--color-surface-raised)] hover:bg-[var(--color-surface-hover)] text-[var(--color-body-text)] hover:text-[var(--color-primary-text)]'
                       }`}
                     >
-                      {format(day, 'd')}
+                      <span className={`font-sans text-[8px] sm:text-[10px] uppercase tracking-wider mb-0.5 sm:mb-1 ${
+                        isSelected ? 'text-black/80 font-bold' : 'text-[var(--color-secondary-text)] font-semibold'
+                      }`}>
+                        {format(day, 'EEE')}
+                      </span>
+                      <span className={`text-xs sm:text-base font-semibold ${
+                        isSelected ? 'text-black font-bold' : 'text-[var(--color-primary-text)]'
+                      }`}>
+                        {format(day, 'd')}
+                      </span>
+                      {isDayToday && (
+                        <span className={`w-1 h-1 rounded-full mt-1 ${
+                          isSelected ? 'bg-black' : 'bg-[var(--color-primary)]'
+                        }`} />
+                      )}
                     </motion.button>
                   );
                 })}
