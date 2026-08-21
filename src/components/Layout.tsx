@@ -1,12 +1,9 @@
-import React from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { CalendarDays, LayoutDashboard, LogOut, LogIn, Shield, Settings, User } from 'lucide-react';
 import { authClient } from '../lib/auth';
 import { motion, AnimatePresence } from 'motion/react';
 import { Particles } from './magicui/particles';
 import { ThemeToggle } from './magicui/theme-toggle';
-import { Badge } from './ui/badge';
-import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar';
 import { Skeleton } from './ui/skeleton';
 
 const AUTH_PAGES = ['/login', '/register', '/forgot-password', '/reset-password'];
@@ -167,43 +164,50 @@ export default function Layout() {
           )}
         </nav>
         {isPending ? (
-          <div className="p-3.5 border-t border-[var(--color-border)] shrink-0 flex items-center gap-2.5">
-            <Skeleton className="w-8 h-8 rounded-lg shrink-0" />
-            <div className="space-y-1.5 flex-1">
-              <Skeleton className="w-20 h-3 rounded-md" />
-              <Skeleton className="w-28 h-2.5 rounded-md" />
+          <div className="p-4 border-t border-[var(--color-border)] shrink-0">
+            <div className="flex items-center gap-3 p-2.5 rounded-xl bg-[var(--color-surface-raised)]/40">
+              <Skeleton className="w-9 h-9 rounded-full shrink-0" />
+              <div className="space-y-1.5 flex-1">
+                <Skeleton className="w-24 h-3 rounded-md" />
+                <Skeleton className="w-32 h-2.5 rounded-md" />
+              </div>
             </div>
           </div>
         ) : session?.user ? (
-          <div className="p-3.5 border-t border-[var(--color-border)] shrink-0 flex flex-col gap-2.5">
-            <div className="flex items-center gap-2.5 p-2 rounded-xl bg-[var(--color-surface-raised)]/60 border border-[var(--color-border)]">
-              <div className="w-8 h-8 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center overflow-hidden shrink-0">
+          <div className="p-4 border-t border-[var(--color-border)] shrink-0 space-y-3">
+            {/* User Profile Row */}
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/25 flex items-center justify-center overflow-hidden shrink-0 shadow-sm">
                 {session.user.image ? (
-                  <img src={session.user.image} alt={session.user.name} className="w-full h-full object-cover" />
+                  <img src={session.user.image} alt={session.user.name} className="w-full h-full object-cover rounded-full" />
                 ) : (
-                  <User size={15} className="text-[var(--color-primary)]" />
+                  <User size={16} className="text-[var(--color-primary)]" />
                 )}
               </div>
               <div className="min-w-0 flex-1">
-                <div className="text-xs font-medium text-[var(--color-primary-text)] truncate">
+                <div className="text-[13px] font-semibold text-[var(--color-primary-text)] truncate leading-tight">
                   {session.user.name || 'Client'}
                 </div>
-                <div className="text-[10px] text-[var(--color-secondary-text)] truncate font-sans">
+                <div className="text-[10px] text-[var(--color-muted-text)] truncate font-sans leading-tight mt-0.5">
                   {session.user.email}
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-2 w-full">
-              <ThemeToggle className="shrink-0" />
+            {/* Actions Row */}
+            <div className="flex items-center gap-1.5">
+              <ThemeToggle className="shrink-0 !p-2 !rounded-lg !border-[var(--color-border)] !bg-transparent hover:!bg-[var(--color-surface-raised)]" />
               <button
                 onClick={handleLogout}
-                className="flex-1 py-1.5 px-3 rounded-lg text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:border-[var(--color-primary)]/40 border border-[var(--color-border)] bg-[var(--color-surface-raised)] font-sans text-[10px] uppercase tracking-wider font-semibold transition-all cursor-pointer text-center"
+                className="flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-[var(--color-secondary-text)] hover:text-red-400 hover:bg-red-500/8 border border-[var(--color-border)] hover:border-red-500/25 font-sans text-[10px] uppercase tracking-widest font-semibold transition-all duration-200 cursor-pointer"
               >
-                Logout
+                <LogOut size={13} />
+                Sign Out
               </button>
             </div>
           </div>
-        ) : null}
+        ) : (
+          null
+        )}
       </motion.aside>
 
       {/* Main Content Area */}
