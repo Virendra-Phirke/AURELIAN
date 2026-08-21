@@ -68,7 +68,7 @@ export function AnimatedThemeToggler({
             },
             {
               duration,
-              easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+              easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
               pseudoElement: '::view-transition-new(root)',
             }
           );

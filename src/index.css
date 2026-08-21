@@ -127,12 +127,35 @@ body {
   outline-offset: 2px;
 }
 
-/* Smooth transitions */
-input,
+/* Universal smooth transitions for theme switches */
+body,
+aside,
+header,
+nav,
+main,
+section,
+article,
+div,
+span,
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+a,
 button,
+input,
 select,
-textarea {
-  transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+textarea,
+table,
+tr,
+th,
+td {
+  transition-property: background-color, border-color, color, fill, stroke, box-shadow;
+  transition-duration: 350ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Hide scrollbar for horizontal scroll areas */
