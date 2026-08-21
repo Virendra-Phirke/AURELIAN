@@ -246,5 +246,13 @@ textarea {
 }
 
 ::view-transition-new(root) {
-  z-index: 999999;
+  z-index: 9999;
+}
+
+.dark::view-transition-old(root) {
+  z-index: 9999;
+}
+
+.dark::view-transition-new(root) {
+  z-index: 1;
 }
