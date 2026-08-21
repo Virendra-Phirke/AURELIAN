@@ -65,6 +65,7 @@ export const services = pgTable("services", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull(), // 'Haircut' or 'Shaving'
   durationMinutes: integer("durationMinutes").notNull(),
+  price: integer("price").default(0),
   active: boolean("active").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().notNull(),
@@ -91,11 +92,27 @@ export const bookings = pgTable("bookings", {
 
 export const shopSettings = pgTable("shop_settings", {
   id: uuid("id").primaryKey().defaultRandom(),
-  openingTime: varchar("openingTime", { length: 5 }).notNull(),
-  closingTime: varchar("closingTime", { length: 5 }).notNull(),
-  slotDurationMinutes: integer("slotDurationMinutes").notNull(),
-  minimumAdvanceMinutes: integer("minimumAdvanceMinutes").notNull(),
-  maximumAdvanceDays: integer("maximumAdvanceDays").notNull(),
+  shopName: text("shopName").default("Aurelian Salon"),
+  shopTagline: text("shopTagline").default("Luxury Grooming & Styling"),
+  phone: text("phone").default("+1 (555) 234-5678"),
+  email: text("email").default("contact@aureliansalon.com"),
+  address: text("address").default("123 Luxury Ave, Beverly Hills, CA"),
+  openingTime: varchar("openingTime", { length: 5 }).default("09:00").notNull(),
+  closingTime: varchar("closingTime", { length: 5 }).default("19:00").notNull(),
+  slotDurationMinutes: integer("slotDurationMinutes").default(30).notNull(),
+  minimumAdvanceMinutes: integer("minimumAdvanceMinutes").default(60).notNull(),
+  maximumAdvanceDays: integer("maximumAdvanceDays").default(30).notNull(),
+  autoConfirmBookings: boolean("autoConfirmBookings").default(true).notNull(),
+  allowCancellation: boolean("allowCancellation").default(true).notNull(),
+  cancellationCutoffHours: integer("cancellationCutoffHours").default(2).notNull(),
+  cancellationCutoffMinutes: integer("cancellationCutoffMinutes").default(120).notNull(),
+  breakStartTime: varchar("breakStartTime", { length: 5 }).default("13:00"),
+  breakEndTime: varchar("breakEndTime", { length: 5 }).default("14:00"),
+  breakEnabled: boolean("breakEnabled").default(false).notNull(),
+  closedDays: text("closedDays").default("0").notNull(), // Comma-separated day numbers: 0=Sun, 1=Mon, ..., 6=Sat
+  currencySymbol: varchar("currencySymbol", { length: 5 }).default("$").notNull(),
+  announcementText: text("announcementText").default(""),
+  announcementActive: boolean("announcementActive").default(false).notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().notNull(),
 });
 

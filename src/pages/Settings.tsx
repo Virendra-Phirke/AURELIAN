@@ -139,21 +139,21 @@ export default function Settings() {
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto space-y-4 sm:space-y-8 pb-16">
+    <div className="w-full max-w-6xl mx-auto space-y-4 sm:space-y-5 pb-12">
       <AnimatePresence>
         {toast && <Toast message={toast.message} type={toast.type} onDone={() => setToast(null)} />}
       </AnimatePresence>
 
       {/* Top Banner (Geist Style) */}
-      <div className="p-3.5 sm:p-8 bg-[var(--color-card-bg)] rounded-xl sm:rounded-2xl flex flex-col sm:flex-row items-center sm:items-start justify-between gap-3 sm:gap-6 shadow-md sm:shadow-xl transition-colors">
-        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-5 text-center sm:text-left w-full sm:w-auto">
+      <div className="p-3.5 sm:p-5 bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-xl sm:rounded-2xl flex flex-col sm:flex-row items-center sm:items-start justify-between gap-3 sm:gap-4 shadow-sm transition-colors">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4 text-center sm:text-left w-full sm:w-auto">
           <div className="relative group shrink-0">
-            <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full p-1 bg-[var(--color-surface-raised)]">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full p-[2px] bg-[var(--color-surface-raised)]">
               <div className="w-full h-full rounded-full bg-[var(--color-surface)] flex items-center justify-center overflow-hidden relative">
                 {newImage || user.image ? (
                   <img src={newImage || user.image} alt={user.name} className="w-full h-full object-cover" />
                 ) : (
-                  <User size={22} className="text-[var(--color-secondary-text)] sm:w-8 sm:h-8" />
+                  <User size={20} className="text-[var(--color-secondary-text)] sm:w-6 sm:h-6" />
                 )}
                 {isEditingProfile && (
                   <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
@@ -166,21 +166,21 @@ export default function Settings() {
 
           <div className="min-w-0">
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
-              <h1 className="text-lg sm:text-2xl font-serif text-[var(--color-primary-text)] font-medium truncate">{user.name}</h1>
-              <span className="px-2 py-0.5 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-sans text-[8px] sm:text-[10px] uppercase tracking-wider font-semibold">
+              <h1 className="text-base sm:text-xl font-serif text-[var(--color-primary-text)] font-medium truncate">{user.name}</h1>
+              <span className="px-2.5 py-0.5 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-sans text-[8.5px] sm:text-[9.5px] uppercase tracking-wider font-semibold">
                 {user.role === 'ADMIN' ? 'Administrator' : 'Client Member'}
               </span>
             </div>
-            <p className="text-[var(--color-secondary-text)] font-sans text-[11px] sm:text-xs truncate">{user.email}</p>
+            <p className="text-[var(--color-secondary-text)] font-sans text-[11px] truncate">{user.email}</p>
           </div>
         </div>
 
         <button
           onClick={handleUpdateProfile}
           disabled={updatingProfile}
-          className={`w-full sm:w-auto px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl font-sans text-[10px] sm:text-xs uppercase tracking-wider font-semibold transition-all inline-flex items-center justify-center gap-1.5 cursor-pointer ${
+          className={`w-full sm:w-auto px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl font-sans text-[10px] sm:text-xs uppercase tracking-wider font-semibold transition-all inline-flex items-center justify-center gap-1.5 cursor-pointer shadow-sm ${
             isEditingProfile
-              ? 'bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-black shadow-[0_0_15px_rgba(229,195,120,0.3)]'
+              ? 'bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-black font-bold'
               : 'bg-[var(--color-surface-raised)] hover:bg-[var(--color-surface-hover)] text-[var(--color-primary-text)]'
           }`}
         >
@@ -189,13 +189,13 @@ export default function Settings() {
       </div>
 
       {/* Main Grid Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-5">
         {/* Left Column: Account Details */}
-        <div className="bg-[var(--color-card-bg)] rounded-xl sm:rounded-2xl p-3.5 sm:p-8 flex flex-col justify-between shadow-md sm:shadow-xl transition-colors">
-          <div className="space-y-3 sm:space-y-6">
-            <div className="flex items-center gap-2 pb-2.5 sm:pb-4 border-b border-[var(--color-surface-raised)]">
-              <User size={14} className="text-[var(--color-primary)] sm:w-4 sm:h-4" />
-              <h2 className="text-[var(--color-primary-text)] font-sans text-[11px] sm:text-xs uppercase tracking-wider font-semibold">Account Details</h2>
+        <div className="bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-xl sm:rounded-2xl p-3.5 sm:p-5 flex flex-col justify-between shadow-sm transition-colors">
+          <div className="space-y-3 sm:space-y-4">
+            <div className="flex items-center gap-2 pb-2.5 border-b border-[var(--color-border)]">
+              <User size={14} className="text-[var(--color-primary)]" />
+              <h2 className="text-[var(--color-primary-text)] font-sans text-[10px] sm:text-xs uppercase tracking-wider font-semibold">Account Details</h2>
             </div>
 
             <div className="space-y-2.5 sm:space-y-4">
@@ -264,12 +264,12 @@ export default function Settings() {
         </div>
 
         {/* Right Column: Security & Theme */}
-        <div className="space-y-3 sm:space-y-6 flex flex-col">
+        <div className="space-y-3 sm:space-y-5 flex flex-col">
           {/* Security & Password */}
-          <div className="bg-[var(--color-card-bg)] rounded-xl sm:rounded-2xl p-3.5 sm:p-8 flex-1 shadow-md sm:shadow-xl transition-colors">
-            <div className="flex items-center gap-2 pb-2.5 sm:pb-4 mb-3 sm:mb-6 border-b border-[var(--color-surface-raised)]">
-              <Shield size={14} className="text-[var(--color-primary)] sm:w-4 sm:h-4" />
-              <h2 className="text-[var(--color-primary-text)] font-sans text-[11px] sm:text-xs uppercase tracking-wider font-semibold">Security & Password</h2>
+          <div className="bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-xl sm:rounded-2xl p-3.5 sm:p-5 flex-1 shadow-sm transition-colors">
+            <div className="flex items-center gap-2 pb-2.5 mb-3 border-b border-[var(--color-border)]">
+              <Shield size={14} className="text-[var(--color-primary)]" />
+              <h2 className="text-[var(--color-primary-text)] font-sans text-[10px] sm:text-xs uppercase tracking-wider font-semibold">Security & Password</h2>
             </div>
 
             {checkingPassword ? (
@@ -277,7 +277,7 @@ export default function Settings() {
                 Checking status...
               </div>
             ) : (
-              <div className="space-y-2.5 sm:space-y-4">
+              <div className="space-y-2.5">
                 {!hasPassword && (
                   <div className="p-2.5 rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-sans text-[11px] flex items-center gap-2">
                     <AlertCircle size={13} className="shrink-0" />
@@ -295,7 +295,7 @@ export default function Settings() {
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full bg-[var(--color-surface-raised)] rounded-lg sm:rounded-xl px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-[var(--color-primary-text)] focus:outline-none transition-colors placeholder:text-[var(--color-muted-text)]"
+                      className="w-full bg-[var(--color-surface-raised)] rounded-lg sm:rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 text-xs text-[var(--color-primary-text)] focus:outline-none transition-colors placeholder:text-[var(--color-muted-text)]"
                     />
                   </div>
                 )}
@@ -309,15 +309,15 @@ export default function Settings() {
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full bg-[var(--color-surface-raised)] rounded-lg sm:rounded-xl px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-[var(--color-primary-text)] focus:outline-none transition-colors placeholder:text-[var(--color-muted-text)]"
+                    className="w-full bg-[var(--color-surface-raised)] rounded-lg sm:rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 text-xs text-[var(--color-primary-text)] focus:outline-none transition-colors placeholder:text-[var(--color-muted-text)]"
                   />
                 </div>
 
-                <div className="pt-2">
+                <div className="pt-1.5">
                   <button
                     onClick={handleChangePassword}
                     disabled={updatingPassword}
-                    className="px-4 py-2 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-black font-sans text-[10px] sm:text-xs font-semibold uppercase tracking-wider rounded-lg sm:rounded-xl transition-all shadow-md disabled:opacity-50 cursor-pointer"
+                    className="px-4 py-2 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-black font-sans text-[10px] sm:text-xs font-semibold uppercase tracking-wider rounded-xl transition-all shadow-sm disabled:opacity-50 cursor-pointer"
                   >
                     {updatingPassword ? 'Updating...' : hasPassword ? 'Update Password' : 'Set Password'}
                   </button>
@@ -327,17 +327,17 @@ export default function Settings() {
           </div>
 
           {/* Theme & Appearance */}
-          <div className="bg-[var(--color-card-bg)] rounded-xl sm:rounded-2xl p-3.5 sm:p-6 shadow-md sm:shadow-xl space-y-3 sm:space-y-4 transition-colors">
-            <div className="flex items-center gap-2 pb-2.5 sm:pb-4 border-b border-[var(--color-surface-raised)]">
-              <Sun size={14} className="text-[var(--color-primary)] sm:w-4 sm:h-4" />
-              <h2 className="text-[var(--color-primary-text)] font-sans text-[11px] sm:text-xs uppercase tracking-wider font-semibold">Appearance & Theme</h2>
+          <div className="bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-xl sm:rounded-2xl p-3.5 sm:p-5 shadow-sm space-y-2.5 transition-colors">
+            <div className="flex items-center gap-2 pb-2.5 border-b border-[var(--color-border)]">
+              <Sun size={14} className="text-[var(--color-primary)]" />
+              <h2 className="text-[var(--color-primary-text)] font-sans text-[10px] sm:text-xs uppercase tracking-wider font-semibold">Appearance & Theme</h2>
             </div>
 
             <div className="grid grid-cols-3 gap-2 pt-0.5">
               <button
                 type="button"
                 onClick={() => setTheme('dark')}
-                className={`py-2 sm:py-2.5 px-2 rounded-lg sm:rounded-xl flex items-center justify-center gap-1.5 sm:gap-2 transition-all cursor-pointer font-sans text-[10px] sm:text-xs uppercase tracking-wider ${
+                className={`py-2 sm:py-2.5 px-2 rounded-xl flex items-center justify-center gap-1.5 sm:gap-2 transition-all cursor-pointer font-sans text-[10px] sm:text-xs uppercase tracking-wider ${
                   theme === 'dark'
                     ? 'bg-[var(--color-primary)] text-black font-bold shadow-sm'
                     : 'bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-hover)]'
@@ -350,7 +350,7 @@ export default function Settings() {
               <button
                 type="button"
                 onClick={() => setTheme('light')}
-                className={`py-2 sm:py-2.5 px-2 rounded-lg sm:rounded-xl flex items-center justify-center gap-1.5 sm:gap-2 transition-all cursor-pointer font-sans text-[10px] sm:text-xs uppercase tracking-wider ${
+                className={`py-2 sm:py-2.5 px-2 rounded-xl flex items-center justify-center gap-1.5 sm:gap-2 transition-all cursor-pointer font-sans text-[10px] sm:text-xs uppercase tracking-wider ${
                   theme === 'light'
                     ? 'bg-[var(--color-primary)] text-black font-bold shadow-sm'
                     : 'bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-hover)]'
@@ -363,7 +363,7 @@ export default function Settings() {
               <button
                 type="button"
                 onClick={() => setTheme('system')}
-                className={`py-2 sm:py-2.5 px-2 rounded-lg sm:rounded-xl flex items-center justify-center gap-1.5 sm:gap-2 transition-all cursor-pointer font-sans text-[10px] sm:text-xs uppercase tracking-wider ${
+                className={`py-2 sm:py-2.5 px-2 rounded-xl flex items-center justify-center gap-1.5 sm:gap-2 transition-all cursor-pointer font-sans text-[10px] sm:text-xs uppercase tracking-wider ${
                   theme === 'system'
                     ? 'bg-[var(--color-primary)] text-black font-bold shadow-sm'
                     : 'bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-hover)]'
@@ -376,7 +376,7 @@ export default function Settings() {
           </div>
 
           {/* Two-Factor Authentication */}
-          <div className="bg-[var(--color-card-bg)] rounded-xl sm:rounded-2xl p-3.5 sm:p-5 flex items-center justify-between gap-3 shadow-md sm:shadow-xl transition-colors">
+          <div className="bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-xl sm:rounded-2xl p-3.5 sm:p-4 flex items-center justify-between gap-3 shadow-sm transition-colors">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-[var(--color-surface-raised)] flex items-center justify-center shrink-0">
                 <Lock size={14} className="text-[var(--color-primary)]" />

@@ -6,10 +6,11 @@ export interface AnimatedListProps {
   className?: string;
   children: React.ReactNode;
   delay?: number;
+  reverse?: boolean;
 }
 
 export const AnimatedList = React.memo(
-  ({ className, children, delay = 600 }: AnimatedListProps) => {
+  ({ className, children, delay = 200, reverse = false }: AnimatedListProps) => {
     const [index, setIndex] = useState(0);
     const childrenArray = useMemo(
       () => React.Children.toArray(children),
@@ -26,13 +27,13 @@ export const AnimatedList = React.memo(
       }
     }, [index, delay, childrenArray.length]);
 
-    const itemsToShow = useMemo(
-      () => childrenArray.slice(0, index + 1).reverse(),
-      [index, childrenArray],
-    );
+    const itemsToShow = useMemo(() => {
+      const slice = childrenArray.slice(0, index + 1);
+      return reverse ? slice.reverse() : slice;
+    }, [index, childrenArray, reverse]);
 
     return (
-      <div className={cn("flex flex-col items-center gap-2.5 sm:gap-3 w-full", className)}>
+      <div className={cn("flex flex-col items-center gap-2 sm:gap-2.5 w-full", className)}>
         <AnimatePresence>
           {itemsToShow.map((item) => (
             <AnimatedListItem key={(item as ReactElement).key}>

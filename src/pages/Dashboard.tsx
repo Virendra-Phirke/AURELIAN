@@ -107,25 +107,25 @@ function StatCard({ label, value, subtext, icon, accent = false, pathData }: {
   return (
     <motion.div
       variants={itemVariants}
-      whileHover={{ y: -2 }}
-      className="relative overflow-hidden rounded-2xl bg-[var(--color-card-bg)] p-3.5 sm:p-5 flex flex-col justify-between min-h-[95px] sm:min-h-[135px] transition-all group shadow-sm"
+      whileHover={{ y: -2, boxShadow: '0 6px 20px rgba(229,195,120,0.12)' }}
+      className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-[var(--color-card-bg)] border border-[var(--color-border)] p-3 sm:p-4 flex flex-col justify-between h-20 sm:h-24 transition-all group shadow-sm hover:shadow-md"
     >
-      {accent && <BorderBeam size={100} duration={8} colorFrom="var(--color-primary)" borderWidth={1.5} />}
+      {accent && <BorderBeam size={60} duration={8} colorFrom="var(--color-primary)" borderWidth={1.5} />}
       <div className="flex items-center justify-between z-10">
-        <span className="font-sans text-[9px] sm:text-[11px] uppercase tracking-wider text-[var(--color-secondary-text)] font-bold">{label}</span>
-        <div className="text-[var(--color-primary)] scale-90 sm:scale-100">{icon}</div>
+        <span className="font-sans text-[8.5px] sm:text-[10px] uppercase tracking-wider text-[var(--color-secondary-text)] font-bold">{label}</span>
+        <div className="text-[var(--color-primary)] scale-85 sm:scale-95">{icon}</div>
       </div>
-      <div className="z-10 mt-1 sm:mt-2">
-        <div className={`text-xl sm:text-3xl font-sans font-semibold tracking-tight block ${accent ? 'text-[var(--color-primary)]' : 'text-[var(--color-primary-text)]'}`}>
+      <div className="z-10">
+        <div className={`text-lg sm:text-2xl font-sans font-bold tracking-tight block ${accent ? 'text-[var(--color-primary)]' : 'text-[var(--color-primary-text)]'}`}>
           {isNum ? <NumberTicker value={Number(value)} /> : value}
         </div>
         {subtext && (
-          <span className="font-sans text-[8px] sm:text-[10px] uppercase tracking-wider text-[var(--color-secondary-text)] mt-0.5 sm:mt-1 block truncate font-medium">{subtext}</span>
+          <span className="font-sans text-[8px] sm:text-[9px] uppercase tracking-wider text-[var(--color-muted-text)] mt-0.5 block truncate font-medium">{subtext}</span>
         )}
       </div>
 
       {/* Sparkline */}
-      <div className="absolute bottom-0 left-0 right-0 h-8 sm:h-12 opacity-25 group-hover:opacity-60 transition-opacity duration-500 pointer-events-none">
+      <div className="absolute bottom-0 left-0 right-0 h-6 sm:h-8 opacity-25 group-hover:opacity-60 transition-opacity duration-500 pointer-events-none">
         <svg viewBox="0 0 100 40" preserveAspectRatio="none" className="w-full h-full">
           <defs>
             <linearGradient id={`sg-${label.replace(/\s+/g, '')}`} x1="0" x2="0" y1="0" y2="1">
@@ -181,7 +181,8 @@ export default function Dashboard() {
       setBookings(bookings.map(b => b.id === id ? { ...b, status: 'CANCELLED' } : b));
       setToast({ message: 'Appointment cancelled', type: 'success' });
     } else {
-      setToast({ message: 'Failed to cancel appointment', type: 'error' });
+      const data = await res.json().catch(() => ({}));
+      setToast({ message: data.error || 'Failed to cancel appointment', type: 'error' });
     }
     setConfirmingCancel(null);
   };
@@ -301,7 +302,7 @@ export default function Dashboard() {
       variants={containerVariants}
       initial="initial"
       animate="animate"
-      className="w-full max-w-7xl mx-auto space-y-8 pb-16"
+      className="w-full max-w-7xl mx-auto space-y-4 sm:space-y-5 pb-12"
     >
       {/* Toast */}
       <AnimatePresence>
@@ -313,18 +314,18 @@ export default function Dashboard() {
          ════════════════════════════════════════ */}
       <motion.div
         variants={itemVariants}
-        className="relative p-4 sm:p-8 bg-[var(--color-card-bg)] rounded-2xl overflow-hidden shadow-xl transition-colors"
+        className="relative p-3.5 sm:p-5 bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-xl sm:rounded-2xl overflow-hidden shadow-sm transition-colors"
       >
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
-          <div className="flex items-center gap-3 sm:gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+          <div className="flex items-center gap-3">
             {/* Avatar */}
             <div className="shrink-0 relative group cursor-pointer" onClick={() => navigate('/settings')}>
-              <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-full p-[2px] bg-[var(--color-surface-raised)] group-hover:border-[var(--color-primary)] transition-colors">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full p-[2px] bg-[var(--color-surface-raised)] group-hover:border-[var(--color-primary)] transition-colors">
                 <div className="w-full h-full rounded-full bg-[var(--color-surface)] flex items-center justify-center overflow-hidden">
                   {user?.image ? (
                     <img src={user.image} alt={user.name} className="w-full h-full object-cover" />
                   ) : (
-                    <User size={18} className="text-[var(--color-secondary-text)] group-hover:text-[var(--color-primary)] transition-colors sm:w-5 sm:h-5" />
+                    <User size={16} className="text-[var(--color-secondary-text)] group-hover:text-[var(--color-primary)] transition-colors sm:w-5 sm:h-5" />
                   )}
                 </div>
               </div>
@@ -332,16 +333,16 @@ export default function Dashboard() {
 
             {/* Greeting */}
             <div>
-              <h1 className="text-lg sm:text-2xl font-light text-[var(--color-primary-text)] tracking-wide">
+              <h1 className="text-base sm:text-xl font-light text-[var(--color-primary-text)] tracking-wide">
                 {getGreeting()}, <span className="font-medium text-[var(--color-primary)]">{user?.name?.split(' ')[0] || 'Client'}</span>
               </h1>
-              <div className="flex flex-wrap items-center gap-2 text-[var(--color-secondary-text)] font-sans text-[10px] sm:text-[11px] uppercase tracking-wider mt-0.5 sm:mt-1">
-                <CalendarDays size={12} className="text-[var(--color-primary)]" />
+              <div className="flex flex-wrap items-center gap-2 text-[var(--color-secondary-text)] font-sans text-[10px] uppercase tracking-wider mt-0.5">
+                <CalendarDays size={11} className="text-[var(--color-primary)]" />
                 <span>{format(new Date(), 'EEEE, MMMM d, yyyy')}</span>
                 {nextAppointment && (
                   <>
                     <span>•</span>
-                    <span className="text-[var(--color-primary)] font-medium">Next appointment {nextAppointmentCountdown}</span>
+                    <span className="text-[var(--color-primary)] font-medium">Next: {nextAppointmentCountdown}</span>
                   </>
                 )}
               </div>
@@ -351,17 +352,17 @@ export default function Dashboard() {
           <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
             <button
               onClick={() => navigate('/booking')}
-              className="flex-1 sm:flex-none px-4 sm:px-5 py-2 sm:py-2.5 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-black font-sans text-[11px] sm:text-xs font-semibold uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(229,195,120,0.25)] cursor-pointer"
+              className="flex-1 sm:flex-none px-4 py-2 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-black font-sans text-[10px] sm:text-xs font-semibold uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer"
             >
-              <CalendarDays size={14} />
+              <CalendarDays size={13} />
               Book Appointment
             </button>
             <button
               onClick={() => navigate('/settings')}
-              className="p-2 sm:p-2.5 bg-[var(--color-surface-raised)] hover:bg-[var(--color-surface-hover)] text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] rounded-xl transition-colors cursor-pointer"
+              className="p-2 bg-[var(--color-surface-raised)] hover:bg-[var(--color-surface-hover)] text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] rounded-xl transition-colors cursor-pointer"
               title="Settings"
             >
-              <Settings size={16} />
+              <Settings size={15} />
             </button>
           </div>
         </div>
@@ -370,27 +371,27 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════
           2. STAT CARDS (4-column grid)
          ════════════════════════════════════════ */}
-      <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+      <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5">
         <StatCard
           label="Next Appointment"
           value={nextAppointment ? format(parseISO(nextAppointment.bookingDate), 'MMM d') : '—'}
           subtext={nextAppointment ? `${nextAppointment.startTime} · ${services[nextAppointment.serviceId] || 'Service'}` : 'None scheduled'}
-          icon={<CalendarDays size={16} />}
+          icon={<CalendarDays size={15} />}
           accent={!!nextAppointment}
           pathData={spark1}
         />
         <StatCard
           label="Total Visits"
           value={completedCount}
-          subtext={`${completedCount} completed sessions`}
-          icon={<TrendingUp size={16} />}
+          subtext={`${completedCount} completed`}
+          icon={<TrendingUp size={15} />}
           pathData={spark2}
         />
         <StatCard
           label="Active Bookings"
           value={activeCount}
-          subtext={activeCount > 0 ? 'Confirmed appointments' : 'No active bookings'}
-          icon={<Zap size={16} />}
+          subtext={activeCount > 0 ? 'Confirmed' : 'None active'}
+          icon={<Zap size={15} />}
           accent={activeCount > 0}
           pathData={spark3}
         />
@@ -398,7 +399,7 @@ export default function Dashboard() {
           label="Membership"
           value={memberSince}
           subtext="Verified client"
-          icon={<Star size={16} />}
+          icon={<Star size={15} />}
           pathData={spark4}
         />
       </motion.div>
@@ -406,14 +407,14 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════
           3. TODAY'S SCHEDULE + SHOP INFO (2-col)
          ════════════════════════════════════════ */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
+      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4">
         {/* Today's Schedule */}
-        <div className="lg:col-span-7 bg-[var(--color-card-bg)] rounded-xl sm:rounded-2xl p-3.5 sm:p-6 flex flex-col justify-between shadow-md transition-colors">
+        <div className="lg:col-span-7 bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-xl sm:rounded-2xl p-3.5 sm:p-5 flex flex-col justify-between shadow-sm transition-colors">
           <div>
-            <div className="flex items-center justify-between pb-3 mb-3 border-b border-[var(--color-surface-raised)]">
+            <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-[var(--color-border)]">
               <div className="flex items-center gap-2">
-                <Sparkles size={14} className="text-[var(--color-primary)] sm:w-4 sm:h-4" />
-                <h3 className="font-sans text-[11px] sm:text-xs uppercase tracking-wider text-[var(--color-primary-text)] font-semibold">Today's Schedule</h3>
+                <Sparkles size={14} className="text-[var(--color-primary)]" />
+                <h3 className="font-sans text-[10px] sm:text-xs uppercase tracking-wider text-[var(--color-primary-text)] font-semibold">Today's Schedule</h3>
               </div>
               <span className="font-sans text-[9px] sm:text-[10px] uppercase tracking-widest text-[var(--color-secondary-text)]">
                 {format(new Date(), 'MMM d')}
@@ -421,26 +422,26 @@ export default function Dashboard() {
             </div>
 
             {todayBookings.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-6 sm:py-10 text-center">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[var(--color-surface-raised)] flex items-center justify-center mb-2 sm:mb-3">
-                  <CalendarDays size={18} className="text-[var(--color-secondary-text)]" />
+              <div className="flex flex-col items-center justify-center py-4 sm:py-6 text-center">
+                <div className="w-9 h-9 rounded-full bg-[var(--color-surface-raised)] flex items-center justify-center mb-2">
+                  <CalendarDays size={16} className="text-[var(--color-secondary-text)]" />
                 </div>
-                <p className="text-xs sm:text-sm text-[var(--color-secondary-text)] font-sans mb-0.5 sm:mb-1">No appointments scheduled for today</p>
-                <p className="font-sans text-[9px] sm:text-[10px] uppercase tracking-wider text-[var(--color-muted-text)]">Your schedule is clear</p>
+                <p className="text-xs text-[var(--color-secondary-text)] font-sans mb-0.5">No appointments scheduled for today</p>
+                <p className="font-sans text-[9px] uppercase tracking-wider text-[var(--color-muted-text)]">Your schedule is clear</p>
               </div>
             ) : (
-              <div className="space-y-2 sm:space-y-3">
+              <div className="space-y-2">
                 {todayBookings.map((b) => (
                   <div
                     key={b.id}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 p-3 sm:p-4 rounded-xl bg-[var(--color-surface-raised)] transition-colors"
+                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 sm:p-3 rounded-xl bg-[var(--color-surface-raised)] transition-colors"
                   >
                     <div>
-                      <div className="flex items-center gap-2.5 mb-1">
-                        <span className="text-xs sm:text-sm font-medium text-[var(--color-primary-text)]">{services[b.serviceId] || 'Service'}</span>
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="text-xs font-medium text-[var(--color-primary-text)]">{services[b.serviceId] || 'Service'}</span>
                         <StatusBadge status={b.status} />
                       </div>
-                      <div className="flex items-center gap-2 font-sans text-[11px] sm:text-xs text-[var(--color-secondary-text)]">
+                      <div className="flex items-center gap-2 font-sans text-[10px] sm:text-[11px] text-[var(--color-secondary-text)]">
                         <Clock size={11} className="text-[var(--color-primary)]" />
                         <span>{b.startTime}{b.endTime ? ` – ${b.endTime}` : ''}</span>
                       </div>
@@ -450,13 +451,13 @@ export default function Dashboard() {
                         {confirmingCancel === b.id ? (
                           <div className="flex items-center gap-1.5 bg-[var(--color-surface)] p-1 rounded-lg">
                             <span className="text-[9px] uppercase tracking-wider text-[var(--color-secondary-text)] px-1">Cancel?</span>
-                            <button onClick={() => handleCancel(b.id)} className="px-2.5 py-0.5 rounded bg-red-500/20 text-red-500 text-[9px] uppercase tracking-wider hover:bg-red-500 hover:text-white transition-colors cursor-pointer">Yes</button>
+                            <button onClick={() => handleCancel(b.id)} className="px-2 py-0.5 rounded bg-red-500/20 text-red-500 text-[9px] uppercase tracking-wider hover:bg-red-500 hover:text-white transition-colors cursor-pointer">Yes</button>
                             <button onClick={() => setConfirmingCancel(null)} className="px-1.5 py-0.5 text-[var(--color-secondary-text)] text-[9px] uppercase tracking-wider hover:text-[var(--color-primary-text)] cursor-pointer">No</button>
                           </div>
                         ) : (
                           <button
                             onClick={() => setConfirmingCancel(b.id)}
-                            className="px-2.5 py-1 rounded-lg text-[var(--color-secondary-text)] font-sans text-[9px] sm:text-[10px] uppercase tracking-wider hover:text-red-500 transition-colors cursor-pointer bg-[var(--color-surface)]"
+                            className="px-2.5 py-1 rounded-lg text-[var(--color-secondary-text)] font-sans text-[9px] uppercase tracking-wider hover:text-red-500 transition-colors cursor-pointer bg-[var(--color-surface)]"
                           >
                             Cancel
                           </button>
@@ -471,15 +472,15 @@ export default function Dashboard() {
         </div>
 
         {/* Shop Info Widget */}
-        <div className="lg:col-span-5 bg-[var(--color-card-bg)] rounded-xl sm:rounded-2xl p-3.5 sm:p-6 flex flex-col justify-between shadow-md transition-colors">
+        <div className="lg:col-span-5 bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-xl sm:rounded-2xl p-3.5 sm:p-5 flex flex-col justify-between shadow-sm transition-colors">
           <div>
-            <div className="flex items-center justify-between pb-3 mb-3 border-b border-[var(--color-surface-raised)]">
+            <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-[var(--color-border)]">
               <div className="flex items-center gap-2">
-                <MapPin size={14} className="text-[var(--color-primary)] sm:w-4 sm:h-4" />
-                <h3 className="font-sans text-[11px] sm:text-xs uppercase tracking-wider text-[var(--color-primary-text)] font-semibold">Salon Hours</h3>
+                <MapPin size={14} className="text-[var(--color-primary)]" />
+                <h3 className="font-sans text-[10px] sm:text-xs uppercase tracking-wider text-[var(--color-primary-text)] font-semibold">Salon Hours</h3>
               </div>
               {isShopOpen !== null && (
-                <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] uppercase tracking-wider font-sans font-medium ${
+                <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] uppercase tracking-wider font-sans font-medium ${
                   isShopOpen ? 'text-emerald-500 bg-emerald-500/10' : 'text-red-500 bg-red-500/10'
                 }`}>
                   <span className={`w-1.5 h-1.5 rounded-full ${isShopOpen ? 'bg-emerald-500' : 'bg-red-500'}`} />
@@ -488,19 +489,19 @@ export default function Dashboard() {
               )}
             </div>
 
-            <div className="space-y-2 sm:space-y-3 font-sans text-[11px] sm:text-xs">
+            <div className="space-y-2 font-sans text-[11px]">
               <div className="flex items-center justify-between py-0.5">
-                <span className="text-[var(--color-secondary-text)] uppercase tracking-wider text-[10px] sm:text-[11px]">Opening Hours</span>
-                <span className="text-[var(--color-primary-text)] font-medium">{shopSettings.openingTime || '09:00'} – {shopSettings.closingTime || '18:00'}</span>
+                <span className="text-[var(--color-secondary-text)] uppercase tracking-wider text-[10px]">Opening Hours</span>
+                <span className="text-[var(--color-primary-text)] font-medium">{shopSettings.openingTime || '09:00'} – {shopSettings.closingTime || '19:00'}</span>
               </div>
-              <div className="w-full h-[1px] bg-[var(--color-surface-raised)]" />
+              <div className="w-full h-[1px] bg-[var(--color-border)]" />
               <div className="flex items-center justify-between py-0.5">
-                <span className="text-[var(--color-secondary-text)] uppercase tracking-wider text-[10px] sm:text-[11px]">Slot Interval</span>
+                <span className="text-[var(--color-secondary-text)] uppercase tracking-wider text-[10px]">Slot Interval</span>
                 <span className="text-[var(--color-primary-text)] font-medium">{shopSettings.slotDurationMinutes || 30} minutes</span>
               </div>
-              <div className="w-full h-[1px] bg-[var(--color-surface-raised)]" />
+              <div className="w-full h-[1px] bg-[var(--color-border)]" />
               <div className="flex items-center justify-between py-0.5">
-                <span className="text-[var(--color-secondary-text)] uppercase tracking-wider text-[10px] sm:text-[11px]">Location</span>
+                <span className="text-[var(--color-secondary-text)] uppercase tracking-wider text-[10px]">Location</span>
                 <span className="text-[var(--color-primary-text)] font-medium">Aurelian Salon & Spa</span>
               </div>
             </div>
@@ -508,7 +509,7 @@ export default function Dashboard() {
 
           <button
             onClick={() => navigate('/booking')}
-            className="mt-4 sm:mt-6 w-full py-2.5 sm:py-3 rounded-xl bg-[var(--color-surface-raised)] hover:bg-[var(--color-surface-hover)] text-[var(--color-primary)] font-sans text-[11px] sm:text-xs uppercase tracking-wider font-semibold transition-all cursor-pointer"
+            className="mt-3 sm:mt-4 w-full py-2 rounded-xl bg-[var(--color-surface-raised)] hover:bg-[var(--color-surface-hover)] text-[var(--color-primary)] font-sans text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold transition-all cursor-pointer text-center"
           >
             Check Available Slots →
           </button>
@@ -518,68 +519,68 @@ export default function Dashboard() {
       {/* ════════════════════════════════════════
           4. UPCOMING APPOINTMENTS (Card Grid)
          ════════════════════════════════════════ */}
-      <motion.div variants={itemVariants} className="space-y-3 sm:space-y-4">
+      <motion.div variants={itemVariants} className="space-y-2.5 sm:space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <CalendarDays size={14} className="text-[var(--color-primary)] sm:w-4 sm:h-4" />
-            <h2 className="font-sans text-[11px] sm:text-xs uppercase tracking-wider text-[var(--color-primary-text)] font-semibold">Upcoming Appointments</h2>
+            <CalendarDays size={14} className="text-[var(--color-primary)]" />
+            <h2 className="font-sans text-[10px] sm:text-xs uppercase tracking-wider text-[var(--color-primary-text)] font-semibold">Upcoming Appointments</h2>
           </div>
           <span className="font-sans text-[9px] sm:text-[10px] uppercase tracking-widest text-[var(--color-secondary-text)]">{upcoming.length} scheduled</span>
         </div>
 
         {upcoming.length === 0 ? (
-          <div className="p-6 sm:p-12 bg-[var(--color-card-bg)] rounded-xl sm:rounded-2xl text-center space-y-3 sm:space-y-4 shadow-md transition-colors">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[var(--color-surface-raised)] mx-auto flex items-center justify-center">
-              <CalendarDays size={18} className="text-[var(--color-secondary-text)] sm:w-5 sm:h-5" />
+          <div className="p-4 sm:p-6 bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-xl sm:rounded-2xl text-center space-y-2 shadow-sm transition-colors">
+            <div className="w-9 h-9 rounded-full bg-[var(--color-surface-raised)] mx-auto flex items-center justify-center">
+              <CalendarDays size={16} className="text-[var(--color-secondary-text)]" />
             </div>
             <div>
-              <h3 className="text-sm sm:text-base text-[var(--color-primary-text)] font-medium mb-0.5 sm:mb-1">No upcoming appointments</h3>
-              <p className="font-sans text-[11px] sm:text-xs text-[var(--color-secondary-text)]">Select a service and reserve your preferred time slot.</p>
+              <h3 className="text-xs sm:text-sm text-[var(--color-primary-text)] font-medium mb-0.5">No upcoming appointments</h3>
+              <p className="font-sans text-[11px] text-[var(--color-secondary-text)]">Select a service and reserve your preferred time slot.</p>
             </div>
             <button
               onClick={() => navigate('/booking')}
-              className="px-4 sm:px-5 py-2 sm:py-2.5 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-black font-sans text-[11px] sm:text-xs font-semibold uppercase tracking-wider rounded-xl transition-all inline-flex items-center gap-2 cursor-pointer shadow-md"
+              className="px-4 py-2 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-black font-sans text-[10px] sm:text-xs font-semibold uppercase tracking-wider rounded-xl transition-all inline-flex items-center gap-2 cursor-pointer shadow-sm"
             >
               <span>Book Appointment</span>
-              <ArrowRight size={13} />
+              <ArrowRight size={12} />
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-3.5">
             {upcoming.map((b, idx) => (
               <div
                 key={b.id}
-                className="relative overflow-hidden p-3.5 sm:p-5 bg-[var(--color-card-bg)] hover:bg-[var(--color-surface-hover)] rounded-xl sm:rounded-2xl transition-all space-y-2.5 sm:space-y-4 shadow-sm"
+                className="relative overflow-hidden p-3.5 sm:p-4 bg-[var(--color-card-bg)] border border-[var(--color-border)] hover:border-[var(--color-primary)]/30 rounded-xl sm:rounded-2xl transition-all space-y-2 shadow-sm"
               >
-                {idx === 0 && <BorderBeam size={100} duration={9} colorFrom="var(--color-primary)" borderWidth={1.5} />}
+                {idx === 0 && <BorderBeam size={80} duration={9} colorFrom="var(--color-primary)" borderWidth={1.5} />}
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <h4 className="text-sm sm:text-base font-medium text-[var(--color-primary-text)] mb-1">{services[b.serviceId] || 'Service'}</h4>
+                    <h4 className="text-xs sm:text-sm font-medium text-[var(--color-primary-text)] mb-0.5">{services[b.serviceId] || 'Service'}</h4>
                     <StatusBadge status={b.status} />
                   </div>
                   <div className="text-right">
                     <div className="text-xs sm:text-sm font-semibold text-[var(--color-primary)] font-sans">{format(parseISO(b.bookingDate), 'MMM d, yyyy')}</div>
-                    <div className="font-sans text-[10px] sm:text-[11px] text-[var(--color-secondary-text)] uppercase tracking-wider">{format(parseISO(b.bookingDate), 'EEEE')}</div>
+                    <div className="font-sans text-[9px] sm:text-[10px] text-[var(--color-secondary-text)] uppercase tracking-wider">{format(parseISO(b.bookingDate), 'EEEE')}</div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 font-sans text-[11px] sm:text-xs text-[var(--color-secondary-text)]">
-                  <Clock size={12} className="text-[var(--color-primary)]" />
+                <div className="flex items-center gap-2 font-sans text-[10px] sm:text-[11px] text-[var(--color-secondary-text)]">
+                  <Clock size={11} className="text-[var(--color-primary)]" />
                   <span>{b.startTime}{b.endTime ? ` – ${b.endTime}` : ''}</span>
                 </div>
 
                 {(b.status === 'ACCEPTED' || b.status === 'PENDING') && (
-                  <div className="pt-2 sm:pt-3 border-t border-[var(--color-surface-raised)] flex justify-end">
+                  <div className="pt-2 border-t border-[var(--color-border)] flex justify-end">
                     {confirmingCancel === b.id ? (
                       <div className="flex items-center gap-1.5 bg-[var(--color-surface-raised)] p-1 rounded-lg">
-                        <span className="text-[9px] uppercase tracking-wider text-[var(--color-secondary-text)] px-1.5">Cancel booking?</span>
-                        <button onClick={() => handleCancel(b.id)} className="px-2.5 py-0.5 rounded bg-red-500/20 text-red-500 text-[9px] uppercase tracking-wider hover:bg-red-500 hover:text-white transition-colors cursor-pointer">Yes</button>
+                        <span className="text-[9px] uppercase tracking-wider text-[var(--color-secondary-text)] px-1">Cancel booking?</span>
+                        <button onClick={() => handleCancel(b.id)} className="px-2 py-0.5 rounded bg-red-500/20 text-red-500 text-[9px] uppercase tracking-wider hover:bg-red-500 hover:text-white transition-colors cursor-pointer">Yes</button>
                         <button onClick={() => setConfirmingCancel(null)} className="px-1.5 py-0.5 text-[var(--color-secondary-text)] text-[9px] uppercase tracking-wider hover:text-[var(--color-primary-text)] cursor-pointer">No</button>
                       </div>
                     ) : (
                       <button
                         onClick={() => setConfirmingCancel(b.id)}
-                        className="px-2.5 py-1 bg-[var(--color-surface-raised)] rounded-lg text-[var(--color-secondary-text)] font-sans text-[9px] sm:text-[10px] uppercase tracking-wider hover:text-red-500 transition-colors cursor-pointer"
+                        className="px-2.5 py-1 bg-[var(--color-surface-raised)] rounded-lg text-[var(--color-secondary-text)] font-sans text-[9px] uppercase tracking-wider hover:text-red-500 transition-colors cursor-pointer"
                       >
                         Cancel Appointment
                       </button>
@@ -596,25 +597,25 @@ export default function Dashboard() {
           5. RECENT ACTIVITY TIMELINE
          ════════════════════════════════════════ */}
       {recentActivity.length > 0 && (
-        <motion.div variants={itemVariants} className="space-y-4">
-          <div className="flex items-center gap-2.5">
-            <History size={16} className="text-[var(--color-primary)]" />
-            <h2 className="font-sans text-xs uppercase tracking-[0.2em] text-[var(--color-primary-text)] font-semibold">Recent Activity</h2>
+        <motion.div variants={itemVariants} className="space-y-2.5 sm:space-y-3">
+          <div className="flex items-center gap-2">
+            <History size={14} className="text-[var(--color-primary)]" />
+            <h2 className="font-sans text-[10px] sm:text-xs uppercase tracking-wider text-[var(--color-primary-text)] font-semibold">Recent Activity</h2>
           </div>
 
-          <div className="bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-2xl p-5 sm:p-6 shadow-md transition-colors">
-            <div className="space-y-4">
+          <div className="bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-xl sm:rounded-2xl p-3.5 sm:p-5 shadow-sm transition-colors">
+            <div className="space-y-3">
               {recentActivity.map((b) => (
-                <div key={b.id} className="flex items-start gap-3.5 pb-3 border-b border-[var(--color-border)] last:border-b-0 last:pb-0">
+                <div key={b.id} className="flex items-start gap-3 pb-2.5 border-b border-[var(--color-border)] last:border-b-0 last:pb-0">
                   <div className="mt-0.5">{getActivityIcon(b.status)}</div>
                   <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                     <div>
                       <span className="text-xs text-[var(--color-primary-text)] font-medium">{getActivityLabel(b)}</span>
-                      <span className="text-[11px] text-[var(--color-secondary-text)] block font-sans">
+                      <span className="text-[10px] sm:text-[11px] text-[var(--color-secondary-text)] block font-sans">
                         {format(parseISO(b.bookingDate), 'MMM d, yyyy')} at {b.startTime}
                       </span>
                     </div>
-                    <span className="font-sans text-[10px] uppercase tracking-wider text-[var(--color-muted-text)] shrink-0">
+                    <span className="font-sans text-[9px] sm:text-[10px] uppercase tracking-wider text-[var(--color-muted-text)] shrink-0">
                       {formatDistanceToNow(new Date(b.createdAt), { addSuffix: true })}
                     </span>
                   </div>

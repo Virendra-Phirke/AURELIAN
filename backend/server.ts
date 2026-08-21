@@ -6,7 +6,7 @@ import { auth } from './auth.js';
 import { apiRouter } from './routes/api.js';
 import { db } from './db/index.js';
 import { services } from './db/schema.js';
-import { sql } from 'drizzle-orm';
+import { sql, eq } from 'drizzle-orm';
 import dotenv from 'dotenv';
 dotenv.config();
 import fs from 'fs';
@@ -60,20 +60,49 @@ async function startServer() {
   app.listen(PORT, "0.0.0.0", async () => {
     console.log(`Server running on http://localhost:${PORT}`);
     
-    // Seed initial services if empty
+    // Seed initial services if empty & ensure schema updates
     try {
+      await db.execute(sql`
+        ALTER TABLE "services" ADD COLUMN IF NOT EXISTS "price" integer DEFAULT 0;
+        ALTER TABLE "shop_settings" ADD COLUMN IF NOT EXISTS "shopName" text DEFAULT 'Aurelian Salon';
+        ALTER TABLE "shop_settings" ADD COLUMN IF NOT EXISTS "shopTagline" text DEFAULT 'Luxury Grooming & Styling';
+        ALTER TABLE "shop_settings" ADD COLUMN IF NOT EXISTS "phone" text DEFAULT '+1 (555) 234-5678';
+        ALTER TABLE "shop_settings" ADD COLUMN IF NOT EXISTS "email" text DEFAULT 'contact@aureliansalon.com';
+        ALTER TABLE "shop_settings" ADD COLUMN IF NOT EXISTS "address" text DEFAULT '123 Luxury Ave, Beverly Hills, CA';
+        ALTER TABLE "shop_settings" ADD COLUMN IF NOT EXISTS "autoConfirmBookings" boolean DEFAULT true;
+        ALTER TABLE "shop_settings" ADD COLUMN IF NOT EXISTS "allowCancellation" boolean DEFAULT true;
+        ALTER TABLE "shop_settings" ADD COLUMN IF NOT EXISTS "cancellationCutoffHours" integer DEFAULT 2;
+        ALTER TABLE "shop_settings" ADD COLUMN IF NOT EXISTS "cancellationCutoffMinutes" integer DEFAULT 120;
+        ALTER TABLE "shop_settings" ADD COLUMN IF NOT EXISTS "breakStartTime" varchar(5) DEFAULT '13:00';
+        ALTER TABLE "shop_settings" ADD COLUMN IF NOT EXISTS "breakEndTime" varchar(5) DEFAULT '14:00';
+        ALTER TABLE "shop_settings" ADD COLUMN IF NOT EXISTS "breakEnabled" boolean DEFAULT false;
+        ALTER TABLE "shop_settings" ADD COLUMN IF NOT EXISTS "closedDays" text DEFAULT '0';
+        ALTER TABLE "shop_settings" ADD COLUMN IF NOT EXISTS "currencySymbol" varchar(5) DEFAULT '$';
+        ALTER TABLE "shop_settings" ADD COLUMN IF NOT EXISTS "announcementText" text DEFAULT '';
+        ALTER TABLE "shop_settings" ADD COLUMN IF NOT EXISTS "announcementActive" boolean DEFAULT false;
+      `);
+
       const existingServices = await db.select().from(services);
       if (existingServices.length === 0) {
         await db.insert(services).values([
-          { name: 'Haircut', durationMinutes: 30 },
-          { name: 'Shaving', durationMinutes: 20 },
-          { name: 'Zat Ke Bal', durationMinutes: 30 }
+          { name: 'Haircut', durationMinutes: 30, price: 75 },
+          { name: 'Shaving', durationMinutes: 20, price: 50 },
+          { name: 'Zat Ke Bal', durationMinutes: 30, price: 90 }
         ]);
         console.log("Seeded default services.");
-      } else if (existingServices.length === 2 && !existingServices.some(s => s.name.toLowerCase() === 'zat ke bal')) {
-        await db.insert(services).values([
-          { name: 'Zat Ke Bal', durationMinutes: 30 }
-        ]);
+      } else {
+        if (existingServices.length === 2 && !existingServices.some(s => s.name.toLowerCase() === 'zat ke bal')) {
+          await db.insert(services).values([
+            { name: 'Zat Ke Bal', durationMinutes: 30, price: 90 }
+          ]);
+        }
+        // Update any services that currently have 0 or null price to standard defaults
+        for (const svc of existingServices) {
+          if (!svc.price || svc.price === 0) {
+            const defaultPrice = svc.name.toLowerCase().includes('shav') ? 50 : svc.name.toLowerCase().includes('zat') ? 90 : 75;
+            await db.update(services).set({ price: defaultPrice }).where(eq(services.id, svc.id));
+          }
+        }
       }
 
       // Ensure database-level unique constraint on active booking slots

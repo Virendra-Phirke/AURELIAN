@@ -96,78 +96,93 @@ export default function Layout() {
         initial={{ x: -20, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="hidden md:flex shrink-0 w-64 flex-col border-r border-[var(--color-border)] bg-[var(--color-sidebar-bg)] z-20 transition-colors"
+        className="hidden md:flex shrink-0 w-60 lg:w-64 flex-col border-r border-[var(--color-border)] bg-[var(--color-sidebar-bg)] z-20 transition-colors"
       >
-        <div className="h-24 flex items-center px-8 border-b border-[var(--color-border)] shrink-0">
-          <Link to="/" className="text-2xl tracking-[0.35em] font-brand font-semibold text-[var(--color-primary)] uppercase">
+        <div className="h-16 sm:h-20 flex items-center px-5 sm:px-6 border-b border-[var(--color-border)] shrink-0">
+          <Link to="/" className="text-xl sm:text-2xl tracking-[0.3em] font-brand font-semibold text-[var(--color-primary)] uppercase">
             AURELIAN
           </Link>
         </div>
-        <nav className="flex-1 flex flex-col gap-2 p-6 overflow-y-auto">
+        <nav className="flex-1 flex flex-col gap-1.5 p-3.5 sm:p-4 overflow-y-auto">
           {session?.user ? (
             <>
               <Link
-                to="/booking"
-                className={`flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all ${
-                  location.pathname === '/booking'
-                    ? 'border-l-4 border-[var(--color-primary)] bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-medium shadow-sm'
-                    : 'text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-raised)] border-l-4 border-transparent'
+                to="/dashboard"
+                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all ${
+                  location.pathname === '/dashboard'
+                    ? 'border-l-[3px] border-[var(--color-primary)] bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-bold shadow-sm'
+                    : 'text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-raised)] border-l-[3px] border-transparent font-medium'
                 }`}
               >
-                <CalendarDays size={18} className={location.pathname === '/booking' ? 'text-[var(--color-primary)]' : 'text-[var(--color-secondary-text)]'} />
-                <span className="font-sans text-[11px] uppercase tracking-[0.2em]">Book</span>
+                <LayoutDashboard size={16} className={location.pathname === '/dashboard' ? 'text-[var(--color-primary)]' : 'text-[var(--color-secondary-text)]'} />
+                <span className="font-sans text-[11px] uppercase tracking-wider">Dashboard</span>
               </Link>
               <Link
-                to="/dashboard"
-                className={`flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all ${
-                  location.pathname === '/dashboard'
-                    ? 'border-l-4 border-[var(--color-primary)] bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-medium shadow-sm'
-                    : 'text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-raised)] border-l-4 border-transparent'
+                to="/booking"
+                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all ${
+                  location.pathname === '/booking'
+                    ? 'border-l-[3px] border-[var(--color-primary)] bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-bold shadow-sm'
+                    : 'text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-raised)] border-l-[3px] border-transparent font-medium'
                 }`}
               >
-                <LayoutDashboard size={18} className={location.pathname === '/dashboard' ? 'text-[var(--color-primary)]' : 'text-[var(--color-secondary-text)]'} />
-                <span className="font-sans text-[11px] uppercase tracking-[0.2em]">Dashboard</span>
+                <CalendarDays size={16} className={location.pathname === '/booking' ? 'text-[var(--color-primary)]' : 'text-[var(--color-secondary-text)]'} />
+                <span className="font-sans text-[11px] uppercase tracking-wider">Book</span>
               </Link>
               <Link
                 to="/settings"
-                className={`flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all ${
+                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all ${
                   location.pathname === '/settings'
-                    ? 'border-l-4 border-[var(--color-primary)] bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-medium shadow-sm'
-                    : 'text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-raised)] border-l-4 border-transparent'
+                    ? 'border-l-[3px] border-[var(--color-primary)] bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-bold shadow-sm'
+                    : 'text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-raised)] border-l-[3px] border-transparent font-medium'
                 }`}
               >
-                <Settings size={18} className={location.pathname === '/settings' ? 'text-[var(--color-primary)]' : 'text-[var(--color-secondary-text)]'} />
-                <span className="font-sans text-[11px] uppercase tracking-[0.2em]">Settings</span>
+                <Settings size={16} className={location.pathname === '/settings' ? 'text-[var(--color-primary)]' : 'text-[var(--color-secondary-text)]'} />
+                <span className="font-sans text-[11px] uppercase tracking-wider">Settings</span>
               </Link>
+
+              {session.user.role === 'ADMIN' && (
+                <div className="pt-2 mt-2 border-t border-[var(--color-border)]">
+                  <Link
+                    to="/admin"
+                    className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition-all font-sans text-[11px] uppercase tracking-wider font-semibold border border-[var(--color-primary)]/20"
+                  >
+                    <Shield size={16} />
+                    <span>Admin Panel</span>
+                  </Link>
+                </div>
+              )}
             </>
           ) : (
-            <Link to="/login" className="flex items-center gap-4 px-4 py-3.5 rounded-xl text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-raised)] border-l-4 border-transparent transition-colors">
-              <LogIn size={18} />
-              <span className="font-sans text-[11px] uppercase tracking-[0.2em]">Sign In</span>
+            <Link to="/login" className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-raised)] border-l-[3px] border-transparent transition-colors font-medium">
+              <LogIn size={16} />
+              <span className="font-sans text-[11px] uppercase tracking-wider">Sign In</span>
             </Link>
           )}
         </nav>
         {session?.user && (
-          <div className="p-6 border-t border-[var(--color-border)] shrink-0 flex flex-col items-center gap-4">
-            <div className="flex flex-col items-center text-center">
-              <div className="w-16 h-16 rounded-xl border border-[var(--color-primary)] p-1 bg-[var(--color-surface-raised)] shadow-[0_0_20px_rgba(229,195,120,0.2)] flex items-center justify-center overflow-hidden mb-2.5">
+          <div className="p-3.5 border-t border-[var(--color-border)] shrink-0 flex flex-col gap-2.5">
+            <div className="flex items-center gap-2.5 p-2 rounded-xl bg-[var(--color-surface-raised)]/60 border border-[var(--color-border)]">
+              <div className="w-8 h-8 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center overflow-hidden shrink-0">
                 {session.user.image ? (
-                  <img src={session.user.image} alt={session.user.name} className="w-full h-full rounded-lg object-cover" />
+                  <img src={session.user.image} alt={session.user.name} className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full rounded-lg bg-[var(--color-surface)] flex items-center justify-center">
-                    <User size={26} className="text-[var(--color-primary)]" />
-                  </div>
+                  <User size={15} className="text-[var(--color-primary)]" />
                 )}
               </div>
-              <div className="text-sm font-medium text-[var(--color-primary-text)] tracking-wide truncate max-w-[190px]">
-                {session.user.name || 'Client'}
+              <div className="min-w-0 flex-1">
+                <div className="text-xs font-medium text-[var(--color-primary-text)] truncate">
+                  {session.user.name || 'Client'}
+                </div>
+                <div className="text-[10px] text-[var(--color-secondary-text)] truncate font-sans">
+                  {session.user.email}
+                </div>
               </div>
             </div>
             <div className="flex items-center gap-2 w-full">
               <ThemeToggle className="shrink-0" />
               <button
                 onClick={handleLogout}
-                className="flex-1 py-2.5 rounded-lg text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:border-[var(--color-primary)] border border-[var(--color-border)] bg-[var(--color-surface)] font-sans text-[10px] uppercase tracking-[0.25em] transition-all cursor-pointer"
+                className="flex-1 py-1.5 px-3 rounded-lg text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:border-[var(--color-primary)]/40 border border-[var(--color-border)] bg-[var(--color-surface-raised)] font-sans text-[10px] uppercase tracking-wider font-semibold transition-all cursor-pointer text-center"
               >
                 Logout
               </button>
@@ -198,20 +213,20 @@ export default function Layout() {
         {session?.user ? (
           <>
             <Link
-              to="/booking"
-              className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${location.pathname === '/booking' ? 'text-[var(--color-primary)] font-semibold' : 'text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)]'
-                }`}
-            >
-              <CalendarDays size={18} />
-              <span className="font-sans text-[9px] uppercase tracking-wider">Book</span>
-            </Link>
-            <Link
               to="/dashboard"
               className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${location.pathname === '/dashboard' ? 'text-[var(--color-primary)] font-semibold' : 'text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)]'
                 }`}
             >
               <LayoutDashboard size={18} />
               <span className="font-sans text-[9px] uppercase tracking-wider">Dashboard</span>
+            </Link>
+            <Link
+              to="/booking"
+              className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${location.pathname === '/booking' ? 'text-[var(--color-primary)] font-semibold' : 'text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)]'
+                }`}
+            >
+              <CalendarDays size={18} />
+              <span className="font-sans text-[9px] uppercase tracking-wider">Book</span>
             </Link>
             <Link
               to="/settings"

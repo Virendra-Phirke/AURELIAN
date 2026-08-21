@@ -5,7 +5,7 @@ import { services, bookings, shopSettings, user, shopBreaks, shopHolidays, sessi
 import { eq, and, desc, gte, lte, sql, count } from "drizzle-orm";
 import redisClient from "../redis.js";
 import { z } from "zod";
-import { format, addMinutes, parse, isBefore, startOfDay, addDays } from "date-fns";
+import { format, addMinutes, subMinutes, parse, isBefore, isAfter, startOfDay, addDays } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
 
 export const apiRouter = express.Router();
@@ -43,7 +43,28 @@ apiRouter.get("/services", rateLimit("services", 300, 60), async (req, res) => {
 
 apiRouter.get("/shop", rateLimit("shop", 300, 60), async (req, res) => {
     const data = await db.select().from(shopSettings).limit(1);
-    res.json(data[0] || { openingTime: "09:00", closingTime: "18:00", slotDurationMinutes: 30, minimumAdvanceMinutes: 60, maximumAdvanceDays: 30 });
+    res.json(data[0] || { 
+        shopName: "Aurelian Salon",
+        shopTagline: "Luxury Grooming & Styling",
+        phone: "+1 (555) 234-5678",
+        email: "contact@aureliansalon.com",
+        address: "123 Luxury Ave, Beverly Hills, CA",
+        openingTime: "09:00", 
+        closingTime: "19:00", 
+        slotDurationMinutes: 30, 
+        minimumAdvanceMinutes: 60, 
+        maximumAdvanceDays: 30,
+        autoConfirmBookings: true,
+        allowCancellation: true,
+        cancellationCutoffHours: 2,
+        breakStartTime: "13:00",
+        breakEndTime: "14:00",
+        breakEnabled: false,
+        closedDays: "0",
+        currencySymbol: "$",
+        announcementText: "",
+        announcementActive: false
+    });
 });
 
 apiRouter.get("/availability", rateLimit("avail", 300, 60), async (req, res) => {
@@ -59,7 +80,17 @@ apiRouter.get("/availability", rateLimit("avail", 300, 60), async (req, res) => 
     if (!svc.length) return res.status(400).json({ error: "Service not found" });
 
     let settings = await db.select().from(shopSettings).limit(1);
-    const shop = settings[0] || { openingTime: "09:00", closingTime: "18:00", slotDurationMinutes: 30, minimumAdvanceMinutes: 60, maximumAdvanceDays: 30 };
+    const shop = settings[0] || { 
+        openingTime: "09:00", 
+        closingTime: "19:00", 
+        slotDurationMinutes: 30, 
+        minimumAdvanceMinutes: 60, 
+        maximumAdvanceDays: 30,
+        breakStartTime: "13:00",
+        breakEndTime: "14:00",
+        breakEnabled: false,
+        closedDays: "0"
+    };
 
     // Check holidays
     const holidays = await db.select().from(shopHolidays).where(eq(shopHolidays.date, date));
@@ -69,6 +100,14 @@ apiRouter.get("/availability", rateLimit("avail", 300, 60), async (req, res) => 
     }
 
     const dayOfWeek = parse(date, "yyyy-MM-dd", new Date()).getDay();
+
+    // Check closed days (e.g., Sunday = 0)
+    const closedDaysList = (shop.closedDays || "").split(',').map((d: string) => parseInt(d.trim())).filter((n: number) => !isNaN(n));
+    if (closedDaysList.includes(dayOfWeek)) {
+        await redisClient.set(cacheKey, JSON.stringify([]), { EX: 60 });
+        return res.json([]);
+    }
+
     const breaks = await db.select().from(shopBreaks).where(and(eq(shopBreaks.dayOfWeek, dayOfWeek), eq(shopBreaks.active, true)));
 
     const booked = await db.select().from(bookings).where(and(eq(bookings.bookingDate, date), eq(bookings.status, "ACCEPTED")));
@@ -92,8 +131,16 @@ apiRouter.get("/availability", rateLimit("avail", 300, 60), async (req, res) => 
             continue;
         }
 
-        // Check breaks
+        // Check shop breaks
         let inBreak = false;
+        if (shop.breakEnabled && shop.breakStartTime && shop.breakEndTime) {
+            const bStart = parse(`${date} ${shop.breakStartTime}`, "yyyy-MM-dd HH:mm", new Date());
+            const bEnd = parse(`${date} ${shop.breakEndTime}`, "yyyy-MM-dd HH:mm", new Date());
+            if ((current >= bStart && current < bEnd) || (slotEnd > bStart && slotEnd <= bEnd) || (current <= bStart && slotEnd >= bEnd)) {
+                inBreak = true;
+            }
+        }
+
         for (const b of breaks) {
             const bStart = parse(`${date} ${b.startTime}`, "yyyy-MM-dd HH:mm", new Date());
             const bEnd = parse(`${date} ${b.endTime}`, "yyyy-MM-dd HH:mm", new Date());
@@ -247,6 +294,30 @@ apiRouter.delete("/bookings/:id", requireAuth, async (req, res) => {
     if (b[0].status === "COMPLETED" || b[0].status === "CANCELLED" || b[0].status === "REJECTED") {
         return res.status(400).json({ error: "Cannot cancel this booking" });
     }
+
+    // Check cancellation policy from shop settings
+    const settings = await db.select().from(shopSettings).limit(1);
+    const shop = settings[0];
+    if (shop) {
+        if (shop.allowCancellation === false) {
+            return res.status(400).json({ error: "Online cancellation is disabled. Please contact the salon directly." });
+        }
+        const cutoffMinutes = shop.cancellationCutoffMinutes !== undefined && shop.cancellationCutoffMinutes !== null
+            ? shop.cancellationCutoffMinutes
+            : (shop.cancellationCutoffHours !== undefined ? shop.cancellationCutoffHours * 60 : 120);
+
+        if (cutoffMinutes > 0) {
+            const bookingStart = parse(`${b[0].bookingDate} ${b[0].startTime}`, "yyyy-MM-dd HH:mm", new Date());
+            const cutoffTime = subMinutes(bookingStart, cutoffMinutes);
+            if (isAfter(new Date(), cutoffTime)) {
+                const displayTime = cutoffMinutes >= 60 && cutoffMinutes % 60 === 0
+                    ? `${cutoffMinutes / 60} hour(s)`
+                    : `${cutoffMinutes} minute(s)`;
+                return res.status(400).json({ error: `Cancellations must be made at least ${displayTime} before appointment time.` });
+            }
+        }
+    }
+
     await db.update(bookings).set({ status: "CANCELLED", cancelledAt: new Date() }).where(eq(bookings.id, b[0].id));
 
     const svc = await db.select().from(services).where(eq(services.id, b[0].serviceId)).limit(1);
@@ -356,20 +427,50 @@ apiRouter.post("/admin/bookings/:id/:action", requireAdmin, async (req, res) => 
 });
 
 apiRouter.post("/admin/services", requireAdmin, async (req, res) => {
-    const schema = z.object({ name: z.string(), durationMinutes: z.number() });
+    const schema = z.object({ 
+        name: z.string().min(1), 
+        durationMinutes: z.number().min(1),
+        price: z.number().min(0).optional().default(0)
+    });
     const p = schema.safeParse(req.body);
-    if (!p.success) return res.status(400).json({ error: "Invalid" });
+    if (!p.success) return res.status(400).json({ error: "Invalid service data" });
     const svc = await db.insert(services).values(p.data).returning();
     res.json(svc[0]);
 });
 
 apiRouter.patch("/admin/settings", requireAdmin, async (req, res) => {
+    const schema = z.object({
+        shopName: z.string().optional(),
+        shopTagline: z.string().optional(),
+        phone: z.string().optional(),
+        email: z.string().optional(),
+        address: z.string().optional(),
+        openingTime: z.string().optional(),
+        closingTime: z.string().optional(),
+        slotDurationMinutes: z.number().optional(),
+        minimumAdvanceMinutes: z.number().optional(),
+        maximumAdvanceDays: z.number().optional(),
+        autoConfirmBookings: z.boolean().optional(),
+        allowCancellation: z.boolean().optional(),
+        cancellationCutoffHours: z.number().optional(),
+        cancellationCutoffMinutes: z.number().optional(),
+        breakStartTime: z.string().optional(),
+        breakEndTime: z.string().optional(),
+        breakEnabled: z.boolean().optional(),
+        closedDays: z.string().optional(),
+        currencySymbol: z.string().optional(),
+        announcementText: z.string().optional(),
+        announcementActive: z.boolean().optional(),
+    });
+    const parsed = schema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ error: "Invalid settings data", details: parsed.error.issues });
+
     const settings = await db.select().from(shopSettings).limit(1);
     if (settings.length) {
-        const s = await db.update(shopSettings).set({ ...req.body, updatedAt: new Date() }).where(eq(shopSettings.id, settings[0].id)).returning();
+        const s = await db.update(shopSettings).set({ ...parsed.data, updatedAt: new Date() }).where(eq(shopSettings.id, settings[0].id)).returning();
         res.json(s[0]);
     } else {
-        const s = await db.insert(shopSettings).values(req.body).returning();
+        const s = await db.insert(shopSettings).values(parsed.data as any).returning();
         res.json(s[0]);
     }
 });
@@ -384,8 +485,9 @@ apiRouter.get("/admin/services", requireAdmin, async (req, res) => {
 apiRouter.patch("/admin/services/:id", requireAdmin, async (req, res) => {
     const serviceId = req.params.id as string;
     const schema = z.object({
-        name: z.string().optional(),
-        durationMinutes: z.number().optional(),
+        name: z.string().min(1).optional(),
+        durationMinutes: z.number().min(1).optional(),
+        price: z.number().min(0).optional(),
         active: z.boolean().optional()
     });
     const p = schema.safeParse(req.body);
@@ -398,6 +500,23 @@ apiRouter.patch("/admin/services/:id", requireAdmin, async (req, res) => {
 
     if (!svc.length) return res.status(404).json({ error: "Service not found" });
     res.json(svc[0]);
+});
+
+// Admin: Delete a service
+apiRouter.delete("/admin/services/:id", requireAdmin, async (req, res) => {
+    const serviceId = req.params.id as string;
+    try {
+        const svc = await db.select().from(services).where(eq(services.id, serviceId)).limit(1);
+        if (!svc.length) return res.status(404).json({ error: "Service not found" });
+
+        // Delete any associated bookings first to prevent FK constraint issues
+        await db.delete(bookings).where(eq(bookings.serviceId, serviceId));
+        await db.delete(services).where(eq(services.id, serviceId));
+
+        res.json({ success: true, message: "Service deleted successfully" });
+    } catch (e: any) {
+        res.status(500).json({ error: e.message || "Failed to delete service" });
+    }
 });
 
 // Admin: Toggle customer role

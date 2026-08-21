@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo, KeyboardEvent } from 'react';
+import { Link } from 'react-router-dom';
 import { format, parseISO, subDays, isAfter } from 'date-fns';
 import { motion, AnimatePresence } from 'motion/react';
-import { LayoutDashboard, CalendarDays, Users, Scissors, Settings as SettingsIcon, ChevronRight, ChevronDown, Clock, User, Shield, Lock, AlertCircle, AlertTriangle, Trash2, Power, Camera, Download, Search, RefreshCw, X, Check } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, Users, Scissors, Settings as SettingsIcon, ChevronRight, ChevronDown, Clock, User, Shield, Lock, AlertCircle, AlertTriangle, Trash2, Power, Camera, Download, Search, RefreshCw, X, Check, Plus, DollarSign, Sparkles, Edit2, Store, Phone, Mail, MapPin, Coffee, Sliders, Megaphone, ArrowLeft } from 'lucide-react';
 import { authClient } from '../lib/auth';
 import { DataPagination } from '../components/ui/pagination';
 import { Badge } from '../components/ui/badge';
@@ -39,6 +40,7 @@ type Service = {
   id: string;
   name: string;
   durationMinutes: number;
+  price?: number;
   active: boolean;
   createdAt: string;
 };
@@ -195,20 +197,20 @@ function StatCard({ label, value, icon, accent = false, pathData }: { label: str
   return (
     <motion.div
       variants={itemVariants}
-      whileHover={{ y: -4, boxShadow: '0 10px 30px rgba(229,195,120,0.15)' }}
-      className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-[var(--color-card-bg)] p-2.5 sm:p-6 flex flex-col justify-between min-h-[75px] sm:aspect-[4/3] transition-all group shadow-sm sm:shadow-md"
+      whileHover={{ y: -2, boxShadow: '0 6px 20px rgba(229,195,120,0.12)' }}
+      className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-[var(--color-card-bg)] border border-[var(--color-border)] p-3 sm:p-4 flex flex-col justify-between h-20 sm:h-24 transition-all group shadow-sm hover:shadow-md"
     >
-      {accent && <BorderBeam size={80} duration={8} colorFrom="var(--color-primary)" borderWidth={1.5} />}
-      <div className="flex items-center gap-1.5 sm:gap-2 z-10">
-        <div className="text-[var(--color-primary)] scale-75 sm:scale-100">{icon}</div>
-        <span className="font-sans text-[8.5px] sm:text-[11px] uppercase tracking-wider font-bold text-[var(--color-secondary-text)] truncate">{label}</span>
+      {accent && <BorderBeam size={60} duration={8} colorFrom="var(--color-primary)" borderWidth={1.5} />}
+      <div className="flex items-center gap-2 z-10">
+        <div className="text-[var(--color-primary)] scale-90 sm:scale-100">{icon}</div>
+        <span className="font-sans text-[9px] sm:text-[10px] uppercase tracking-wider font-bold text-[var(--color-secondary-text)] truncate">{label}</span>
       </div>
-      <div className={`text-xl sm:text-5xl font-semibold z-10 font-sans tracking-tight mt-0.5 sm:mt-0 ${accent ? 'text-[var(--color-primary)]' : 'text-[var(--color-primary-text)]'}`}>
+      <div className={`text-lg sm:text-2xl font-bold z-10 font-sans tracking-tight ${accent ? 'text-[var(--color-primary)]' : 'text-[var(--color-primary-text)]'}`}>
         <NumberTicker value={numValue} />
       </div>
       
       {/* Sparkline */}
-      <div className="absolute bottom-0 left-0 right-0 h-8 sm:h-16 opacity-30 group-hover:opacity-90 transition-opacity duration-500">
+      <div className="absolute bottom-0 left-0 right-0 h-6 sm:h-8 opacity-25 group-hover:opacity-75 transition-opacity duration-500">
         <svg viewBox="0 0 100 40" preserveAspectRatio="none" className="w-full h-full">
           <defs>
             <linearGradient id={`grad-${label.replace(/\s+/g, '')}`} x1="0" x2="0" y1="0" y2="1">
@@ -249,21 +251,19 @@ function Toast({ message, type = 'success', onDone }: { message: string; type?: 
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: -20, scale: 0.9 }}
+      initial={{ opacity: 0, y: -15, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: -20, scale: 0.9 }}
-      className={`fixed top-6 right-6 z-50 px-6 py-4 rounded-xl border ${
+      exit={{ opacity: 0, y: -15, scale: 0.95 }}
+      className={`fixed top-6 right-6 z-50 px-5 py-3.5 rounded-xl border ${
         type === 'error'
-          ? 'bg-[#2a0808] border-red-500/30 text-red-400'
-          : 'bg-[#111] border-[#C5A059]/30 text-[#C5A059]'
-      } font-sans text-xs uppercase tracking-widest shadow-[0_10px_40px_rgba(0,0,0,0.8)]`}
+          ? 'bg-red-950/30 border-red-500/30 text-red-500'
+          : 'bg-[var(--color-surface-raised)] border-[var(--color-primary)]/40 text-[var(--color-primary)]'
+      } font-sans text-xs uppercase tracking-widest shadow-2xl flex items-center gap-3 font-semibold`}
       role="alert"
       aria-live="polite"
     >
-      <div className="flex items-center gap-3">
-        {type === 'success' ? <div className="w-2 h-2 rounded-full bg-[#C5A059] animate-pulse" /> : <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />}
-        {message}
-      </div>
+      <div className={`w-2 h-2 rounded-full ${type === 'error' ? 'bg-red-500' : 'bg-[var(--color-primary)]'}`} />
+      <span>{message}</span>
     </motion.div>
   );
 }
@@ -291,12 +291,20 @@ export default function Admin() {
   const [bookingSearch, setBookingSearch] = useState('');
   const [customerSearch, setCustomerSearch] = useState('');
 
-  // Service form
+  // Service Modal & Form State
+  const [isAddServiceOpen, setIsAddServiceOpen] = useState(false);
   const [newServiceName, setNewServiceName] = useState('');
-  const [newServiceDuration, setNewServiceDuration] = useState(30);
-  const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
-  const [editServiceName, setEditServiceName] = useState('');
-  const [editServiceDuration, setEditServiceDuration] = useState(30);
+  const [newServicePrice, setNewServicePrice] = useState<number | ''>(50);
+  const [newServiceDuration, setNewServiceDuration] = useState<number>(30);
+  const [isCreatingService, setIsCreatingService] = useState(false);
+
+  // Service Setup / Edit Modal State
+  const [selectedServiceForSetup, setSelectedServiceForSetup] = useState<Service | null>(null);
+  const [setupServiceName, setSetupServiceName] = useState('');
+  const [setupServicePrice, setSetupServicePrice] = useState<number | ''>(50);
+  const [setupServiceDuration, setSetupServiceDuration] = useState<number>(30);
+  const [setupServiceActive, setSetupServiceActive] = useState<boolean>(true);
+  const [isSavingSetup, setIsSavingSetup] = useState(false);
 
   // Customer Edit form
   const [editingCustomerId, setEditingCustomerId] = useState<string | null>(null);
@@ -489,19 +497,6 @@ export default function Admin() {
     }
   };
 
-  const handleToggleRole = async (id: string) => {
-    setCustomers(prev => prev.map(c => c.id === id ? { ...c, role: c.role === 'ADMIN' ? 'USER' : 'ADMIN' } : c));
-    showToast('Role updated');
-
-    const res = await fetch(`/api/admin/customers/${id}/role`, { method: 'PATCH' });
-    if (res.ok) {
-      fetchAll(false);
-    } else {
-      fetchAll(false);
-      const data = await res.json();
-      showToast(data.error || 'Failed to update role', 'error');
-    }
-  };
 
   const handleSaveCustomerEdit = async (id: string) => {
     const trimmedName = editCustomerName.trim();
@@ -531,21 +526,95 @@ export default function Admin() {
   };
 
   // --- Service actions ---
-  const handleAddService = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newServiceName.trim()) return;
-    const res = await fetch('/api/admin/services', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: newServiceName.trim(), durationMinutes: newServiceDuration }),
-    });
-    if (res.ok) {
-      setNewServiceName('');
-      setNewServiceDuration(30);
-      fetchAll(false);
-      showToast('Service created');
-    } else {
+  const handleAddService = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const trimmedName = newServiceName.trim();
+    if (!trimmedName) return showToast('Please enter a service name', 'error');
+
+    const duration = Number(newServiceDuration) || 30;
+    const price = newServicePrice === '' ? 0 : Number(newServicePrice);
+
+    setIsCreatingService(true);
+    try {
+      const res = await fetch('/api/admin/services', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          name: trimmedName, 
+          durationMinutes: duration,
+          price: price >= 0 ? price : 0
+        }),
+      });
+      if (res.ok) {
+        setNewServiceName('');
+        setNewServiceDuration(30);
+        setNewServicePrice(50);
+        setIsAddServiceOpen(false);
+        fetchAll(false);
+        showToast('Service created successfully');
+      } else {
+        const err = await res.json().catch(() => ({}));
+        showToast(err.error || 'Failed to create service', 'error');
+      }
+    } catch {
       showToast('Failed to create service', 'error');
+    } finally {
+      setIsCreatingService(false);
+    }
+  };
+
+  const openServiceSetup = (s: Service) => {
+    setSelectedServiceForSetup(s);
+    setSetupServiceName(s.name);
+    setSetupServiceDuration(s.durationMinutes);
+    setSetupServicePrice(s.price !== undefined && s.price !== null ? s.price : (s.name.toLowerCase().includes('shav') ? 50 : s.name.toLowerCase().includes('zat') ? 90 : 75));
+    setSetupServiceActive(s.active);
+  };
+
+  const handleSaveServiceSetup = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!selectedServiceForSetup) return;
+    const trimmedName = setupServiceName.trim();
+    if (!trimmedName) return showToast('Service name cannot be empty', 'error');
+    const duration = Number(setupServiceDuration) || 30;
+    const price = setupServicePrice === '' ? 0 : Number(setupServicePrice);
+    const active = setupServiceActive;
+
+    setIsSavingSetup(true);
+    // Optimistic UI update
+    setAllServices(prev => prev.map(s => s.id === selectedServiceForSetup.id ? {
+      ...s,
+      name: trimmedName,
+      durationMinutes: duration,
+      price,
+      active
+    } : s));
+    setServiceMap(prev => ({ ...prev, [selectedServiceForSetup.id]: trimmedName }));
+    const currentId = selectedServiceForSetup.id;
+    setSelectedServiceForSetup(null);
+    showToast('Service setup updated');
+
+    try {
+      const res = await fetch(`/api/admin/services/${currentId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: trimmedName,
+          durationMinutes: duration,
+          price,
+          active
+        }),
+      });
+      if (res.ok) {
+        fetchAll(false);
+      } else {
+        fetchAll(false);
+        showToast('Failed to update service setup', 'error');
+      }
+    } catch {
+      showToast('Network error updating service', 'error');
+    } finally {
+      setIsSavingSetup(false);
     }
   };
 
@@ -568,26 +637,38 @@ export default function Admin() {
     }
   };
 
-  const handleSaveServiceEdit = async (id: string) => {
-    const trimmedName = editServiceName.trim();
-    if (!trimmedName) return showToast('Service name cannot be empty', 'error');
-
-    // Optimistic UI update (instant, no screen reload)
-    setAllServices(prev => prev.map(s => s.id === id ? { ...s, name: trimmedName, durationMinutes: editServiceDuration } : s));
-    setServiceMap(prev => ({ ...prev, [id]: trimmedName }));
-    setEditingServiceId(null);
-    showToast('Service updated');
-
-    const res = await fetch(`/api/admin/services/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: trimmedName, durationMinutes: editServiceDuration }),
+  const requestDeleteService = (s: Service) => {
+    if (selectedServiceForSetup?.id === s.id) {
+      setSelectedServiceForSetup(null);
+    }
+    setConfirmModal({
+      isOpen: true,
+      title: `Delete "${s.name}"?`,
+      description: `Are you sure you want to permanently delete "${s.name}"? This service will be immediately removed from the catalog and booking system.`,
+      confirmText: 'Delete Service',
+      variant: 'danger',
+      icon: 'trash',
+      onConfirm: () => handleDeleteService(s.id),
     });
+  };
+
+  const handleDeleteService = async (id: string) => {
+    // Optimistic update
+    setAllServices(prev => prev.filter(s => s.id !== id));
+    setServiceMap(prev => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+    showToast('Service deleted successfully');
+
+    const res = await fetch(`/api/admin/services/${id}`, { method: 'DELETE' });
     if (res.ok) {
       fetchAll(false);
     } else {
       fetchAll(false);
-      showToast('Failed to update service', 'error');
+      const data = await res.json().catch(() => ({}));
+      showToast(data.error || 'Failed to delete service', 'error');
     }
   };
 
@@ -604,20 +685,6 @@ export default function Admin() {
     });
   };
 
-  const requestToggleRole = (c: Customer) => {
-    const isDemoting = c.role === 'ADMIN';
-    setConfirmModal({
-      isOpen: true,
-      title: isDemoting ? `Demote ${c.name}?` : `Promote ${c.name}?`,
-      description: isDemoting
-        ? `Revoke administrator access from "${c.name}". They will lose access to the admin dashboard and management tools.`
-        : `Grant administrator privileges to "${c.name}". They will have full access to manage all bookings, shop services, and customers.`,
-      confirmText: isDemoting ? 'Demote to User' : 'Promote to Admin',
-      variant: isDemoting ? 'warning' : 'primary',
-      icon: 'shield',
-      onConfirm: () => handleToggleRole(c.id),
-    });
-  };
 
   const requestToggleServiceActive = (s: Service) => {
     if (s.active) {
@@ -661,8 +728,8 @@ export default function Admin() {
 
   // --- Settings ---
   const [savingSettings, setSavingSettings] = useState(false);
-  const handleSettingsSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSettingsSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     setSavingSettings(true);
     const res = await fetch('/api/admin/settings', {
       method: 'PATCH',
@@ -670,7 +737,7 @@ export default function Admin() {
       body: JSON.stringify(settings),
     });
     if (res.ok) {
-      showToast('Settings saved');
+      showToast('Shop configuration saved successfully');
       fetchAll(false);
     } else {
       showToast('Failed to save settings', 'error');
@@ -792,24 +859,376 @@ export default function Admin() {
       {/* Responsive Confirmation Box */}
       <ConfirmationModal config={confirmModal} onClose={() => setConfirmModal(null)} />
 
+      {/* Add New Service Modal Dialog */}
+      <Dialog open={isAddServiceOpen} onOpenChange={(open) => { if (!open) setIsAddServiceOpen(false); }}>
+        <DialogContent onClose={() => setIsAddServiceOpen(false)} className="max-w-[94vw] sm:max-w-lg p-5 sm:p-7 rounded-2xl sm:rounded-3xl bg-[var(--color-card-bg)] shadow-2xl border border-[var(--color-border)]">
+          <form onSubmit={handleAddService} className="space-y-4 sm:space-y-5">
+            <div className="flex items-center gap-3 pb-3 border-b border-[var(--color-border)]">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center shrink-0 border border-[var(--color-primary)]/20">
+                <Scissors size={20} className="sm:w-5 sm:h-5" />
+              </div>
+              <div>
+                <h2 className="font-serif text-lg sm:text-xl font-medium text-[var(--color-primary-text)]">
+                  Add New Service
+                </h2>
+                <p className="font-sans text-[11px] sm:text-xs text-[var(--color-secondary-text)]">
+                  Configure service name, pricing, and appointment duration
+                </p>
+              </div>
+            </div>
+
+            {/* Service Name */}
+            <div className="space-y-1.5">
+              <label className="block font-sans text-[10px] sm:text-[11px] uppercase tracking-wider text-[var(--color-primary-text)] font-semibold">
+                Service Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={newServiceName}
+                onChange={e => setNewServiceName(e.target.value)}
+                placeholder="e.g. Haircut & Beard Trim"
+                required
+                autoFocus
+                className="w-full px-4 py-2.5 sm:py-3 rounded-xl bg-[var(--color-surface-raised)] border border-[var(--color-border)] text-[var(--color-primary-text)] placeholder:text-[var(--color-muted-text)] focus:border-[var(--color-primary)] focus:outline-none font-sans text-xs sm:text-sm transition-all"
+              />
+            </div>
+
+            {/* Charges (Price) & Duration (Time) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              {/* Charges */}
+              <div className="space-y-1.5">
+                <label className="block font-sans text-[10px] sm:text-[11px] uppercase tracking-wider text-[var(--color-primary-text)] font-semibold">
+                  Charges / Price ($) <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-primary)] font-bold text-sm">$</span>
+                  <input
+                    type="number"
+                    min={0}
+                    step={1}
+                    value={newServicePrice}
+                    onChange={e => setNewServicePrice(e.target.value === '' ? '' : parseInt(e.target.value) || 0)}
+                    placeholder="50"
+                    required
+                    className="w-full pl-8 pr-4 py-2.5 sm:py-3 rounded-xl bg-[var(--color-surface-raised)] border border-[var(--color-border)] text-[var(--color-primary-text)] placeholder:text-[var(--color-muted-text)] focus:border-[var(--color-primary)] focus:outline-none font-sans text-xs sm:text-sm transition-all"
+                  />
+                </div>
+              </div>
+
+              {/* Duration */}
+              <div className="space-y-1.5">
+                <label className="block font-sans text-[10px] sm:text-[11px] uppercase tracking-wider text-[var(--color-primary-text)] font-semibold">
+                  Duration (Time) <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    min={5}
+                    max={480}
+                    step={5}
+                    value={newServiceDuration}
+                    onChange={e => setNewServiceDuration(parseInt(e.target.value) || 30)}
+                    required
+                    className="w-full pl-4 pr-14 py-2.5 sm:py-3 rounded-xl bg-[var(--color-surface-raised)] border border-[var(--color-border)] text-[var(--color-primary-text)] placeholder:text-[var(--color-muted-text)] focus:border-[var(--color-primary)] focus:outline-none font-sans text-xs sm:text-sm transition-all"
+                  />
+                  <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--color-muted-text)] font-sans text-[10px] sm:text-xs uppercase tracking-wider font-semibold">
+                    Mins
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Duration Quick Presets */}
+            <div className="space-y-1.5 pt-0.5">
+              <span className="font-sans text-[9px] uppercase tracking-wider text-[var(--color-secondary-text)] font-semibold">
+                Quick Duration Presets:
+              </span>
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                {[15, 20, 30, 45, 60, 90].map(mins => (
+                  <button
+                    key={mins}
+                    type="button"
+                    onClick={() => setNewServiceDuration(mins)}
+                    className={`px-2.5 py-1 rounded-lg font-sans text-[10px] sm:text-xs font-semibold transition-all cursor-pointer ${
+                      newServiceDuration === mins
+                        ? 'bg-[var(--color-primary)] text-black shadow-sm font-bold'
+                        : 'bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-hover)]'
+                    }`}
+                  >
+                    {mins}m
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Live Preview Card */}
+            <div className="p-3 sm:p-3.5 rounded-xl bg-[var(--color-surface-raised)]/70 border border-[var(--color-border)] space-y-1">
+              <span className="font-sans text-[9px] uppercase tracking-wider text-[var(--color-muted-text)] font-semibold">Preview</span>
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center shrink-0">
+                    <Scissors size={14} />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-xs font-semibold text-[var(--color-primary-text)] truncate">
+                      {newServiceName.trim() || 'Service Name Preview'}
+                    </div>
+                    <div className="text-[10px] text-[var(--color-secondary-text)] font-sans">
+                      {newServiceDuration || 30} mins duration
+                    </div>
+                  </div>
+                </div>
+                <div className="text-sm font-bold font-sans text-[var(--color-primary)] shrink-0">
+                  ${newServicePrice === '' ? 0 : newServicePrice}
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer / Actions */}
+            <div className="flex items-center justify-end gap-2 sm:gap-2.5 pt-3 border-t border-[var(--color-border)]">
+              <button
+                type="button"
+                onClick={() => setIsAddServiceOpen(false)}
+                className="px-3.5 py-2 sm:py-2.5 rounded-xl bg-[var(--color-surface-raised)] hover:bg-[var(--color-surface-hover)] text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] font-sans text-[11px] sm:text-xs uppercase tracking-wider font-semibold transition-all cursor-pointer whitespace-nowrap"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isCreatingService}
+                className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-black font-sans text-[11px] sm:text-xs uppercase tracking-wider font-bold transition-all shadow-md cursor-pointer disabled:opacity-60 flex items-center gap-1.5 whitespace-nowrap"
+              >
+                {isCreatingService ? (
+                  <>
+                    <div className="w-3 h-3 border-2 border-black border-t-transparent rounded-full animate-spin shrink-0" />
+                    <span>Adding...</span>
+                  </>
+                ) : (
+                  <>
+                    <Plus size={14} className="stroke-[2.5] shrink-0" />
+                    <span>Add Service</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Service Setup & Edit Menu Modal Dialog */}
+      <Dialog open={!!selectedServiceForSetup} onOpenChange={(open) => { if (!open) setSelectedServiceForSetup(null); }}>
+        <DialogContent onClose={() => setSelectedServiceForSetup(null)} className="max-w-[94vw] sm:max-w-lg p-5 sm:p-7 rounded-2xl sm:rounded-3xl bg-[var(--color-card-bg)] shadow-2xl border border-[var(--color-border)]">
+          {selectedServiceForSetup && (
+            <form onSubmit={handleSaveServiceSetup} className="space-y-4 sm:space-y-5">
+              <div className="flex items-center justify-between gap-3 pb-3 border-b border-[var(--color-border)]">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center shrink-0 border border-[var(--color-primary)]/20">
+                    <Scissors size={20} className="sm:w-5 sm:h-5" />
+                  </div>
+                  <div>
+                    <h2 className="font-serif text-lg sm:text-xl font-medium text-[var(--color-primary-text)]">
+                      Service Setup
+                    </h2>
+                    <p className="font-sans text-[11px] sm:text-xs text-[var(--color-secondary-text)]">
+                      Configure service details, duration, pricing & availability
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Service Name */}
+              <div className="space-y-1.5">
+                <label className="block font-sans text-[10px] sm:text-[11px] uppercase tracking-wider text-[var(--color-primary-text)] font-semibold">
+                  Service Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={setupServiceName}
+                  onChange={e => setSetupServiceName(e.target.value)}
+                  placeholder="e.g. Precision Haircut"
+                  required
+                  className="w-full px-4 py-2.5 sm:py-3 rounded-xl bg-[var(--color-surface-raised)] border border-[var(--color-border)] text-[var(--color-primary-text)] placeholder:text-[var(--color-muted-text)] focus:border-[var(--color-primary)] focus:outline-none font-sans text-xs sm:text-sm transition-all"
+                />
+              </div>
+
+              {/* Charges (Price) & Duration (Time) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                {/* Charges */}
+                <div className="space-y-1.5">
+                  <label className="block font-sans text-[10px] sm:text-[11px] uppercase tracking-wider text-[var(--color-primary-text)] font-semibold">
+                    Charges / Price ($) <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-primary)] font-bold text-sm">$</span>
+                    <input
+                      type="number"
+                      min={0}
+                      step={1}
+                      value={setupServicePrice}
+                      onChange={e => setSetupServicePrice(e.target.value === '' ? '' : parseInt(e.target.value) || 0)}
+                      placeholder="50"
+                      required
+                      className="w-full pl-8 pr-4 py-2.5 sm:py-3 rounded-xl bg-[var(--color-surface-raised)] border border-[var(--color-border)] text-[var(--color-primary-text)] placeholder:text-[var(--color-muted-text)] focus:border-[var(--color-primary)] focus:outline-none font-sans text-xs sm:text-sm transition-all"
+                    />
+                  </div>
+                </div>
+
+                {/* Duration */}
+                <div className="space-y-1.5">
+                  <label className="block font-sans text-[10px] sm:text-[11px] uppercase tracking-wider text-[var(--color-primary-text)] font-semibold">
+                    Duration (Time) <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      min={5}
+                      max={480}
+                      step={5}
+                      value={setupServiceDuration}
+                      onChange={e => setSetupServiceDuration(parseInt(e.target.value) || 30)}
+                      required
+                      className="w-full pl-4 pr-14 py-2.5 sm:py-3 rounded-xl bg-[var(--color-surface-raised)] border border-[var(--color-border)] text-[var(--color-primary-text)] placeholder:text-[var(--color-muted-text)] focus:border-[var(--color-primary)] focus:outline-none font-sans text-xs sm:text-sm transition-all"
+                    />
+                    <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--color-muted-text)] font-sans text-[10px] sm:text-xs uppercase tracking-wider font-semibold">
+                      Mins
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Duration Quick Presets */}
+              <div className="space-y-1.5 pt-0.5">
+                <span className="font-sans text-[9px] uppercase tracking-wider text-[var(--color-secondary-text)] font-semibold">
+                  Quick Duration Presets:
+                </span>
+                <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                  {[15, 20, 30, 45, 60, 90].map(mins => (
+                    <button
+                      key={mins}
+                      type="button"
+                      onClick={() => setSetupServiceDuration(mins)}
+                      className={`px-2.5 py-1 rounded-lg font-sans text-[10px] sm:text-xs font-semibold transition-all cursor-pointer ${
+                        setupServiceDuration === mins
+                          ? 'bg-[var(--color-primary)] text-black shadow-sm font-bold'
+                          : 'bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-hover)]'
+                      }`}
+                    >
+                      {mins}m
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Service Status Toggle Card */}
+              <div className="p-3 sm:p-3.5 rounded-xl bg-[var(--color-surface-raised)] border border-[var(--color-border)] flex items-center justify-between gap-3">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-[var(--color-primary-text)] font-sans">
+                      Active Status
+                    </span>
+                    <span className={`px-2 py-0.5 rounded-full text-[9px] uppercase tracking-widest font-semibold border ${
+                      setupServiceActive
+                        ? 'text-emerald-500 border-emerald-500/30 bg-emerald-500/10'
+                        : 'text-[var(--color-muted-text)] border-[var(--color-border)] bg-[var(--color-card-bg)]'
+                    }`}>
+                      {setupServiceActive ? 'Active' : 'Inactive'}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-[var(--color-secondary-text)] font-sans mt-0.5">
+                    {setupServiceActive ? 'Available for customer bookings online' : 'Hidden from customer booking options'}
+                  </p>
+                </div>
+                <Switch
+                  checked={setupServiceActive}
+                  onCheckedChange={setSetupServiceActive}
+                  aria-label="Toggle active status in setup"
+                />
+              </div>
+
+              {/* Modal Footer / Actions */}
+              <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-2.5 pt-3 border-t border-[var(--color-border)]">
+                {/* Delete Button */}
+                <button
+                  type="button"
+                  onClick={() => requestDeleteService(selectedServiceForSetup)}
+                  className="w-full sm:w-auto px-3.5 py-2 sm:py-2.5 rounded-xl text-red-500 hover:bg-red-500/10 border border-red-500/30 hover:border-red-500/50 font-sans text-[11px] sm:text-xs uppercase tracking-wider font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm whitespace-nowrap"
+                >
+                  <Trash2 size={13} className="shrink-0" />
+                  <span>Delete Service</span>
+                </button>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedServiceForSetup(null)}
+                    className="flex-1 sm:flex-none px-3.5 py-2 sm:py-2.5 rounded-xl bg-[var(--color-surface-raised)] hover:bg-[var(--color-surface-hover)] text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] font-sans text-[11px] sm:text-xs uppercase tracking-wider font-semibold transition-all cursor-pointer text-center whitespace-nowrap"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSavingSetup}
+                    className="flex-1 sm:flex-none px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-black font-sans text-[11px] sm:text-xs uppercase tracking-wider font-bold transition-all shadow-md cursor-pointer disabled:opacity-60 flex items-center justify-center gap-1.5 text-center whitespace-nowrap"
+                  >
+                    {isSavingSetup ? (
+                      <>
+                        <div className="w-3 h-3 border-2 border-black border-t-transparent rounded-full animate-spin shrink-0" />
+                        <span>Saving...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Check size={14} className="stroke-[2.5] shrink-0" />
+                        <span>Save Changes</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Floating Action Button (+) for Services (Mobile Only - Hidden on PC) */}
+      {activeTab === 'services' && (
+        <motion.button
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0, opacity: 0 }}
+          whileHover={{ scale: 1.08, y: -2 }}
+          whileTap={{ scale: 0.92 }}
+          onClick={() => setIsAddServiceOpen(true)}
+          className="sm:hidden fixed bottom-20 right-4 z-40 flex items-center justify-center p-3.5 rounded-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-black font-sans font-bold shadow-[0_8px_25px_rgba(229,195,120,0.35)] transition-all cursor-pointer group"
+          aria-label="Add new service"
+          title="Add New Service"
+        >
+          <Plus size={22} className="stroke-[2.5] transition-transform duration-300 group-hover:rotate-90" />
+        </motion.button>
+      )}
+
       <div className="flex-1 flex flex-col sm:flex-row overflow-hidden">
         
         {/* ======================== DESKTOP SIDEBAR ======================== */}
         <motion.div 
-          initial={{ x: -50, opacity: 0 }}
+          initial={{ x: -20, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className="hidden sm:flex flex-col w-64 border-r border-[var(--color-border)] bg-[var(--color-sidebar-bg)] h-full transition-colors"
+          className="hidden sm:flex flex-col w-60 lg:w-64 border-r border-[var(--color-border)] bg-[var(--color-sidebar-bg)] h-full transition-colors shrink-0"
         >
-          <div className="p-8">
-            <h4 className="font-sans text-[10px] uppercase tracking-[0.4em] text-[var(--color-primary)] mb-2 font-bold">Management</h4>
-            <h1 className="text-3xl font-light text-[var(--color-primary-text)] italic tracking-tight font-serif">Admin</h1>
+          <div className="h-16 sm:h-20 flex items-center justify-between px-5 border-b border-[var(--color-border)] shrink-0">
+            <div>
+              <h4 className="font-sans text-[8.5px] uppercase tracking-[0.3em] text-[var(--color-primary)] font-bold">Control Center</h4>
+              <h1 className="text-base sm:text-lg font-serif text-[var(--color-primary-text)] font-medium">Aurelian Admin</h1>
+            </div>
+            <span className="px-2 py-0.5 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-sans text-[8.5px] uppercase tracking-wider font-semibold border border-[var(--color-primary)]/20">
+              Admin
+            </span>
           </div>
 
           <div 
             role="tablist" 
             aria-label="Admin dashboard tabs" 
-            className="flex-1 flex flex-col gap-2 px-4"
+            className="flex-1 flex flex-col gap-1.5 p-3.5 sm:p-4 overflow-y-auto"
           >
             {TABS.map((tab, idx) => {
               const isActive = activeTab === tab.key;
@@ -824,30 +1243,34 @@ export default function Admin() {
                   tabIndex={isActive ? 0 : -1}
                   onClick={() => setActiveTab(tab.key)}
                   onKeyDown={(e) => handleTabKeyDown(e, idx)}
-                  className={`relative flex items-center gap-4 px-4 py-3 rounded-xl font-sans text-xs uppercase tracking-widest transition-all duration-300 overflow-hidden outline-none cursor-pointer ${
+                  className={`relative flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-sans text-xs uppercase tracking-wider transition-all duration-200 overflow-hidden outline-none cursor-pointer ${
                     isActive
-                      ? 'text-[var(--color-primary)] bg-[var(--color-primary)]/10 font-bold shadow-sm'
-                      : 'text-[var(--color-secondary-text)] font-semibold hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-raised)]'
+                      ? 'text-[var(--color-primary)] bg-[var(--color-primary)]/10 font-bold shadow-sm border-l-[3px] border-[var(--color-primary)]'
+                      : 'text-[var(--color-secondary-text)] font-medium hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-raised)] border-l-[3px] border-transparent'
                   }`}
                 >
-                  {isActive && (
-                    <motion.div 
-                      layoutId="sidebarActiveIndicator"
-                      className="absolute left-0 top-0 bottom-0 w-1 bg-[var(--color-primary)] rounded-r-full shadow-[0_0_10px_rgba(229,195,120,0.5)]"
-                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                    />
-                  )}
                   {tab.icon}
-                  {tab.label}
+                  <span>{tab.label}</span>
                 </button>
               );
             })}
+          </div>
+
+          {/* Admin Sidebar Footer */}
+          <div className="p-3.5 border-t border-[var(--color-border)] shrink-0 flex flex-col gap-2">
+            <Link
+              to="/booking"
+              className="flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-[var(--color-surface-raised)] hover:bg-[var(--color-surface-hover)] text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] font-sans text-[10px] uppercase tracking-wider font-semibold transition-all border border-[var(--color-border)]"
+            >
+              <ArrowLeft size={13} />
+              <span>Exit to Client View</span>
+            </Link>
           </div>
         </motion.div>
 
         {/* ======================== MAIN CONTENT AREA ======================== */}
         <div className="flex-1 h-full overflow-y-auto overflow-x-hidden bg-[var(--color-bg)] transition-colors">
-          <div className="p-3.5 sm:p-8 md:p-12 pb-24 sm:pb-12 min-h-full flex flex-col">
+          <div className="p-3.5 sm:p-6 lg:p-8 pb-20 sm:pb-8 min-h-full flex flex-col max-w-7xl mx-auto w-full">
             {loading ? (
               <motion.div 
                 initial={{ opacity: 0 }} 
@@ -877,35 +1300,35 @@ export default function Admin() {
                   {/* ======================== OVERVIEW TAB ======================== */}
                   {activeTab === 'overview' && (
                     <>
-                      <motion.div variants={itemVariants} className="mb-2 sm:mb-8">
-                        <h1 className="text-xl sm:text-4xl md:text-5xl font-light text-[var(--color-primary-text)] mb-1.5 sm:mb-4 tracking-tight">
+                      <motion.div variants={itemVariants} className="mb-1.5 sm:mb-3">
+                        <h1 className="text-lg sm:text-2xl font-light text-[var(--color-primary-text)] mb-1 sm:mb-2 tracking-tight">
                           Good day, <span className="text-[var(--color-primary)] italic font-serif">Admin.</span>
                         </h1>
-                        <div className="inline-flex items-center gap-1.5 sm:gap-2 text-[var(--color-primary)] bg-[var(--color-primary)]/10 px-2.5 sm:px-4 py-1 sm:py-2 rounded-full font-sans text-[9px] sm:text-[11px] tracking-wider sm:tracking-widest shadow-sm font-bold">
-                          <span className="w-4 h-4 sm:w-6 sm:h-6 rounded-full bg-[var(--color-primary)] text-black flex items-center justify-center font-bold">
-                            <ChevronRight size={10} className="sm:w-3 sm:h-3" />
+                        <div className="inline-flex items-center gap-1.5 text-[var(--color-primary)] bg-[var(--color-primary)]/10 px-2.5 py-1 rounded-full font-sans text-[9px] sm:text-[10px] tracking-wider shadow-sm font-bold">
+                          <span className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-[var(--color-primary)] text-black flex items-center justify-center font-bold">
+                            <ChevronRight size={10} />
                           </span>
                           <span>This Week ({weekStartStr} - {weekEndStr})</span>
                         </div>
                       </motion.div>
 
-                      <motion.div variants={listVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 md:gap-6">
-                        <StatCard label="Total Bookings" value={bookings.length} icon={<CalendarDays size={16} />} pathData={sparkline1} />
-                        <StatCard label="Today's Bookings" value={todayBookingsCount} icon={<Clock size={16} />} accent={todayBookingsCount > 0} pathData={sparkline2} />
-                        <StatCard label="Total Customers" value={totalCustomers} icon={<Users size={16} />} pathData={sparkline3} />
-                        <StatCard label="Completed Week" value={completedThisWeek} icon={<Scissors size={16} />} pathData={sparkline4} />
+                      <motion.div variants={listVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5">
+                        <StatCard label="Total Bookings" value={bookings.length} icon={<CalendarDays size={15} />} pathData={sparkline1} />
+                        <StatCard label="Today's Bookings" value={todayBookingsCount} icon={<Clock size={15} />} accent={todayBookingsCount > 0} pathData={sparkline2} />
+                        <StatCard label="Total Customers" value={totalCustomers} icon={<Users size={15} />} pathData={sparkline3} />
+                        <StatCard label="Completed Week" value={completedThisWeek} icon={<Scissors size={15} />} pathData={sparkline4} />
                       </motion.div>
 
                       {/* Large Trend Chart */}
-                      <motion.div variants={itemVariants} className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-[var(--color-card-bg)] p-3 sm:p-8 shadow-sm sm:shadow-md h-40 sm:h-64 group transition-colors">
-                        <BorderBeam size={180} duration={14} colorFrom="var(--color-primary)" borderWidth={1} />
+                      <motion.div variants={itemVariants} className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-[var(--color-card-bg)] border border-[var(--color-border)] p-3 sm:p-4 shadow-sm h-28 sm:h-36 group transition-colors">
+                        <BorderBeam size={120} duration={14} colorFrom="var(--color-primary)" borderWidth={1} />
                         <div className="flex items-center justify-between z-10 relative">
-                          <div className="text-[var(--color-primary-text)] font-sans text-[10px] sm:text-xs uppercase tracking-wider sm:tracking-widest flex items-center gap-1.5 font-bold">
-                            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[var(--color-primary)]" />
+                          <div className="text-[var(--color-primary-text)] font-sans text-[10px] sm:text-xs uppercase tracking-wider flex items-center gap-1.5 font-bold">
+                            <div className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]" />
                             Weekly Booking Trends
                           </div>
                         </div>
-                        <div className="absolute bottom-0 left-0 right-0 h-28 sm:h-48 opacity-60 group-hover:opacity-100 transition-opacity duration-700">
+                        <div className="absolute bottom-0 left-0 right-0 h-20 sm:h-24 opacity-60 group-hover:opacity-100 transition-opacity duration-700">
                           <svg viewBox="0 0 100 40" preserveAspectRatio="none" className="w-full h-full">
                             <defs>
                               <linearGradient id="grad-big" x1="0" x2="0" y1="0" y2="1">
@@ -935,7 +1358,7 @@ export default function Admin() {
                       </motion.div>
 
                       {/* ======================== UPCOMING APPOINTMENTS ANIMATED LIST ======================== */}
-                      <motion.div variants={itemVariants} className="mt-4 sm:mt-8 space-y-3 sm:space-y-4">
+                      <motion.div variants={itemVariants} className="mt-3 sm:mt-4 space-y-2.5">
                         <div className="flex items-center justify-between">
                           <h2 className="font-sans text-[9px] sm:text-[10px] uppercase tracking-widest text-[var(--color-secondary-text)] font-semibold flex items-center gap-2">
                             <Clock size={12} className="text-[var(--color-primary)]" />
@@ -947,14 +1370,14 @@ export default function Admin() {
                         </div>
 
                         {activeUpcomingBookings.length === 0 ? (
-                          <div className="p-6 sm:p-8 rounded-2xl bg-[var(--color-card-bg)] border border-[var(--color-border)] text-center space-y-2">
-                            <div className="w-10 h-10 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] mx-auto flex items-center justify-center">
-                              <CalendarDays size={18} />
+                          <div className="p-4 sm:p-5 rounded-xl sm:rounded-2xl bg-[var(--color-card-bg)] border border-[var(--color-border)] text-center space-y-1.5">
+                            <div className="w-8 h-8 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] mx-auto flex items-center justify-center">
+                              <CalendarDays size={15} />
                             </div>
-                            <h3 className="font-serif text-sm sm:text-base font-medium text-[var(--color-primary-text)]">
+                            <h3 className="font-serif text-xs sm:text-sm font-medium text-[var(--color-primary-text)]">
                               No upcoming appointments
                             </h3>
-                            <p className="font-sans text-xs text-[var(--color-secondary-text)] max-w-xs mx-auto">
+                            <p className="font-sans text-[11px] text-[var(--color-secondary-text)] max-w-xs mx-auto">
                               New customer bookings will automatically appear here in real-time.
                             </p>
                           </div>
@@ -1112,8 +1535,8 @@ export default function Admin() {
                         </div>
                       </motion.div>
 
-                      {/* Mobile View: Direct Animated List (No outer box container) */}
-                      <div className="sm:hidden flex-1 flex flex-col gap-3">
+                      {/* Direct Animated List (Mobile & PC - No outer box container) */}
+                      <div className="flex-1 flex flex-col gap-3">
                         {filteredBookings.length === 0 ? (
                           <div className="p-8 rounded-2xl bg-[var(--color-card-bg)] border border-[var(--color-border)] text-center text-[var(--color-secondary-text)] font-sans text-xs uppercase tracking-wider">
                             {bookingSearch || statusFilter !== 'ALL' ? 'No bookings match your filters' : 'No bookings found'}
@@ -1127,50 +1550,65 @@ export default function Admin() {
                                 return (
                                   <div
                                     key={b.id}
-                                    className="p-4 bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-2xl space-y-3 shadow-sm hover:shadow-md transition-all"
+                                    className="p-4 sm:p-5 bg-[var(--color-card-bg)] border border-[var(--color-border)] hover:border-[var(--color-primary)]/30 rounded-2xl shadow-sm hover:shadow-md transition-all"
                                   >
-                                    <div className="flex items-center justify-between gap-2">
-                                      <div className="flex items-center gap-3 min-w-0">
-                                        <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center shrink-0 border border-[var(--color-primary)]/20">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-6">
+                                      {/* Customer & Status */}
+                                      <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                                        <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center shrink-0 border border-[var(--color-primary)]/20">
                                           <CalendarDays size={18} />
                                         </div>
-                                        <div className="min-w-0">
-                                          <span className="text-[var(--color-primary-text)] font-semibold text-sm truncate block">
-                                            {customer?.name || 'Unknown'}
-                                          </span>
-                                          <span className="text-xs text-[var(--color-secondary-text)] truncate block font-sans">
+                                        <div className="min-w-0 flex-1">
+                                          <div className="flex items-center gap-2 flex-wrap">
+                                            <span className="text-[var(--color-primary-text)] font-semibold text-sm sm:text-base truncate block">
+                                              {customer?.name || 'Unknown'}
+                                            </span>
+                                            <StatusBadge status={b.status} />
+                                          </div>
+                                          <span className="text-xs text-[var(--color-secondary-text)] truncate block font-sans mt-0.5">
                                             {customer?.email || ''}
                                           </span>
                                         </div>
                                       </div>
-                                      <StatusBadge status={b.status} />
-                                    </div>
 
-                                    <div className="flex items-center justify-between text-xs pt-1 border-t border-[var(--color-border)]">
-                                      <span className="font-medium text-[var(--color-primary-text)]">
-                                        {serviceMap[b.serviceId] || 'Service'}
-                                      </span>
-                                      <span className="text-[var(--color-secondary-text)] font-sans text-[11px]">
-                                        {format(parseISO(b.bookingDate), 'MMM d, yyyy')} • {b.startTime}
-                                      </span>
-                                    </div>
-
-                                    {isActive && (
-                                      <div className="flex items-center gap-2 pt-1">
-                                        <button
-                                          onClick={() => handleBookingAction(b.id, 'complete')}
-                                          className="flex-1 py-2 rounded-xl bg-emerald-500 text-white text-[10px] uppercase tracking-wider font-bold cursor-pointer shadow-sm"
-                                        >
-                                          Complete
-                                        </button>
-                                        <button
-                                          onClick={() => requestCancelBooking(b.id)}
-                                          className="flex-1 py-2 rounded-xl bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)] hover:text-red-400 text-[10px] uppercase tracking-wider font-semibold cursor-pointer"
-                                        >
-                                          Cancel
-                                        </button>
+                                      {/* Service & Time */}
+                                      <div className="flex items-center gap-4 text-xs font-sans sm:px-4 sm:border-x sm:border-[var(--color-border)] shrink-0">
+                                        <div>
+                                          <span className="text-[10px] uppercase tracking-wider text-[var(--color-muted-text)] block font-semibold">Service</span>
+                                          <span className="font-medium text-[var(--color-primary-text)] text-xs sm:text-sm">{serviceMap[b.serviceId] || 'Service'}</span>
+                                        </div>
+                                        <div>
+                                          <span className="text-[10px] uppercase tracking-wider text-[var(--color-muted-text)] block font-semibold">Scheduled</span>
+                                          <span className="text-[var(--color-secondary-text)] text-xs">{format(parseISO(b.bookingDate), 'MMM d, yyyy')} • {b.startTime}</span>
+                                        </div>
                                       </div>
-                                    )}
+
+                                      {/* Action Buttons with Icons */}
+                                      {isActive ? (
+                                        <div className="flex items-center gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-[var(--color-border)]">
+                                          <button
+                                            onClick={() => handleBookingAction(b.id, 'complete')}
+                                            className="flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] sm:text-xs uppercase tracking-wider font-bold cursor-pointer shadow-sm transition-all flex items-center justify-center gap-1.5"
+                                            title="Mark completed"
+                                          >
+                                            <Check size={13} className="stroke-[2.5]" />
+                                            <span>Complete</span>
+                                          </button>
+                                          <button
+                                            onClick={() => requestCancelBooking(b.id)}
+                                            className="flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-[var(--color-surface-raised)] hover:bg-red-500/10 text-[var(--color-secondary-text)] hover:text-red-400 text-[11px] sm:text-xs uppercase tracking-wider font-semibold cursor-pointer transition-all flex items-center justify-center gap-1.5"
+                                            title="Cancel booking"
+                                          >
+                                            <X size={13} className="stroke-[2.5]" />
+                                            <span>Cancel</span>
+                                          </button>
+                                        </div>
+                                      ) : (
+                                        <div className="hidden sm:block text-xs text-[var(--color-muted-text)] italic font-sans shrink-0">
+                                          Archived
+                                        </div>
+                                      )}
+                                    </div>
                                   </div>
                                 );
                               })}
@@ -1189,76 +1627,6 @@ export default function Admin() {
                           />
                         </div>
                       </div>
-
-                      {/* Desktop View: Table Container */}
-                      <motion.div variants={itemVariants} className="hidden sm:flex flex-1 flex-col overflow-hidden rounded-2xl bg-[var(--color-card-bg)] border border-[var(--color-border)] shadow-xl min-h-[350px] transition-colors">
-                        <div className="flex-1 overflow-x-auto overflow-y-auto custom-scrollbar">
-                          <table className="w-full text-left font-sans text-sm min-w-[800px]" aria-label="Bookings table">
-                            <thead className="border-b border-[var(--color-surface-raised)] bg-[var(--color-surface-raised)] sticky top-0 z-10">
-                              <tr>
-                                <th scope="col" className="px-6 py-4 font-sans text-[10px] uppercase tracking-[0.2em] text-[var(--color-secondary-text)] font-semibold">Date & Time</th>
-                                <th scope="col" className="px-6 py-4 font-sans text-[10px] uppercase tracking-[0.2em] text-[var(--color-secondary-text)] font-semibold">Customer</th>
-                                <th scope="col" className="px-6 py-4 font-sans text-[10px] uppercase tracking-[0.2em] text-[var(--color-secondary-text)] font-semibold">Service</th>
-                                <th scope="col" className="px-6 py-4 font-sans text-[10px] uppercase tracking-[0.2em] text-[var(--color-secondary-text)] font-semibold">Status</th>
-                                <th scope="col" className="px-6 py-4 font-sans text-[10px] uppercase tracking-[0.2em] text-[var(--color-secondary-text)] font-semibold text-right">Actions</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-[var(--color-surface-raised)]">
-                              {filteredBookings.length === 0 ? (
-                                <tr>
-                                  <td colSpan={5} className="px-8 py-24 text-center text-[var(--color-secondary-text)] font-sans text-[11px] uppercase tracking-widest">
-                                    {bookingSearch || statusFilter !== 'ALL' ? 'No bookings match your filters' : 'No bookings found'}
-                                  </td>
-                                </tr>
-                              ) : paginatedBookings.map((b, i) => {
-                                const customer = customerMap[b.userId];
-                                const isActive = b.status === 'ACCEPTED' || b.status === 'CONFIRMED' || b.status === 'PENDING';
-                                return (
-                                  <motion.tr 
-                                    initial={{ opacity: 0, y: 8 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: i * 0.03 }}
-                                    key={b.id} 
-                                    className="hover:bg-[var(--color-surface-raised)]/60 transition-colors group"
-                                  >
-                                    <td className="px-6 py-4">
-                                      <div className="text-[var(--color-primary-text)] tracking-wider mb-0.5 text-xs font-semibold">{format(parseISO(b.bookingDate), 'MMM d, yyyy')}</div>
-                                      <div className="text-[11px] text-[var(--color-secondary-text)] tracking-widest uppercase">{b.startTime} – {b.endTime}</div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                      <div className="text-[var(--color-primary)] font-semibold text-sm mb-0.5">{customer?.name || 'Unknown'}</div>
-                                      <div className="text-[11px] text-[var(--color-secondary-text)]">{customer?.email || ''}</div>
-                                    </td>
-                                    <td className="px-6 py-4 font-normal text-[var(--color-body-text)] text-xs">{serviceMap[b.serviceId] || 'Unknown'}</td>
-                                    <td className="px-6 py-4"><StatusBadge status={b.status} /></td>
-                                    <td className="px-6 py-4 text-right">
-                                      <div className="flex items-center justify-end gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
-                                        {isActive && (
-                                          <>
-                                            <button onClick={() => handleBookingAction(b.id, 'complete')} className="px-3.5 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 border border-emerald-500/30 hover:bg-emerald-500 hover:text-white text-[10px] uppercase tracking-widest transition-all font-semibold cursor-pointer">Complete</button>
-                                            <button onClick={() => requestCancelBooking(b.id)} className="px-3.5 py-1.5 rounded-lg text-[var(--color-secondary-text)] hover:bg-red-500/10 hover:text-red-500 text-[10px] uppercase tracking-widest transition-all cursor-pointer">Cancel</button>
-                                          </>
-                                        )}
-                                      </div>
-                                    </td>
-                                  </motion.tr>
-                                );
-                              })}
-                            </tbody>
-                          </table>
-                        </div>
-                        
-                        {/* Pagination Footer */}
-                        <DataPagination
-                          currentPage={bookingPage}
-                          totalPages={bookingTotalPages}
-                          totalItems={filteredBookings.length}
-                          pageSize={bookingPageSize}
-                          onPageChange={setBookingPage}
-                          onPageSizeChange={setBookingPageSize}
-                          pageSizeOptions={[5, 10, 20, 50]}
-                        />
-                      </motion.div>
                     </div>
                   )}
 
@@ -1293,8 +1661,8 @@ export default function Admin() {
                         </div>
                       </motion.div>
 
-                      {/* Mobile View: Direct Animated List (No outer box container) */}
-                      <div className="sm:hidden flex-1 flex flex-col gap-3">
+                      {/* Direct Animated List (Mobile & PC - No outer box container) */}
+                      <div className="flex-1 flex flex-col gap-3">
                         {filteredCustomers.length === 0 ? (
                           <div className="p-8 rounded-2xl bg-[var(--color-card-bg)] border border-[var(--color-border)] text-center text-[var(--color-secondary-text)] font-sans text-xs uppercase tracking-wider">
                             {customerSearch ? 'No customers match search' : 'No registered customers found'}
@@ -1305,84 +1673,97 @@ export default function Admin() {
                               {paginatedCustomers.map((c) => (
                                 <div
                                   key={c.id}
-                                  className="p-4 bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-2xl space-y-3 shadow-sm hover:shadow-md transition-all"
+                                  className="p-4 sm:p-5 bg-[var(--color-card-bg)] border border-[var(--color-border)] hover:border-[var(--color-primary)]/30 rounded-2xl shadow-sm hover:shadow-md transition-all"
                                 >
                                   {editingCustomerId === c.id ? (
-                                    <div className="space-y-2.5">
-                                      <input
-                                        type="text"
-                                        value={editCustomerName}
-                                        onChange={e => setEditCustomerName(e.target.value)}
-                                        placeholder="Customer Name"
-                                        className="w-full px-3.5 py-2 rounded-xl bg-[var(--color-surface-raised)] text-[var(--color-primary-text)] text-xs outline-none"
-                                        autoFocus
-                                      />
-                                      <input
-                                        type="email"
-                                        value={editCustomerEmail}
-                                        onChange={e => setEditCustomerEmail(e.target.value)}
-                                        placeholder="Customer Email"
-                                        className="w-full px-3.5 py-2 rounded-xl bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)] text-xs outline-none"
-                                      />
-                                      <div className="flex gap-2 pt-1">
-                                        <button
-                                          onClick={() => handleSaveCustomerEdit(c.id)}
-                                          className="flex-1 py-2 rounded-xl bg-emerald-500 text-white text-[10px] uppercase tracking-wider font-bold cursor-pointer shadow-sm"
-                                        >
-                                          Save
-                                        </button>
+                                    <div className="space-y-3">
+                                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <input
+                                          type="text"
+                                          value={editCustomerName}
+                                          onChange={e => setEditCustomerName(e.target.value)}
+                                          placeholder="Customer Name"
+                                          className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--color-surface-raised)] text-[var(--color-primary-text)] text-xs outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+                                          autoFocus
+                                        />
+                                        <input
+                                          type="email"
+                                          value={editCustomerEmail}
+                                          onChange={e => setEditCustomerEmail(e.target.value)}
+                                          placeholder="Customer Email"
+                                          className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)] text-xs outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+                                        />
+                                      </div>
+                                      <div className="flex items-center justify-end gap-2 pt-1">
                                         <button
                                           onClick={() => setEditingCustomerId(null)}
-                                          className="flex-1 py-2 rounded-xl bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)] text-[10px] uppercase tracking-wider font-semibold cursor-pointer"
+                                          className="px-4 py-2 rounded-xl bg-[var(--color-surface-raised)] hover:bg-[var(--color-surface-hover)] text-[var(--color-secondary-text)] text-xs uppercase tracking-wider font-semibold cursor-pointer transition-all"
                                         >
                                           Cancel
+                                        </button>
+                                        <button
+                                          onClick={() => handleSaveCustomerEdit(c.id)}
+                                          className="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs uppercase tracking-wider font-bold cursor-pointer shadow-sm transition-all flex items-center gap-1.5"
+                                        >
+                                          <Check size={14} className="stroke-[2.5]" />
+                                          <span>Save</span>
                                         </button>
                                       </div>
                                     </div>
                                   ) : (
-                                    <>
-                                      <div className="flex items-center justify-between gap-3">
-                                        <div className="flex items-center gap-3 min-w-0">
-                                          <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center font-serif font-bold text-sm shrink-0 border border-[var(--color-primary)]/20">
-                                            {(c.name || 'U').charAt(0).toUpperCase()}
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-6">
+                                      {/* Customer Info (Avatar, Name, Email, Role) */}
+                                      <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                                        <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center font-serif font-bold text-sm sm:text-base shrink-0 border border-[var(--color-primary)]/20">
+                                          {(c.name || 'U').charAt(0).toUpperCase()}
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                          <div className="flex items-center gap-2 flex-wrap">
+                                            <span className="text-[var(--color-primary-text)] font-semibold text-sm sm:text-base truncate">{c.name}</span>
+                                            <span className="px-2 py-0.5 rounded-full text-[9px] uppercase tracking-widest font-sans font-semibold text-[var(--color-secondary-text)] bg-[var(--color-surface-raised)] border border-[var(--color-border)] shrink-0">
+                                              {c.role}
+                                            </span>
                                           </div>
-                                          <div className="min-w-0">
-                                            <div className="text-[var(--color-primary-text)] font-semibold text-sm truncate">{c.name}</div>
-                                            <div className="text-[var(--color-secondary-text)] text-xs truncate font-sans">{c.email}</div>
-                                          </div>
+                                          <div className="text-[var(--color-secondary-text)] text-xs truncate font-sans mt-0.5">{c.email}</div>
                                         </div>
                                       </div>
 
-                                      <div className="flex items-center justify-between text-xs pt-1 border-t border-[var(--color-border)] text-[var(--color-secondary-text)] font-sans">
-                                        <span>Bookings: <strong className="text-[var(--color-primary-text)] font-semibold">{c.bookingCount}</strong></span>
-                                        <span>Joined: {c.createdAt ? format(new Date(c.createdAt), 'MMM d, yyyy') : 'Unknown'}</span>
+                                      {/* Stats (Bookings & Joined) */}
+                                      <div className="flex items-center gap-4 text-xs text-[var(--color-secondary-text)] font-sans sm:px-4 sm:border-x sm:border-[var(--color-border)] shrink-0">
+                                        <div>
+                                          <span className="text-[10px] uppercase tracking-wider text-[var(--color-muted-text)] block font-semibold">Bookings</span>
+                                          <strong className="text-[var(--color-primary-text)] font-semibold text-xs sm:text-sm">{c.bookingCount}</strong>
+                                        </div>
+                                        <div>
+                                          <span className="text-[10px] uppercase tracking-wider text-[var(--color-muted-text)] block font-semibold">Joined</span>
+                                          <span className="text-[var(--color-secondary-text)] text-xs">{c.createdAt ? format(new Date(c.createdAt), 'MMM d, yyyy') : 'Unknown'}</span>
+                                        </div>
                                       </div>
 
-                                      <div className="flex items-center gap-2 pt-1">
+                                      {/* Action Buttons with Icons */}
+                                      <div className="flex items-center gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-[var(--color-border)]">
                                         <button
                                           onClick={() => {
                                             setEditingCustomerId(c.id);
                                             setEditCustomerName(c.name || '');
                                             setEditCustomerEmail(c.email || '');
                                           }}
-                                          className="flex-1 py-2 rounded-xl bg-[var(--color-primary)]/10 hover:bg-[var(--color-primary)]/20 text-[var(--color-primary)] text-[10px] uppercase tracking-wider font-bold transition-all cursor-pointer text-center"
+                                          className="flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-[var(--color-primary)]/10 hover:bg-[var(--color-primary)]/20 text-[var(--color-primary)] text-[11px] sm:text-xs uppercase tracking-wider font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                                          title="Edit customer"
                                         >
-                                          Edit
-                                        </button>
-                                        <button
-                                          onClick={() => requestToggleRole(c)}
-                                          className="flex-1 py-2 rounded-xl bg-[var(--color-surface-raised)] hover:bg-[var(--color-surface-hover)] text-[var(--color-primary-text)] text-[10px] uppercase tracking-wider font-semibold transition-all cursor-pointer text-center"
-                                        >
-                                          Promote
+                                          <Edit2 size={13} className="stroke-[2.2]" />
+                                          <span>Edit</span>
                                         </button>
                                         <button
                                           onClick={() => requestDeleteCustomer(c)}
-                                          className="flex-1 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 text-[10px] uppercase tracking-wider font-semibold transition-all cursor-pointer text-center"
+                                          className="flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 text-[11px] sm:text-xs uppercase tracking-wider font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                                          title="Delete customer"
                                         >
-                                          Delete
+                                          <Trash2 size={13} className="stroke-[2.2]" />
+                                          <span>Delete</span>
                                         </button>
                                       </div>
-                                    </>
+                                    </div>
                                   )}
                                 </div>
                               ))}
@@ -1401,427 +1782,583 @@ export default function Admin() {
                           />
                         </div>
                       </div>
-
-                      {/* Desktop View: Table Container */}
-                      <motion.div variants={itemVariants} className="hidden sm:flex flex-1 flex-col overflow-hidden rounded-2xl bg-[var(--color-card-bg)] border border-[var(--color-border)] shadow-xl min-h-[350px] transition-colors">
-                        <div className="flex-1 overflow-x-auto overflow-y-auto custom-scrollbar">
-                          <table className="w-full text-left font-sans text-sm min-w-[700px]">
-                            <thead className="border-b border-[var(--color-surface-raised)] bg-[var(--color-surface-raised)] sticky top-0 z-10">
-                              <tr>
-                                <th scope="col" className="px-6 py-4 font-sans text-[10px] uppercase tracking-[0.2em] text-[var(--color-secondary-text)] font-semibold">Customer</th>
-                                <th scope="col" className="px-6 py-4 font-sans text-[10px] uppercase tracking-[0.2em] text-[var(--color-secondary-text)] font-semibold">Role</th>
-                                <th scope="col" className="px-6 py-4 font-sans text-[10px] uppercase tracking-[0.2em] text-[var(--color-secondary-text)] font-semibold text-center">Bookings</th>
-                                <th scope="col" className="px-6 py-4 font-sans text-[10px] uppercase tracking-[0.2em] text-[var(--color-secondary-text)] font-semibold text-right">Joined</th>
-                                <th scope="col" className="px-6 py-4 font-sans text-[10px] uppercase tracking-[0.2em] text-[var(--color-secondary-text)] font-semibold text-right">Actions</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-[var(--color-surface-raised)]">
-                              {filteredCustomers.length === 0 ? (
-                                <tr>
-                                  <td colSpan={5} className="px-8 py-24 text-center text-[var(--color-secondary-text)] font-sans text-[11px] uppercase tracking-widest">
-                                    {customerSearch ? 'No customers match your search' : 'No registered customers found'}
-                                  </td>
-                                </tr>
-                              ) : paginatedCustomers.map((c, i) => (
-                                <motion.tr 
-                                  initial={{ opacity: 0, y: 8 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  transition={{ delay: i * 0.03 }}
-                                  key={c.id} 
-                                  className="hover:bg-[var(--color-surface-raised)]/60 transition-colors group"
-                                >
-                                  <td className="px-6 py-4">
-                                    {editingCustomerId === c.id ? (
-                                      <div className="space-y-2 max-w-xs">
-                                        <input
-                                          type="text"
-                                          value={editCustomerName}
-                                          onChange={e => setEditCustomerName(e.target.value)}
-                                          placeholder="Customer Name"
-                                          className="w-full px-3 py-1.5 rounded-lg bg-[var(--color-card-bg)] text-[var(--color-primary-text)] text-xs outline-none shadow-sm"
-                                          autoFocus
-                                        />
-                                        <input
-                                          type="email"
-                                          value={editCustomerEmail}
-                                          onChange={e => setEditCustomerEmail(e.target.value)}
-                                          placeholder="Customer Email"
-                                          className="w-full px-3 py-1.5 rounded-lg bg-[var(--color-card-bg)] text-[var(--color-secondary-text)] text-xs outline-none"
-                                        />
-                                      </div>
-                                    ) : (
-                                      <>
-                                        <div className="text-[var(--color-primary-text)] font-semibold text-sm mb-0.5">{c.name}</div>
-                                        <div className="text-[var(--color-secondary-text)] text-xs font-sans">{c.email}</div>
-                                      </>
-                                    )}
-                                  </td>
-                                  <td className="px-6 py-4">
-                                    <span className="px-2.5 py-0.5 rounded-full text-[9px] uppercase tracking-widest font-sans font-semibold text-[var(--color-secondary-text)] bg-[var(--color-surface-raised)] border border-[var(--color-border)]">
-                                      {c.role}
-                                    </span>
-                                  </td>
-                                  <td className="px-6 py-4 text-center">
-                                    <span className="text-[var(--color-primary-text)] font-semibold text-sm">{c.bookingCount}</span>
-                                  </td>
-                                  <td className="px-6 py-4 text-right text-[var(--color-secondary-text)] text-xs font-sans">
-                                    {c.createdAt ? format(new Date(c.createdAt), 'MMM d, yyyy') : 'Unknown'}
-                                  </td>
-                                  <td className="px-6 py-4 text-right">
-                                    <div className="flex items-center justify-end gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
-                                      {editingCustomerId === c.id ? (
-                                        <>
-                                          <button
-                                            onClick={() => handleSaveCustomerEdit(c.id)}
-                                            className="px-3.5 py-1.5 rounded-lg bg-emerald-500 text-white text-[10px] uppercase tracking-widest hover:bg-emerald-600 transition-all font-semibold shadow-sm cursor-pointer"
-                                          >
-                                            Save
-                                          </button>
-                                          <button
-                                            onClick={() => setEditingCustomerId(null)}
-                                            className="px-3.5 py-1.5 rounded-lg text-[var(--color-secondary-text)] hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-primary-text)] text-[10px] uppercase tracking-widest transition-all cursor-pointer"
-                                          >
-                                            Cancel
-                                          </button>
-                                        </>
-                                      ) : (
-                                        <>
-                                          <button
-                                            onClick={() => {
-                                              setEditingCustomerId(c.id);
-                                              setEditCustomerName(c.name || '');
-                                              setEditCustomerEmail(c.email || '');
-                                            }}
-                                            className="px-3 py-1.5 rounded-lg text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 text-[10px] uppercase tracking-widest transition-all font-semibold cursor-pointer"
-                                          >
-                                            Edit
-                                          </button>
-                                          <button
-                                            onClick={() => requestToggleRole(c)}
-                                            className="px-3 py-1.5 rounded-lg text-[var(--color-secondary-text)] hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-primary-text)] text-[10px] uppercase tracking-widest transition-all cursor-pointer font-semibold"
-                                          >
-                                            Promote
-                                          </button>
-                                          <button
-                                            onClick={() => requestDeleteCustomer(c)}
-                                            className="px-3 py-1.5 rounded-lg text-red-500 hover:bg-red-500/10 text-[10px] uppercase tracking-widest transition-all cursor-pointer font-semibold"
-                                          >
-                                            Delete
-                                          </button>
-                                        </>
-                                      )}
-                                    </div>
-                                  </td>
-                                </motion.tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                        
-                        {/* Pagination Footer */}
-                        <DataPagination
-                          currentPage={customerPage}
-                          totalPages={customerTotalPages}
-                          totalItems={filteredCustomers.length}
-                          pageSize={customerPageSize}
-                          onPageChange={setCustomerPage}
-                          onPageSizeChange={setCustomerPageSize}
-                          pageSizeOptions={[5, 10, 20, 50]}
-                        />
-                      </motion.div>
                     </div>
                   )}
 
                   {/* ======================== SERVICES TAB ======================== */}
                   {activeTab === 'services' && (
                     <div className="flex-1 flex flex-col">
-                      <motion.form variants={itemVariants} onSubmit={handleAddService} className="shrink-0 p-3.5 sm:p-8 rounded-xl sm:rounded-2xl bg-[var(--color-card-bg)] border border-[var(--color-border)] shadow-md sm:shadow-xl space-y-3 sm:space-y-6 mb-3 sm:mb-8 transition-colors">
-                        <h3 className="font-sans text-[10px] sm:text-[11px] uppercase tracking-wider text-[var(--color-primary)] flex items-center gap-2 font-semibold">
-                          <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-[var(--color-primary)]/10 flex items-center justify-center">
-                            <Scissors size={12} className="sm:w-3.5 sm:h-3.5" />
+                      {/* Services Header & Quick Action */}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-6 shrink-0">
+                        <div>
+                          <div className="flex items-center gap-2.5">
+                            <h2 className="font-serif text-lg sm:text-2xl font-light text-[var(--color-primary-text)] tracking-tight">
+                              Services <span className="text-[var(--color-primary)] italic">Catalog</span>
+                            </h2>
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-sans font-bold bg-[var(--color-primary)]/10 text-[var(--color-primary)] border border-[var(--color-primary)]/20">
+                              {allServices.length} Total
+                            </span>
                           </div>
-                          Add New Service
-                        </h3>
-                        <div className="flex flex-col md:flex-row gap-2.5 sm:gap-6">
-                          <div className="flex-1">
-                            <input
-                              type="text"
-                              value={newServiceName}
-                              onChange={e => setNewServiceName(e.target.value)}
-                              placeholder="Service Name (e.g. Haircut)"
-                              required
-                              className="w-full px-3.5 sm:px-5 py-2 sm:py-3.5 rounded-lg sm:rounded-xl bg-[var(--color-surface-raised)] text-[var(--color-primary-text)] placeholder:text-[var(--color-muted-text)] focus:outline-none font-sans text-xs sm:text-sm transition-all"
-                            />
-                          </div>
-                          <div className="w-full md:w-48">
-                            <div className="relative">
-                              <input
-                                type="number"
-                                min={5}
-                                max={480}
-                                step={5}
-                                value={newServiceDuration}
-                                onChange={e => setNewServiceDuration(parseInt(e.target.value) || 30)}
-                                required
-                                className="w-full px-3.5 sm:px-5 py-2 sm:py-3.5 rounded-lg sm:rounded-xl bg-[var(--color-surface-raised)] text-[var(--color-primary-text)] focus:outline-none font-sans text-xs sm:text-sm transition-all"
-                              />
-                              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-muted-text)] font-sans text-[10px] sm:text-xs uppercase tracking-wider font-semibold">
-                                Mins
-                              </span>
-                            </div>
-                          </div>
+                          <p className="text-xs text-[var(--color-secondary-text)] font-sans mt-0.5">
+                            Manage salon services, pricing, and appointment durations
+                          </p>
+                        </div>
+                        <div className="hidden sm:flex items-center gap-3">
                           <motion.button
+                            whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
-                            type="submit"
-                            className="px-6 sm:px-8 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-black font-sans text-xs sm:text-sm uppercase tracking-wider transition-all shadow-md font-bold cursor-pointer"
+                            onClick={() => setIsAddServiceOpen(true)}
+                            className="px-4 py-2.5 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-black font-sans text-xs uppercase tracking-wider font-bold transition-all shadow-md flex items-center gap-2 cursor-pointer"
                           >
+                            <Plus size={16} className="stroke-[2.5]" />
                             Add Service
                           </motion.button>
                         </div>
-                      </motion.form>
-
-                      {/* Mobile View: Direct Animated List (No outer box container) */}
-                      <div className="sm:hidden flex-1 overflow-y-auto">
-                        <AnimatedList delay={80}>
-                          {allServices.map((s) => (
-                            <div
-                              key={s.id}
-                              className={`p-4 bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-2xl space-y-3 shadow-sm hover:shadow-md transition-all ${!s.active ? 'opacity-40 grayscale' : ''}`}
-                            >
-                              {editingServiceId === s.id ? (
-                                <div className="space-y-2.5">
-                                  <input
-                                    value={editServiceName}
-                                    onChange={e => setEditServiceName(e.target.value)}
-                                    placeholder="Service Name"
-                                    className="w-full px-3.5 py-2 rounded-xl bg-[var(--color-surface-raised)] text-[var(--color-primary-text)] text-xs outline-none"
-                                    autoFocus
-                                  />
-                                  <input
-                                    type="number"
-                                    min={5}
-                                    value={editServiceDuration}
-                                    onChange={e => setEditServiceDuration(parseInt(e.target.value) || 30)}
-                                    className="w-full px-3.5 py-2 rounded-xl bg-[var(--color-surface-raised)] text-[var(--color-primary-text)] text-xs outline-none"
-                                  />
-                                  <div className="flex gap-2 pt-1">
-                                    <button
-                                      onClick={() => handleSaveServiceEdit(s.id)}
-                                      className="flex-1 py-2 rounded-xl bg-emerald-500 text-white text-[10px] uppercase tracking-wider font-bold cursor-pointer shadow-sm"
-                                    >
-                                      Save
-                                    </button>
-                                    <button
-                                      onClick={() => setEditingServiceId(null)}
-                                      className="flex-1 py-2 rounded-xl bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)] text-[10px] uppercase tracking-wider font-semibold cursor-pointer"
-                                    >
-                                      Cancel
-                                    </button>
-                                  </div>
-                                </div>
-                              ) : (
-                                <div className="flex items-center justify-between gap-3">
-                                  <div className="flex items-center gap-3 min-w-0">
-                                    <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center shrink-0 border border-[var(--color-primary)]/20">
-                                      <Scissors size={18} />
-                                    </div>
-                                    <div className="min-w-0">
-                                      <div className="text-[var(--color-primary-text)] font-semibold text-sm truncate">{s.name}</div>
-                                      <div className="text-[var(--color-secondary-text)] text-xs font-sans">
-                                        {s.durationMinutes} <span className="text-[10px]">MIN</span>
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                  <div className="flex items-center gap-2 shrink-0">
-                                    <Switch
-                                      checked={s.active}
-                                      onCheckedChange={() => requestToggleServiceActive(s)}
-                                      aria-label={`Toggle ${s.name} active`}
-                                    />
-                                    <button
-                                      onClick={() => {
-                                        setEditingServiceId(s.id);
-                                        setEditServiceName(s.name);
-                                        setEditServiceDuration(s.durationMinutes);
-                                      }}
-                                      className="px-3 py-1.5 rounded-xl text-[var(--color-primary)] bg-[var(--color-primary)]/10 text-[10px] uppercase tracking-wider font-semibold cursor-pointer hover:bg-[var(--color-primary)]/20 transition-colors"
-                                    >
-                                      Edit
-                                    </button>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </AnimatedList>
                       </div>
 
-                      {/* Desktop View: Table Container */}
-                      <motion.div variants={itemVariants} className="hidden sm:flex flex-1 flex-col overflow-hidden rounded-2xl bg-[var(--color-card-bg)] border border-[var(--color-border)] shadow-xl min-h-[350px] transition-colors">
-                        <div className="flex-1 overflow-x-auto overflow-y-auto custom-scrollbar">
-                          <table className="w-full text-left font-sans text-sm min-w-[600px]">
-                            <thead className="border-b border-[var(--color-surface-raised)] bg-[var(--color-surface-raised)] sticky top-0 z-10">
-                            <tr>
-                              <th scope="col" className="px-8 py-4 font-sans text-[10px] uppercase tracking-[0.2em] text-[var(--color-secondary-text)] font-semibold">Service</th>
-                              <th scope="col" className="px-8 py-4 font-sans text-[10px] uppercase tracking-[0.2em] text-[var(--color-secondary-text)] font-semibold">Duration</th>
-                              <th scope="col" className="px-8 py-4 font-sans text-[10px] uppercase tracking-[0.2em] text-[var(--color-secondary-text)] font-semibold">Status</th>
-                              <th scope="col" className="px-8 py-4 font-sans text-[10px] uppercase tracking-[0.2em] text-[var(--color-secondary-text)] font-semibold text-right">Actions</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-[var(--color-surface-raised)]">
-                            {allServices.map((s, i) => (
-                              <motion.tr 
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: i * 0.05 }}
-                                key={s.id} 
-                                className={`hover:bg-[var(--color-surface-raised)]/60 transition-colors group ${!s.active ? 'opacity-40 grayscale' : ''}`}
-                              >
-                                <td className="px-8 py-4">
-                                  {editingServiceId === s.id ? (
-                                    <input value={editServiceName} onChange={e => setEditServiceName(e.target.value)} className="px-4 py-2 rounded-lg bg-[var(--color-input-bg)] border border-[var(--color-primary)] text-[var(--color-primary-text)] outline-none font-sans text-sm w-full transition-shadow" autoFocus />
-                                  ) : <span className="text-[var(--color-primary-text)] font-semibold text-[15px]">{s.name}</span>}
-                                </td>
-                                <td className="px-8 py-4">
-                                  {editingServiceId === s.id ? (
-                                    <input type="number" min={5} value={editServiceDuration} onChange={e => setEditServiceDuration(parseInt(e.target.value) || 30)} className="w-24 px-4 py-2 rounded-lg bg-[var(--color-input-bg)] border border-[var(--color-primary)] text-[var(--color-primary-text)] outline-none font-sans text-sm transition-shadow" />
-                                  ) : <span className="text-[var(--color-primary-text)]">{s.durationMinutes} <span className="text-[var(--color-secondary-text)] text-xs ml-1 font-semibold">MIN</span></span>}
-                                </td>
-                                <td className="px-8 py-4">
-                                  <div className="flex items-center gap-3">
-                                    <Switch
-                                      checked={s.active}
-                                      onCheckedChange={() => requestToggleServiceActive(s)}
-                                      aria-label={`Toggle ${s.name} active`}
-                                    />
-                                    <span className={`px-2.5 py-0.5 rounded-full text-[9px] uppercase tracking-widest font-sans font-semibold border ${s.active ? 'text-emerald-500 border-emerald-500/30 bg-emerald-500/10' : 'text-[var(--color-muted-text)] border-[var(--color-border)] bg-[var(--color-surface-raised)]'}`}>
-                                      {s.active ? 'Active' : 'Inactive'}
-                                    </span>
+                      {/* Services Catalog - Responsive Grid on PC */}
+                      <div className="flex-1 overflow-y-auto">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
+                          {allServices.map((s, idx) => (
+                            <motion.div
+                              key={s.id}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: idx * 0.04 }}
+                              whileHover={{ y: -2 }}
+                              onClick={() => openServiceSetup(s)}
+                              className={`p-4 sm:p-5 bg-[var(--color-card-bg)] border border-[var(--color-border)] hover:border-[var(--color-primary)]/40 rounded-2xl shadow-sm hover:shadow-md transition-all cursor-pointer group select-none ${!s.active ? 'opacity-40 grayscale-[30%]' : ''}`}
+                            >
+                              <div className="flex items-center justify-between gap-3">
+                                <div className="flex items-center gap-3.5 min-w-0">
+                                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center shrink-0 border border-[var(--color-primary)]/20 group-hover:scale-105 transition-transform">
+                                    <Scissors size={20} className="sm:w-5 sm:h-5" />
                                   </div>
-                                </td>
-                                <td className="px-8 py-4 text-right">
-                                  <div className="flex items-center justify-end gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
-                                    {editingServiceId === s.id ? (
-                                      <>
-                                        <button onClick={() => handleSaveServiceEdit(s.id)} className="px-3.5 py-1.5 rounded-lg bg-emerald-500 text-white text-[10px] uppercase tracking-widest hover:bg-emerald-600 transition-all font-semibold shadow-sm cursor-pointer">Save</button>
-                                        <button onClick={() => setEditingServiceId(null)} className="px-3.5 py-1.5 rounded-lg text-[var(--color-secondary-text)] hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-primary-text)] text-[10px] uppercase tracking-widest transition-all cursor-pointer">Cancel</button>
-                                      </>
-                                    ) : (
-                                      <button onClick={() => { setEditingServiceId(s.id); setEditServiceName(s.name); setEditServiceDuration(s.durationMinutes); }} className="px-3.5 py-1.5 rounded-lg text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 text-[10px] uppercase tracking-widest transition-all font-semibold cursor-pointer">Edit</button>
-                                    )}
+                                  <div className="min-w-0">
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-[var(--color-primary-text)] font-semibold text-sm sm:text-base truncate group-hover:text-[var(--color-primary)] transition-colors">{s.name}</span>
+                                      {!s.active && (
+                                        <span className="px-2 py-0.5 rounded-full text-[8px] uppercase tracking-widest font-semibold text-[var(--color-muted-text)] bg-[var(--color-surface-raised)] border border-[var(--color-border)]">
+                                          Inactive
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div className="text-[var(--color-secondary-text)] text-xs font-sans flex items-center gap-2 mt-0.5">
+                                      <span>{s.durationMinutes} <span className="text-[10px] font-semibold">MIN</span></span>
+                                      <span>•</span>
+                                      <span className="text-[var(--color-primary)] font-semibold font-sans">${s.price !== undefined && s.price !== null ? s.price : (s.name.toLowerCase().includes('shav') ? 50 : s.name.toLowerCase().includes('zat') ? 90 : 75)}</span>
+                                    </div>
                                   </div>
-                                </td>
-                              </motion.tr>
-                            ))}
-                          </tbody>
-                        </table>
+                                </div>
+
+                                <div className="flex items-center gap-1.5 shrink-0 text-[var(--color-muted-text)] group-hover:text-[var(--color-primary)] group-hover:translate-x-0.5 transition-all">
+                                  <ChevronRight size={18} />
+                                </div>
+                              </div>
+                            </motion.div>
+                          ))}
                         </div>
-                        <div className="shrink-0 p-3 sm:p-4 border-t border-[var(--color-surface-raised)] bg-[var(--color-surface-raised)] text-center text-[9px] uppercase tracking-wider text-[var(--color-muted-text)] font-semibold">
-                          End of Services
-                        </div>
-                      </motion.div>
+                      </div>
                     </div>
                   )}
 
                   {/* ======================== SETTINGS TAB ======================== */}
                   {activeTab === 'settings' && (
-                    <motion.div variants={itemVariants}>
-                      <form onSubmit={handleSettingsSubmit} className="space-y-4 sm:space-y-8 max-w-2xl p-3.5 sm:p-12 rounded-xl sm:rounded-3xl bg-[var(--color-card-bg)] shadow-md sm:shadow-xl transition-colors">
-                        <div className="border-b border-[var(--color-surface-raised)] pb-3 sm:pb-6 mb-3 sm:mb-8">
-                          <h2 className="text-lg sm:text-3xl font-light text-[var(--color-primary-text)] flex items-center gap-2 sm:gap-4 font-serif">
-                            <SettingsIcon className="text-[var(--color-primary)]" size={20}/> Shop Configuration
-                          </h2>
-                          <p className="text-[var(--color-secondary-text)] font-sans text-[11px] sm:text-xs mt-1 sm:mt-3">Manage your salon's operating hours and booking rules.</p>
+                    <motion.div variants={itemVariants} className="space-y-6 max-w-5xl">
+                      {/* Settings Header */}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
+                        <div>
+                          <div className="flex items-center gap-2.5">
+                            <h2 className="font-serif text-lg sm:text-2xl font-light text-[var(--color-primary-text)] tracking-tight">
+                              Shop <span className="text-[var(--color-primary)] italic">Configuration</span>
+                            </h2>
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-sans font-bold bg-[var(--color-primary)]/10 text-[var(--color-primary)] border border-[var(--color-primary)]/20">
+                              Salon Control Center
+                            </span>
+                          </div>
+                          <p className="text-xs text-[var(--color-secondary-text)] font-sans mt-0.5">
+                            Customize salon branding, operating hours, booking rules, breaks, and broadcast notices
+                          </p>
                         </div>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-8">
-                          <div className="space-y-1 sm:space-y-2">
-                            <label className="block font-sans text-[9px] sm:text-[10px] uppercase tracking-wider text-[var(--color-primary)] ml-1 font-semibold">Opening Time</label>
-                            <input type="time" value={settings.openingTime || ''} onChange={e => setSettings({ ...settings, openingTime: e.target.value })} className="w-full px-3.5 sm:px-5 py-2 sm:py-3.5 rounded-lg sm:rounded-xl bg-[var(--color-surface-raised)] text-[var(--color-primary-text)] focus:outline-none font-sans text-xs sm:text-sm transition-all" required />
+
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          type="button"
+                          onClick={() => handleSettingsSubmit()}
+                          disabled={savingSettings}
+                          className="px-6 py-2.5 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-black font-sans text-xs uppercase tracking-wider font-bold transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 shrink-0"
+                        >
+                          <Check size={16} className="stroke-[2.5]" />
+                          <span>{savingSettings ? 'Saving...' : 'Save All Changes'}</span>
+                        </motion.button>
+                      </div>
+
+                      {/* Section 1: Salon Branding & Contact Info */}
+                      <div className="bg-[var(--color-card-bg)] rounded-xl sm:rounded-2xl p-3.5 sm:p-5 border border-[var(--color-border)] shadow-sm space-y-4">
+                        <div className="flex items-center gap-2.5 pb-2.5 border-b border-[var(--color-border)]">
+                          <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center">
+                            <Store size={16} />
                           </div>
-                          <div className="space-y-1 sm:space-y-2">
-                            <label className="block font-sans text-[9px] sm:text-[10px] uppercase tracking-wider text-[var(--color-primary)] ml-1 font-semibold">Closing Time</label>
-                            <input type="time" value={settings.closingTime || ''} onChange={e => setSettings({ ...settings, closingTime: e.target.value })} className="w-full px-3.5 sm:px-5 py-2 sm:py-3.5 rounded-lg sm:rounded-xl bg-[var(--color-surface-raised)] text-[var(--color-primary-text)] focus:outline-none font-sans text-xs sm:text-sm transition-all" required />
-                          </div>
-                          <div className="space-y-1 sm:space-y-2">
-                            <label className="block font-sans text-[9px] sm:text-[10px] uppercase tracking-wider text-[var(--color-primary)] ml-1 font-semibold">Slot Duration <span className="text-[var(--color-secondary-text)] lowercase tracking-normal">(minutes)</span></label>
-                            <input type="number" value={settings.slotDurationMinutes || ''} onChange={e => setSettings({ ...settings, slotDurationMinutes: parseInt(e.target.value) })} className="w-full px-3.5 sm:px-5 py-2 sm:py-3.5 rounded-lg sm:rounded-xl bg-[var(--color-surface-raised)] text-[var(--color-primary-text)] focus:outline-none font-sans text-xs sm:text-sm transition-all" required />
-                          </div>
-                          <div className="space-y-1 sm:space-y-2">
-                            <label className="block font-sans text-[9px] sm:text-[10px] uppercase tracking-wider text-[var(--color-primary)] ml-1 font-semibold">Min Advance <span className="text-[var(--color-secondary-text)] lowercase tracking-normal">(minutes)</span></label>
-                            <input type="number" value={settings.minimumAdvanceMinutes || ''} onChange={e => setSettings({ ...settings, minimumAdvanceMinutes: parseInt(e.target.value) })} className="w-full px-3.5 sm:px-5 py-2 sm:py-3.5 rounded-lg sm:rounded-xl bg-[var(--color-surface-raised)] text-[var(--color-primary-text)] focus:outline-none font-sans text-xs sm:text-sm transition-all" required />
+                          <div>
+                            <h3 className="font-serif text-sm sm:text-base font-medium text-[var(--color-primary-text)]">Salon Branding & Contact Details</h3>
+                            <p className="text-[10px] sm:text-[11px] text-[var(--color-secondary-text)] font-sans">Business identity displayed on customer receipts, booking screens, and communications</p>
                           </div>
                         </div>
-                        
-                        <div className="pt-2 sm:pt-6">
-                          <motion.button 
-                            whileTap={{ scale: 0.98 }}
-                            type="submit" 
-                            className="w-full py-2.5 sm:py-4 rounded-lg sm:rounded-xl bg-[var(--color-primary)] text-black font-sans text-[10px] sm:text-[11px] uppercase tracking-wider font-bold hover:bg-[var(--color-primary-hover)] transition-all shadow-sm cursor-pointer"
-                          >
-                            Save Settings
-                          </motion.button>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                          <div>
+                            <label className="block font-sans text-[9px] sm:text-[10px] uppercase tracking-wider text-[var(--color-secondary-text)] font-semibold mb-1">Salon / Shop Name</label>
+                            <input
+                              type="text"
+                              value={settings.shopName || ''}
+                              onChange={e => setSettings({ ...settings, shopName: e.target.value })}
+                              placeholder="e.g. Aurelian Salon"
+                              className="w-full px-3.5 py-2 sm:py-2.5 rounded-xl bg-[var(--color-surface-raised)] border border-[var(--color-border)] text-[var(--color-primary-text)] focus:border-[var(--color-primary)] focus:outline-none font-sans text-xs transition-all"
+                            />
+                          </div>
+                          <div>
+                            <label className="block font-sans text-[9px] sm:text-[10px] uppercase tracking-wider text-[var(--color-secondary-text)] font-semibold mb-1">Tagline / Slogan</label>
+                            <input
+                              type="text"
+                              value={settings.shopTagline || ''}
+                              onChange={e => setSettings({ ...settings, shopTagline: e.target.value })}
+                              placeholder="e.g. Mastering The Craft of Timeless Elegance"
+                              className="w-full px-3.5 py-2 sm:py-2.5 rounded-xl bg-[var(--color-surface-raised)] border border-[var(--color-border)] text-[var(--color-primary-text)] focus:border-[var(--color-primary)] focus:outline-none font-sans text-xs transition-all"
+                            />
+                          </div>
+                          <div>
+                            <label className="block font-sans text-[9px] sm:text-[10px] uppercase tracking-wider text-[var(--color-secondary-text)] font-semibold mb-1">Contact Phone / WhatsApp</label>
+                            <div className="relative">
+                              <Phone size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-muted-text)]" />
+                              <input
+                                type="text"
+                                value={settings.phone || ''}
+                                onChange={e => setSettings({ ...settings, phone: e.target.value })}
+                                placeholder="e.g. +1 (555) 234-5678"
+                                className="w-full pl-9 pr-3.5 py-2 sm:py-2.5 rounded-xl bg-[var(--color-surface-raised)] border border-[var(--color-border)] text-[var(--color-primary-text)] focus:border-[var(--color-primary)] focus:outline-none font-sans text-xs transition-all"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block font-sans text-[9px] sm:text-[10px] uppercase tracking-wider text-[var(--color-secondary-text)] font-semibold mb-1">Customer Support Email</label>
+                            <div className="relative">
+                              <Mail size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-muted-text)]" />
+                              <input
+                                type="email"
+                                value={settings.email || ''}
+                                onChange={e => setSettings({ ...settings, email: e.target.value })}
+                                placeholder="e.g. contact@aureliansalon.com"
+                                className="w-full pl-9 pr-3.5 py-2 sm:py-2.5 rounded-xl bg-[var(--color-surface-raised)] border border-[var(--color-border)] text-[var(--color-primary-text)] focus:border-[var(--color-primary)] focus:outline-none font-sans text-xs transition-all"
+                              />
+                            </div>
+                          </div>
+                          <div className="sm:col-span-2">
+                            <label className="block font-sans text-[9px] sm:text-[10px] uppercase tracking-wider text-[var(--color-secondary-text)] font-semibold mb-1">Physical Salon Address</label>
+                            <div className="relative">
+                              <MapPin size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-muted-text)]" />
+                              <input
+                                type="text"
+                                value={settings.address || ''}
+                                onChange={e => setSettings({ ...settings, address: e.target.value })}
+                                placeholder="e.g. 123 Luxury Ave, Beverly Hills, CA 90210"
+                                className="w-full pl-9 pr-3.5 py-2 sm:py-2.5 rounded-xl bg-[var(--color-surface-raised)] border border-[var(--color-border)] text-[var(--color-primary-text)] focus:border-[var(--color-primary)] focus:outline-none font-sans text-xs transition-all"
+                              />
+                            </div>
+                          </div>
                         </div>
-                      </form>
+                      </div>
+
+                      {/* Section 2: Operating Schedule, Working Days & Breaks */}
+                      <div className="bg-[var(--color-card-bg)] rounded-xl sm:rounded-2xl p-3.5 sm:p-5 border border-[var(--color-border)] shadow-sm space-y-4">
+                        <div className="flex items-center gap-2.5 pb-2.5 border-b border-[var(--color-border)]">
+                          <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center">
+                            <Clock size={16} />
+                          </div>
+                          <div>
+                            <h3 className="font-serif text-sm sm:text-base font-medium text-[var(--color-primary-text)]">Operating Hours & Weekly Schedule</h3>
+                            <p className="text-[10px] sm:text-[11px] text-[var(--color-secondary-text)] font-sans">Set daily open/close hours, weekly off-days, and lunch break intervals</p>
+                          </div>
+                        </div>
+
+                        {/* Daily Open / Close */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block font-sans text-[10px] uppercase tracking-wider text-[var(--color-primary)] font-semibold mb-1.5">Opening Time</label>
+                            <input
+                              type="time"
+                              value={settings.openingTime || '09:00'}
+                              onChange={e => setSettings({ ...settings, openingTime: e.target.value })}
+                              className="w-full px-4 py-2.5 rounded-xl bg-[var(--color-surface-raised)] border border-[var(--color-border)] text-[var(--color-primary-text)] focus:border-[var(--color-primary)] focus:outline-none font-sans text-xs transition-all"
+                            />
+                          </div>
+                          <div>
+                            <label className="block font-sans text-[10px] uppercase tracking-wider text-[var(--color-primary)] font-semibold mb-1.5">Closing Time</label>
+                            <input
+                              type="time"
+                              value={settings.closingTime || '19:00'}
+                              onChange={e => setSettings({ ...settings, closingTime: e.target.value })}
+                              className="w-full px-4 py-2.5 rounded-xl bg-[var(--color-surface-raised)] border border-[var(--color-border)] text-[var(--color-primary-text)] focus:border-[var(--color-primary)] focus:outline-none font-sans text-xs transition-all"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Weekly Working Days Selection */}
+                        <div>
+                          <label className="block font-sans text-[10px] uppercase tracking-wider text-[var(--color-primary)] font-semibold mb-2">Weekly Working Days (Click to toggle Off-Days)</label>
+                          <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
+                            {[
+                              { label: 'Sun', day: 0 },
+                              { label: 'Mon', day: 1 },
+                              { label: 'Tue', day: 2 },
+                              { label: 'Wed', day: 3 },
+                              { label: 'Thu', day: 4 },
+                              { label: 'Fri', day: 5 },
+                              { label: 'Sat', day: 6 },
+                            ].map(({ label, day }) => {
+                              const closedList = (settings.closedDays || '').split(',').map((d: string) => parseInt(d.trim())).filter((n: number) => !isNaN(n));
+                              const isClosed = closedList.includes(day);
+                              return (
+                                <button
+                                  key={day}
+                                  type="button"
+                                  onClick={() => {
+                                    let newList = [...closedList];
+                                    if (isClosed) {
+                                      newList = newList.filter(d => d !== day);
+                                    } else {
+                                      newList.push(day);
+                                    }
+                                    setSettings({ ...settings, closedDays: newList.join(',') });
+                                  }}
+                                  className={`py-2 px-1 rounded-xl text-center font-sans text-xs font-semibold border transition-all cursor-pointer ${
+                                    isClosed
+                                      ? 'bg-red-500/10 border-red-500/30 text-red-400'
+                                      : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                                  }`}
+                                >
+                                  <div className="text-[11px] sm:text-xs font-bold">{label}</div>
+                                  <div className="text-[9px] uppercase tracking-wider mt-0.5">{isClosed ? 'Closed' : 'Open'}</div>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* Lunch / Daily Break */}
+                        <div className="p-4 rounded-xl bg-[var(--color-surface-raised)] border border-[var(--color-border)] space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Coffee size={16} className="text-[var(--color-primary)]" />
+                              <div>
+                                <span className="font-sans text-xs font-semibold text-[var(--color-primary-text)]">Daily Lunch / Staff Break</span>
+                                <p className="text-[10px] text-[var(--color-secondary-text)] font-sans">Slots during this window are automatically excluded from customer bookings</p>
+                              </div>
+                            </div>
+                            <Switch
+                              checked={!!settings.breakEnabled}
+                              onCheckedChange={checked => setSettings({ ...settings, breakEnabled: checked })}
+                            />
+                          </div>
+
+                          {settings.breakEnabled && (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-[var(--color-border)]">
+                              <div>
+                                <label className="block font-sans text-[10px] uppercase tracking-wider text-[var(--color-muted-text)] font-semibold mb-1">Break Start</label>
+                                <input
+                                  type="time"
+                                  value={settings.breakStartTime || '13:00'}
+                                  onChange={e => setSettings({ ...settings, breakStartTime: e.target.value })}
+                                  className="w-full px-3.5 py-2 rounded-xl bg-[var(--color-card-bg)] border border-[var(--color-border)] text-[var(--color-primary-text)] text-xs outline-none"
+                                />
+                              </div>
+                              <div>
+                                <label className="block font-sans text-[10px] uppercase tracking-wider text-[var(--color-muted-text)] font-semibold mb-1">Break End</label>
+                                <input
+                                  type="time"
+                                  value={settings.breakEndTime || '14:00'}
+                                  onChange={e => setSettings({ ...settings, breakEndTime: e.target.value })}
+                                  className="w-full px-3.5 py-2 rounded-xl bg-[var(--color-card-bg)] border border-[var(--color-border)] text-[var(--color-primary-text)] text-xs outline-none"
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Section 3: Booking Rules & Policies */}
+                      <div className="bg-[var(--color-card-bg)] rounded-xl sm:rounded-2xl p-3.5 sm:p-5 border border-[var(--color-border)] shadow-sm space-y-4">
+                        <div className="flex items-center gap-2.5 pb-2.5 border-b border-[var(--color-border)]">
+                          <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center">
+                            <Sliders size={16} />
+                          </div>
+                          <div>
+                            <h3 className="font-serif text-sm sm:text-base font-medium text-[var(--color-primary-text)]">Booking Rules & Cancellation Policies</h3>
+                            <p className="text-[10px] sm:text-[11px] text-[var(--color-secondary-text)] font-sans">Control appointment intervals, advance booking windows, auto-confirm mode, and cancellations</p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                          <div>
+                            <label className="block font-sans text-[10px] uppercase tracking-wider text-[var(--color-primary)] font-semibold mb-1.5">Slot Interval (Mins)</label>
+                            <select
+                              value={settings.slotDurationMinutes !== undefined ? settings.slotDurationMinutes : 30}
+                              onChange={e => setSettings({ ...settings, slotDurationMinutes: parseInt(e.target.value) || 0 })}
+                              className="w-full px-4 py-2.5 rounded-xl bg-[var(--color-surface-raised)] border border-[var(--color-border)] text-[var(--color-primary-text)] focus:border-[var(--color-primary)] focus:outline-none font-sans text-xs transition-all"
+                            >
+                              <option value={15}>15 Minutes</option>
+                              <option value={20}>20 Minutes</option>
+                              <option value={30}>30 Minutes</option>
+                              <option value={45}>45 Minutes</option>
+                              <option value={60}>60 Minutes</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block font-sans text-[10px] uppercase tracking-wider text-[var(--color-primary)] font-semibold mb-1.5">Min Advance Notice (Mins)</label>
+                            <input
+                              type="number"
+                              min={0}
+                              value={settings.minimumAdvanceMinutes !== undefined ? settings.minimumAdvanceMinutes : 60}
+                              onChange={e => setSettings({ ...settings, minimumAdvanceMinutes: e.target.value === '' ? '' : Math.max(0, parseInt(e.target.value) || 0) })}
+                              className="w-full px-4 py-2.5 rounded-xl bg-[var(--color-surface-raised)] border border-[var(--color-border)] text-[var(--color-primary-text)] focus:border-[var(--color-primary)] focus:outline-none font-sans text-xs transition-all"
+                            />
+                          </div>
+                          <div>
+                            <label className="block font-sans text-[10px] uppercase tracking-wider text-[var(--color-primary)] font-semibold mb-1.5">Max Booking Window (Days)</label>
+                            <input
+                              type="number"
+                              min={0}
+                              value={settings.maximumAdvanceDays !== undefined ? settings.maximumAdvanceDays : 30}
+                              onChange={e => setSettings({ ...settings, maximumAdvanceDays: e.target.value === '' ? '' : Math.max(0, parseInt(e.target.value) || 0) })}
+                              className="w-full px-4 py-2.5 rounded-xl bg-[var(--color-surface-raised)] border border-[var(--color-border)] text-[var(--color-primary-text)] focus:border-[var(--color-primary)] focus:outline-none font-sans text-xs transition-all"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-[var(--color-border)]">
+                          {/* Auto-Confirm Toggle */}
+                          <div className="p-4 rounded-xl bg-[var(--color-surface-raised)] border border-[var(--color-border)] flex items-center justify-between">
+                            <div>
+                              <span className="font-sans text-xs font-semibold text-[var(--color-primary-text)] block">Auto-Confirm Appointments</span>
+                              <span className="text-[10px] text-[var(--color-secondary-text)] font-sans">Automatically accept bookings without requiring manual admin approval</span>
+                            </div>
+                            <Switch
+                              checked={settings.autoConfirmBookings !== false}
+                              onCheckedChange={checked => setSettings({ ...settings, autoConfirmBookings: checked })}
+                            />
+                          </div>
+
+                          {/* Cancellation Policy */}
+                          <div className="p-4 rounded-xl bg-[var(--color-surface-raised)] border border-[var(--color-border)] space-y-2.5">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <span className="font-sans text-xs font-semibold text-[var(--color-primary-text)] block">Allow Client Cancellation</span>
+                                <span className="text-[10px] text-[var(--color-secondary-text)] font-sans">Allow clients to cancel from their dashboard</span>
+                              </div>
+                              <Switch
+                                checked={settings.allowCancellation !== false}
+                                onCheckedChange={checked => setSettings({ ...settings, allowCancellation: checked })}
+                              />
+                            </div>
+                            {settings.allowCancellation !== false && (
+                              <div className="space-y-2 pt-2 border-t border-[var(--color-border)]">
+                                <div className="flex items-center justify-between text-xs">
+                                  <span className="text-[10px] text-[var(--color-primary-text)] uppercase tracking-wider font-semibold">
+                                    Cutoff Prior To Booking
+                                  </span>
+                                  <div className="flex items-center gap-1.5">
+                                    <input
+                                      type="number"
+                                      min={0}
+                                      step={1}
+                                      value={
+                                        settings.cancellationCutoffMinutes !== undefined
+                                          ? settings.cancellationCutoffMinutes
+                                          : settings.cancellationCutoffHours !== undefined
+                                          ? settings.cancellationCutoffHours * 60
+                                          : 120
+                                      }
+                                      onChange={e => {
+                                        const val = e.target.value === '' ? '' : Math.max(0, parseInt(e.target.value) || 0);
+                                        setSettings({
+                                          ...settings,
+                                          cancellationCutoffMinutes: val,
+                                          cancellationCutoffHours: typeof val === 'number' ? Math.floor(val / 60) : 0
+                                        });
+                                      }}
+                                      className="w-20 px-2 py-1 rounded-lg bg-[var(--color-card-bg)] border border-[var(--color-border)] text-[var(--color-primary-text)] text-xs text-right font-bold"
+                                    />
+                                    <span className="text-[10px] text-[var(--color-secondary-text)] font-sans">mins</span>
+                                  </div>
+                                </div>
+
+                                {/* Quick Presets for Cancellation: 0m (Anytime), 5m, 15m, 30m, 1h, 2h */}
+                                <div className="flex flex-wrap gap-1.5 pt-0.5">
+                                  {[
+                                    { label: '0m (Anytime)', value: 0 },
+                                    { label: '5m', value: 5 },
+                                    { label: '15m', value: 15 },
+                                    { label: '30m', value: 30 },
+                                    { label: '1h', value: 60 },
+                                    { label: '2h', value: 120 },
+                                  ].map(preset => {
+                                    const currentCutoff =
+                                      settings.cancellationCutoffMinutes !== undefined
+                                        ? settings.cancellationCutoffMinutes
+                                        : settings.cancellationCutoffHours !== undefined
+                                        ? settings.cancellationCutoffHours * 60
+                                        : 120;
+                                    const isSelected = currentCutoff === preset.value;
+                                    return (
+                                      <button
+                                        key={preset.value}
+                                        type="button"
+                                        onClick={() =>
+                                          setSettings({
+                                            ...settings,
+                                            cancellationCutoffMinutes: preset.value,
+                                            cancellationCutoffHours: Math.floor(preset.value / 60)
+                                          })
+                                        }
+                                        className={`px-2 py-0.5 rounded-md font-sans text-[9px] uppercase tracking-wider font-semibold transition-all cursor-pointer ${
+                                          isSelected
+                                            ? 'bg-[var(--color-primary)] text-black font-bold shadow-sm'
+                                            : 'bg-[var(--color-surface)] text-[var(--color-secondary-text)] hover:text-[var(--color-primary-text)] hover:bg-[var(--color-surface-hover)] border border-[var(--color-border)]'
+                                        }`}
+                                      >
+                                        {preset.label}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Section 4: Currency & Broadcast Announcement */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                        {/* Currency Symbol */}
+                        <div className="bg-[var(--color-card-bg)] rounded-2xl p-5 border border-[var(--color-border)] shadow-sm space-y-3">
+                          <div className="flex items-center gap-2 pb-2 border-b border-[var(--color-border)]">
+                            <DollarSign size={16} className="text-[var(--color-primary)]" />
+                            <h3 className="font-serif text-sm font-medium text-[var(--color-primary-text)]">Pricing Currency</h3>
+                          </div>
+                          <p className="text-[10px] text-[var(--color-secondary-text)] font-sans">Currency symbol used across services and customer checkout</p>
+                          <div className="flex gap-2">
+                            {['$', '€', '£', '₹', 'AED'].map(curr => (
+                              <button
+                                key={curr}
+                                type="button"
+                                onClick={() => setSettings({ ...settings, currencySymbol: curr })}
+                                className={`flex-1 py-2 rounded-xl font-bold font-sans text-xs border transition-all cursor-pointer ${
+                                  (settings.currencySymbol || '$') === curr
+                                    ? 'bg-[var(--color-primary)] text-black border-[var(--color-primary)]'
+                                    : 'bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)] border-[var(--color-border)] hover:text-[var(--color-primary-text)]'
+                                }`}
+                              >
+                                {curr}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Broadcast Announcement Banner */}
+                        <div className="sm:col-span-2 bg-[var(--color-card-bg)] rounded-2xl p-5 border border-[var(--color-border)] shadow-sm space-y-3">
+                          <div className="flex items-center justify-between pb-2 border-b border-[var(--color-border)]">
+                            <div className="flex items-center gap-2">
+                              <Megaphone size={16} className="text-[var(--color-primary)]" />
+                              <h3 className="font-serif text-sm font-medium text-[var(--color-primary-text)]">Shop Notice / Announcement Banner</h3>
+                            </div>
+                            <Switch
+                              checked={!!settings.announcementActive}
+                              onCheckedChange={checked => setSettings({ ...settings, announcementActive: checked })}
+                            />
+                          </div>
+                          <input
+                            type="text"
+                            value={settings.announcementText || ''}
+                            onChange={e => setSettings({ ...settings, announcementText: e.target.value })}
+                            placeholder="e.g. Special Holiday Promo: 20% off all beard grooming this weekend!"
+                            className="w-full px-4 py-2.5 rounded-xl bg-[var(--color-surface-raised)] border border-[var(--color-border)] text-[var(--color-primary-text)] focus:border-[var(--color-primary)] focus:outline-none font-sans text-xs transition-all"
+                          />
+                          <p className="text-[10px] text-[var(--color-secondary-text)] font-sans">When enabled, this broadcast banner appears prominently at the top of the client booking page.</p>
+                        </div>
+                      </div>
+
+                      {/* Bottom Save Action */}
+                      <div className="pt-2 flex justify-end">
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          type="button"
+                          onClick={() => handleSettingsSubmit()}
+                          disabled={savingSettings}
+                          className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-black font-sans text-xs uppercase tracking-wider font-bold transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                        >
+                          <Check size={16} className="stroke-[2.5]" />
+                          <span>{savingSettings ? 'Saving...' : 'Save All Changes'}</span>
+                        </motion.button>
+                      </div>
                     </motion.div>
                   )}
                   {/* ======================== PROFILE TAB ======================== */}
                   {activeTab === 'profile' && (
-                    <motion.div variants={itemVariants} className="space-y-3 sm:space-y-6">
+                    <motion.div variants={itemVariants} className="space-y-3 sm:space-y-5">
                       
                       {/* Top Banner (Avatar & Basic Info) */}
-                      <div className="bg-[var(--color-card-bg)] rounded-xl sm:rounded-3xl p-3.5 sm:p-10 relative overflow-hidden flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-8 shadow-md sm:shadow-xl transition-colors">
+                      <div className="bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-xl sm:rounded-2xl p-3.5 sm:p-5 relative overflow-hidden flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-5 shadow-sm transition-colors">
                         <div className="relative group shrink-0 z-10">
-                          <div className="w-14 h-14 sm:w-32 sm:h-32 rounded-full p-1 bg-gradient-to-b from-[var(--color-primary)] to-[var(--color-primary)]/20 flex items-center justify-center">
+                          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full p-[2px] bg-gradient-to-b from-[var(--color-primary)] to-[var(--color-primary)]/20 flex items-center justify-center">
                             <div className="w-full h-full rounded-full bg-[var(--color-surface-raised)] flex items-center justify-center overflow-hidden relative">
                               {newImage || adminUser?.image ? (
                                 <img src={newImage || adminUser?.image} alt={adminUser?.name || 'Admin'} className="w-full h-full object-cover" />
                               ) : (
-                                <User size={24} className="text-[var(--color-secondary-text)] sm:w-12 sm:h-12" />
+                                <User size={20} className="text-[var(--color-secondary-text)] sm:w-8 sm:h-8" />
                               )}
                             </div>
                           </div>
                         </div>
 
                         <div className="flex-1 text-center sm:text-left z-10 min-w-0">
-                          <h1 className="text-xl sm:text-4xl font-serif text-[var(--color-primary-text)] mb-0.5 sm:mb-2 font-medium truncate">{adminUser?.name || 'Admin'}</h1>
-                          <p className="text-[var(--color-secondary-text)] font-sans text-[10px] sm:text-[11px] uppercase tracking-wider mb-2 sm:mb-4 truncate">{adminUser?.email || 'admin@example.com'}</p>
+                          <h1 className="text-base sm:text-xl font-serif text-[var(--color-primary-text)] mb-0.5 font-medium truncate">{adminUser?.name || 'Admin'}</h1>
+                          <p className="text-[var(--color-secondary-text)] font-sans text-[10px] sm:text-[11px] uppercase tracking-wider mb-1.5 truncate">{adminUser?.email || 'admin@example.com'}</p>
                           
-                          <div className="inline-flex px-3 py-1 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-sans text-[8px] sm:text-[9px] uppercase tracking-wider font-semibold">
+                          <div className="inline-flex px-2.5 py-0.5 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-sans text-[8px] sm:text-[9px] uppercase tracking-wider font-semibold">
                             Administrator
                           </div>
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-5">
                         
                         {/* Left Column: Account Details */}
-                        <div className="bg-[var(--color-card-bg)] rounded-xl sm:rounded-3xl p-3.5 sm:p-10 flex flex-col shadow-md sm:shadow-lg transition-colors">
-                          <div className="flex items-center gap-2 mb-3 sm:mb-8 pb-2.5 sm:pb-4 border-b border-[var(--color-surface-raised)]">
-                            <User size={14} className="text-[var(--color-primary)] sm:w-4 sm:h-4" />
-                            <h2 className="text-[var(--color-primary)] font-sans text-[10px] uppercase tracking-wider font-semibold">Account Details</h2>
+                        <div className="bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-xl sm:rounded-2xl p-3.5 sm:p-5 flex flex-col shadow-sm transition-colors">
+                          <div className="flex items-center gap-2 mb-3 pb-2.5 border-b border-[var(--color-border)]">
+                            <User size={14} className="text-[var(--color-primary)]" />
+                            <h2 className="text-[var(--color-primary-text)] font-sans text-[10px] sm:text-xs uppercase tracking-wider font-semibold">Account Details</h2>
                           </div>
                           
-                          <div className="space-y-3 sm:space-y-6 flex-1">
+                          <div className="space-y-3 flex-1">
                             <div>
-                              <label className="block font-sans text-[9px] uppercase tracking-wider text-[var(--color-secondary-text)] mb-1 font-semibold">Full Name</label>
+                              <label className="block font-sans text-[9px] sm:text-[10px] uppercase tracking-wider text-[var(--color-secondary-text)] mb-1 font-semibold">Full Name</label>
                               <input 
                                 type="text" 
                                 value={isEditingProfile ? newName : adminUser?.name || ''}
                                 onChange={e => setNewName(e.target.value)}
                                 disabled={!isEditingProfile}
-                                className="w-full bg-[var(--color-surface-raised)] rounded-lg sm:rounded-2xl px-3.5 sm:px-5 py-2 sm:py-3.5 text-[var(--color-primary-text)] focus:outline-none font-sans text-xs sm:text-sm disabled:opacity-70"
+                                className="w-full bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-xl px-3.5 sm:px-4 py-2 sm:py-2.5 text-[var(--color-primary-text)] focus:outline-none font-sans text-xs disabled:opacity-70"
                               />
                             </div>
                             
                             <div>
-                              <label className="block font-sans text-[9px] uppercase tracking-wider text-[var(--color-secondary-text)] mb-1 font-semibold">Email Address</label>
+                              <label className="block font-sans text-[9px] sm:text-[10px] uppercase tracking-wider text-[var(--color-secondary-text)] mb-1 font-semibold">Email Address</label>
                               <input 
                                 type="email" 
                                 value={adminUser?.email || ''}
                                 disabled
-                                className="w-full bg-[var(--color-surface-raised)] rounded-lg sm:rounded-2xl px-3.5 sm:px-5 py-2 sm:py-3.5 text-[var(--color-secondary-text)] focus:outline-none font-sans text-xs sm:text-sm disabled:opacity-50"
+                                className="w-full bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-xl px-3.5 sm:px-4 py-2 sm:py-2.5 text-[var(--color-secondary-text)] focus:outline-none font-sans text-xs disabled:opacity-50"
                               />
                             </div>
 
@@ -1874,17 +2411,17 @@ export default function Admin() {
                         </div>
 
                         {/* Right Column: Security */}
-                        <div className="space-y-3 sm:space-y-6 flex flex-col">
-                          <div className="bg-[var(--color-card-bg)] rounded-xl sm:rounded-3xl p-3.5 sm:p-10 flex-1 shadow-md sm:shadow-lg transition-colors">
-                            <div className="flex items-center gap-2 mb-3 sm:mb-8 pb-2.5 sm:pb-4 border-b border-[var(--color-surface-raised)]">
-                              <Shield size={14} className="text-[var(--color-primary)] sm:w-4 sm:h-4" />
-                              <h2 className="text-[var(--color-primary)] font-sans text-[10px] uppercase tracking-wider font-semibold">Security</h2>
+                        <div className="space-y-3 sm:space-y-5 flex flex-col">
+                          <div className="bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-xl sm:rounded-2xl p-3.5 sm:p-5 flex-1 shadow-sm transition-colors">
+                            <div className="flex items-center gap-2 mb-3 pb-2.5 border-b border-[var(--color-border)]">
+                              <Shield size={14} className="text-[var(--color-primary)]" />
+                              <h2 className="text-[var(--color-primary-text)] font-sans text-[10px] sm:text-xs uppercase tracking-wider font-semibold">Security & Password</h2>
                             </div>
 
                             {checkingPassword ? (
                               <div className="text-[var(--color-secondary-text)] font-sans text-[10px] uppercase tracking-wider flex h-full items-center justify-center">Checking status...</div>
                             ) : (
-                              <div className="space-y-3 sm:space-y-6">
+                              <div className="space-y-3">
                                 {!hasPassword && (
                                   <div className="bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-3 sm:px-5 py-2.5 sm:py-4 rounded-lg sm:rounded-2xl font-sans text-[10px] uppercase tracking-wider flex items-center gap-2 mb-3 font-medium">
                                     <AlertCircle size={14} /> No password set for this account.
@@ -1893,32 +2430,32 @@ export default function Admin() {
                                 
                                 {hasPassword && (
                                   <div>
-                                    <label className="block font-sans text-[9px] uppercase tracking-wider text-[var(--color-secondary-text)] mb-1 font-semibold">Current Password</label>
+                                    <label className="block font-sans text-[9px] sm:text-[10px] uppercase tracking-wider text-[var(--color-secondary-text)] mb-1 font-semibold">Current Password</label>
                                     <input 
                                       type="password" 
                                       value={currentPassword}
                                       onChange={e => setCurrentPassword(e.target.value)}
                                       placeholder="••••••••"
-                                      className="w-full bg-[var(--color-surface-raised)] rounded-lg sm:rounded-2xl px-3.5 sm:px-5 py-2 sm:py-3.5 text-[var(--color-primary-text)] focus:outline-none font-sans text-xs sm:text-sm"
+                                      className="w-full bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-xl px-3.5 sm:px-4 py-2 sm:py-2.5 text-[var(--color-primary-text)] focus:outline-none font-sans text-xs"
                                     />
                                   </div>
                                 )}
                                 <div>
-                                  <label className="block font-sans text-[9px] uppercase tracking-wider text-[var(--color-secondary-text)] mb-1 font-semibold">New Password</label>
+                                  <label className="block font-sans text-[9px] sm:text-[10px] uppercase tracking-wider text-[var(--color-secondary-text)] mb-1 font-semibold">New Password</label>
                                   <input 
                                     type="password" 
                                     value={newPassword}
                                     onChange={e => setNewPassword(e.target.value)}
                                     placeholder="••••••••"
-                                    className="w-full bg-[var(--color-surface-raised)] rounded-lg sm:rounded-2xl px-3.5 sm:px-5 py-2 sm:py-3.5 text-[var(--color-primary-text)] focus:outline-none font-sans text-xs sm:text-sm"
+                                    className="w-full bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-xl px-3.5 sm:px-4 py-2 sm:py-2.5 text-[var(--color-primary-text)] focus:outline-none font-sans text-xs"
                                   />
                                 </div>
 
-                                <div className="pt-2 sm:pt-6">
+                                <div className="pt-1.5">
                                   <button 
                                     onClick={handleChangePassword}
                                     disabled={updatingPassword}
-                                    className="px-4 sm:px-8 py-2 sm:py-3 bg-[var(--color-primary)] text-black font-sans text-[10px] uppercase tracking-wider rounded-lg sm:rounded-2xl hover:bg-[var(--color-primary-hover)] transition-all shadow-sm font-bold cursor-pointer disabled:opacity-70"
+                                    className="px-4 sm:px-5 py-2 sm:py-2.5 bg-[var(--color-primary)] text-black font-sans text-[10px] sm:text-xs uppercase tracking-wider rounded-xl hover:bg-[var(--color-primary-hover)] transition-all shadow-sm font-bold cursor-pointer disabled:opacity-70"
                                   >
                                     {updatingPassword ? (hasPassword ? 'Updating...' : 'Setting...') : (hasPassword ? 'Update Password' : 'Set Password')}
                                   </button>
@@ -1927,13 +2464,13 @@ export default function Admin() {
                             )}
                           </div>
 
-                          <div className="bg-[var(--color-card-bg)] rounded-xl sm:rounded-3xl p-3.5 sm:p-8 flex items-center justify-between gap-3 shadow-md sm:shadow-lg transition-colors">
-                            <div className="flex items-center gap-2.5 sm:gap-5">
-                              <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-full bg-[var(--color-surface-raised)] flex items-center justify-center shrink-0">
-                                <Shield size={16} className="text-[var(--color-primary)]" />
+                          <div className="bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-xl sm:rounded-2xl p-3.5 sm:p-4 flex items-center justify-between gap-3 shadow-sm transition-colors">
+                            <div className="flex items-center gap-2.5 sm:gap-4">
+                              <div className="w-8 h-8 rounded-lg bg-[var(--color-surface-raised)] flex items-center justify-center shrink-0">
+                                <Shield size={15} className="text-[var(--color-primary)]" />
                               </div>
                               <div>
-                                <h3 className="text-[var(--color-primary-text)] font-serif text-sm sm:text-lg mb-0.5 font-medium">Two-Factor Authentication</h3>
+                                <h3 className="text-[var(--color-primary-text)] font-sans text-[10px] sm:text-xs uppercase tracking-wider font-semibold">Two-Factor Authentication</h3>
                                 <p className="text-[var(--color-secondary-text)] font-sans text-[9px] sm:text-[10px]">Add an extra layer of security</p>
                               </div>
                             </div>
