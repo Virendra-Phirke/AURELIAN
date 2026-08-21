@@ -29,12 +29,12 @@ export default function ForgotPassword() {
   const onSubmit = async (data: ForgotPasswordFormValues) => {
     setLoading(true);
     setServerError('');
-    
+
     const { error } = await (authClient as any).forgetPassword({
       email: data.email,
-      redirectTo: `${window.location.origin}/reset-password`,
+      redirectTo: "/reset-password",
     });
-    
+
     if (error) {
       setServerError(error.message || 'Failed to send reset link');
     } else {
@@ -47,7 +47,7 @@ export default function ForgotPassword() {
     `w-full px-5 py-3.5 bg-[var(--color-input-bg)] border rounded-xl ${hasError ? 'border-red-500/50' : 'border-[var(--color-border)]'} text-[var(--color-primary-text)] placeholder:text-[var(--color-muted-text)] focus:outline-none focus:border-[var(--color-primary)] focus:shadow-[0_0_15px_rgba(229,195,120,0.15)] font-sans text-sm transition-all`;
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
@@ -55,7 +55,7 @@ export default function ForgotPassword() {
     >
       <div className="bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden transition-colors">
         <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[var(--color-primary)] to-transparent opacity-60" />
-        
+
         <div className="text-center mb-10">
           <h1 className="text-4xl font-light text-[var(--color-primary-text)] mb-3 italic tracking-tight font-serif">Reset Access</h1>
           <p className="font-sans text-[11px] uppercase tracking-widest text-[var(--color-secondary-text)] font-semibold">
@@ -64,9 +64,9 @@ export default function ForgotPassword() {
         </div>
 
         {serverError && (
-          <motion.div 
-            initial={{ opacity: 0, y: -5 }} 
-            animate={{ opacity: 1, y: 0 }} 
+          <motion.div
+            initial={{ opacity: 0, y: -5 }}
+            animate={{ opacity: 1, y: 0 }}
             className="p-4 mb-6 text-[11px] text-red-500 bg-red-500/10 border border-red-500/20 uppercase tracking-widest text-center rounded-xl font-semibold"
           >
             {serverError}
@@ -74,9 +74,9 @@ export default function ForgotPassword() {
         )}
 
         {success ? (
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }} 
-            animate={{ opacity: 1, scale: 1 }} 
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
             className="text-center space-y-6"
           >
             <div className="flex items-center justify-center mb-4">

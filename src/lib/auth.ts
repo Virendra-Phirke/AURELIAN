@@ -11,7 +11,7 @@ export const authClient = createAuthClient({
     oneTapClient({
       clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID || "746469864617-u982sdj01nksir0dqgohgmkj8op44bdj.apps.googleusercontent.com",
       autoSelect: false,
-      cancelOnTapOutside: false,
+      cancelOnTapOutside: true,
       context: "signin",
     })
   ]

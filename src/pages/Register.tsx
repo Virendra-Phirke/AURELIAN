@@ -70,7 +70,7 @@ export default function Register() {
         <div className="text-center mb-10">
           <h1 className="text-4xl font-light text-[var(--color-primary-text)] mb-3 italic tracking-tight font-serif">Become a Client</h1>
           <p className="font-sans text-[11px] uppercase tracking-widest text-[var(--color-secondary-text)] font-medium">
-            Request Access
+            Create an Account
           </p>
         </div>
 
@@ -131,7 +131,7 @@ export default function Register() {
             disabled={loading}
             className="w-full mt-2 py-4 bg-[var(--color-primary)] text-black font-sans text-[11px] uppercase tracking-widest rounded-xl hover:bg-[var(--color-primary-hover)] transition-colors disabled:opacity-50 shadow-[0_0_20px_rgba(229,195,120,0.25)] flex items-center justify-center gap-2 cursor-pointer font-bold"
           >
-            {loading ? 'Processing...' : 'Request Access'}
+            {loading ? 'Processing...' : 'Create Account'}
             <ArrowRight size={14} />
           </motion.button>
         </form>
