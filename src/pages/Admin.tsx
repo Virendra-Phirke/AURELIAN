@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo, KeyboardEvent } from 'react';
 import { format, parseISO, subDays, isAfter } from 'date-fns';
 import { motion, AnimatePresence } from 'motion/react';
-import { LayoutDashboard, CalendarDays, Users, Scissors, Settings as SettingsIcon, ChevronRight, User, Shield, Lock, AlertCircle, Camera, Download, Search, RefreshCw, X, Check } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, Users, Scissors, Settings as SettingsIcon, ChevronRight, ChevronDown, User, Shield, Lock, AlertCircle, Camera, Download, Search, RefreshCw, X, Check } from 'lucide-react';
 import { authClient } from '../lib/auth';
 import { DataPagination } from '../components/ui/pagination';
 import { Badge } from '../components/ui/badge';
@@ -901,9 +901,30 @@ export default function Admin() {
                   {/* ======================== BOOKINGS TAB ======================== */}
                   {activeTab === 'bookings' && (
                     <div className="flex-1 flex flex-col">
-                      <motion.div variants={itemVariants} className="flex flex-col gap-3 lg:flex-row lg:items-center justify-between mb-3 sm:mb-6 shrink-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <div className="flex flex-wrap gap-1 bg-[var(--color-card-bg)] p-1 rounded-xl shadow-sm" role="group" aria-label="Filter bookings by status">
+                      <motion.div variants={itemVariants} className="flex flex-col gap-2.5 lg:flex-row lg:items-center justify-between mb-3 sm:mb-6 shrink-0">
+                        <div className="flex items-center gap-2 w-full lg:w-auto">
+                          {/* Mobile Status Filter Dropdown */}
+                          <div className="sm:hidden relative flex-1">
+                            <select
+                              value={statusFilter}
+                              onChange={(e) => setStatusFilter(e.target.value as any)}
+                              aria-label="Filter bookings by status"
+                              className="w-full appearance-none px-3.5 py-2 pr-8 rounded-xl bg-[var(--color-card-bg)] text-[var(--color-primary-text)] font-sans text-xs uppercase tracking-wider font-semibold focus:outline-none cursor-pointer shadow-sm"
+                            >
+                              {STATUS_FILTERS.map(sf => {
+                                const count = sf === 'ALL' ? bookings.length : bookings.filter(b => b.status === sf).length;
+                                return (
+                                  <option key={sf} value={sf} className="bg-[var(--color-surface-raised)] text-[var(--color-primary-text)]">
+                                    Status: {sf} ({count})
+                                  </option>
+                                );
+                              })}
+                            </select>
+                            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-primary)] pointer-events-none" />
+                          </div>
+
+                          {/* Desktop Status Filter Pills */}
+                          <div className="hidden sm:flex flex-wrap gap-1 bg-[var(--color-card-bg)] p-1 rounded-xl shadow-sm" role="group" aria-label="Filter bookings by status">
                             {STATUS_FILTERS.map(sf => {
                               const countForFilter = sf === 'ALL' ? bookings.length : bookings.filter(b => b.status === sf).length;
                               return (
@@ -928,7 +949,7 @@ export default function Admin() {
 
                           <button
                             onClick={exportBookingsToCSV}
-                            className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-[var(--color-surface-raised)] hover:bg-[var(--color-surface-hover)] text-[var(--color-primary-text)] font-sans text-[10px] sm:text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                            className="px-3 sm:px-4 py-2 rounded-xl bg-[var(--color-surface-raised)] hover:bg-[var(--color-surface-hover)] text-[var(--color-primary-text)] font-sans text-[10px] sm:text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-sm cursor-pointer shrink-0"
                             title="Export filtered bookings to CSV"
                           >
                             <Download size={13} className="text-[var(--color-primary)]" />
