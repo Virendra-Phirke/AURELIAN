@@ -24,20 +24,31 @@ async function startServer() {
   });
 
   app.use(cors());
-  app.use(express.json({ limit: '10kb' }));
 
-  // Better Auth handler
+  // Better Auth handler - MUST be before express.json() so Better Auth can read raw request stream
   const { toNodeHandler } = await import('better-auth/node');
   const authHandler = toNodeHandler(auth);
-  app.all('/api/auth/*all', async (req, res, next) => {
+
+  app.all('/api/auth', async (req, res) => {
     try {
       await authHandler(req, res);
     } catch (e: any) {
       console.error('BetterAuth Error:', e);
-      fs.writeFileSync('auth-error.log', e.toString() + '\\n' + (e.stack || ''));
       res.status(500).send('Error');
     }
   });
+
+  app.all('/api/auth/*splat', async (req, res) => {
+    try {
+      await authHandler(req, res);
+    } catch (e: any) {
+      console.error('BetterAuth Error:', e);
+      res.status(500).send('Error');
+    }
+  });
+
+  app.use(express.json({ limit: '10kb' }));
+  app.use(express.urlencoded({ extended: true }));
 
   // Main API Routes
   app.use('/api', apiRouter);

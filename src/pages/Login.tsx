@@ -6,7 +6,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Mail, Lock, ArrowRight } from 'lucide-react';
-import GoogleOneTap from '../components/GoogleOneTap';
 import { BorderBeam } from '../components/magicui/border-beam';
 
 import { signInWithOAuthPopup } from '../lib/oauthPopup';
@@ -332,8 +331,6 @@ export default function Login() {
           </>
         )}
       </div>
-
-      <GoogleOneTap callbackURL="/booking" />
     </motion.div>
   );
 }

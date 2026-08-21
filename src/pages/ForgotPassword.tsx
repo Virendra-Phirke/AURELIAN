@@ -32,7 +32,7 @@ export default function ForgotPassword() {
     
     const { error } = await (authClient as any).forgetPassword({
       email: data.email,
-      redirectTo: "/reset-password",
+      redirectTo: `${window.location.origin}/reset-password`,
     });
     
     if (error) {
