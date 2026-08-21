@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { authClient } from '../lib/auth';
 import { useNavigate } from 'react-router-dom';
+import { DataPagination } from '../components/ui/pagination';
 
 // --- Types ---
 type Booking = {
@@ -189,6 +190,16 @@ export default function Dashboard() {
       .sort((a, b) => b.bookingDate.localeCompare(a.bookingDate)),
     [bookings]
   );
+
+  const [pastPage, setPastPage] = useState(1);
+  const [pastPageSize, setPastPageSize] = useState(5);
+
+  const paginatedPast = useMemo(() => {
+    const start = (pastPage - 1) * pastPageSize;
+    return past.slice(start, start + pastPageSize);
+  }, [past, pastPage, pastPageSize]);
+
+  const pastTotalPages = Math.max(1, Math.ceil(past.length / pastPageSize));
 
   const todayBookings = useMemo(() =>
     bookings.filter(b =>
@@ -632,8 +643,8 @@ export default function Dashboard() {
                 exit={{ opacity: 0, height: 0 }}
                 className="overflow-hidden mt-3"
               >
-                <div className="bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl divide-y divide-[#141414]">
-                  {past.map((b) => (
+                <div className="bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl overflow-hidden divide-y divide-[#141414]">
+                  {paginatedPast.map((b) => (
                     <div
                       key={b.id}
                       className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-[#111111] transition-colors"
@@ -650,6 +661,16 @@ export default function Dashboard() {
                       <StatusBadge status={b.status} />
                     </div>
                   ))}
+
+                  <DataPagination
+                    currentPage={pastPage}
+                    totalPages={pastTotalPages}
+                    totalItems={past.length}
+                    pageSize={pastPageSize}
+                    onPageChange={setPastPage}
+                    onPageSizeChange={setPastPageSize}
+                    pageSizeOptions={[5, 10, 20]}
+                  />
                 </div>
               </motion.div>
             )}

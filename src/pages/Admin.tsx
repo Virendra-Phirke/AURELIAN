@@ -1,8 +1,11 @@
-import React, { useState, useEffect, useRef, useCallback, KeyboardEvent } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo, KeyboardEvent } from 'react';
 import { format, parseISO, subDays, isAfter } from 'date-fns';
 import { motion, AnimatePresence } from 'motion/react';
-import { LayoutDashboard, CalendarDays, Users, Scissors, Settings as SettingsIcon, ChevronRight, User, Shield, Lock, AlertCircle, Camera } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, Users, Scissors, Settings as SettingsIcon, ChevronRight, User, Shield, Lock, AlertCircle, Camera, Download, Search, RefreshCw, X, Check } from 'lucide-react';
 import { authClient } from '../lib/auth';
+import { DataPagination } from '../components/ui/pagination';
+import { Badge } from '../components/ui/badge';
+import { Button } from '../components/ui/button';
 
 // --- Types ---
 type Booking = {
@@ -276,6 +279,12 @@ export default function Admin() {
   const [editCustomerName, setEditCustomerName] = useState('');
   const [editCustomerEmail, setEditCustomerEmail] = useState('');
 
+  // Pagination State
+  const [bookingPage, setBookingPage] = useState(1);
+  const [bookingPageSize, setBookingPageSize] = useState(10);
+  const [customerPage, setCustomerPage] = useState(1);
+  const [customerPageSize, setCustomerPageSize] = useState(10);
+
   // Toast
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const showToast = useCallback((message: string, type: 'success' | 'error' = 'success') => {
@@ -530,27 +539,79 @@ export default function Admin() {
     setLoading(false);
   };
 
-  // --- Filtered data ---
-  const filteredBookings = bookings.filter(b => {
-    if (statusFilter !== 'ALL' && b.status !== statusFilter) return false;
-    if (bookingSearch) {
-      const q = bookingSearch.toLowerCase();
-      const customer = customerMap[b.userId];
-      const serviceName = serviceMap[b.serviceId] || '';
-      if (
-        !(customer?.name?.toLowerCase().includes(q)) &&
-        !(customer?.email?.toLowerCase().includes(q)) &&
-        !(serviceName.toLowerCase().includes(q))
-      ) return false;
-    }
-    return true;
-  });
+  // --- Filtered & Paginated data ---
+  const filteredBookings = useMemo(() => {
+    return bookings.filter(b => {
+      if (statusFilter !== 'ALL' && b.status !== statusFilter) return false;
+      if (bookingSearch) {
+        const q = bookingSearch.toLowerCase();
+        const customer = customerMap[b.userId];
+        const serviceName = serviceMap[b.serviceId] || '';
+        if (
+          !(customer?.name?.toLowerCase().includes(q)) &&
+          !(customer?.email?.toLowerCase().includes(q)) &&
+          !(serviceName.toLowerCase().includes(q))
+        ) return false;
+      }
+      return true;
+    });
+  }, [bookings, statusFilter, bookingSearch, customerMap, serviceMap]);
 
-  const filteredCustomers = customers.filter(c => {
-    if (!customerSearch) return true;
-    const q = customerSearch.toLowerCase();
-    return c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q);
-  });
+  const paginatedBookings = useMemo(() => {
+    const start = (bookingPage - 1) * bookingPageSize;
+    return filteredBookings.slice(start, start + bookingPageSize);
+  }, [filteredBookings, bookingPage, bookingPageSize]);
+
+  const bookingTotalPages = Math.max(1, Math.ceil(filteredBookings.length / bookingPageSize));
+
+  const filteredCustomers = useMemo(() => {
+    return customers.filter(c => {
+      if (!customerSearch) return true;
+      const q = customerSearch.toLowerCase();
+      return (c.name || '').toLowerCase().includes(q) || (c.email || '').toLowerCase().includes(q);
+    });
+  }, [customers, customerSearch]);
+
+  const paginatedCustomers = useMemo(() => {
+    const start = (customerPage - 1) * customerPageSize;
+    return filteredCustomers.slice(start, start + customerPageSize);
+  }, [filteredCustomers, customerPage, customerPageSize]);
+
+  const customerTotalPages = Math.max(1, Math.ceil(filteredCustomers.length / customerPageSize));
+
+  // Reset page index when search or status filters change
+  useEffect(() => {
+    setBookingPage(1);
+  }, [statusFilter, bookingSearch]);
+
+  useEffect(() => {
+    setCustomerPage(1);
+  }, [customerSearch]);
+
+  const exportBookingsToCSV = () => {
+    if (filteredBookings.length === 0) return showToast('No bookings to export', 'error');
+    const headers = ['Booking ID', 'Date', 'Start Time', 'End Time', 'Customer Name', 'Customer Email', 'Service', 'Status', 'Created At'];
+    const rows = filteredBookings.map(b => [
+      b.id,
+      b.bookingDate,
+      b.startTime,
+      b.endTime || '',
+      `"${(customerMap[b.userId]?.name || 'Unknown').replace(/"/g, '""')}"`,
+      customerMap[b.userId]?.email || '',
+      `"${(serviceMap[b.serviceId] || 'Unknown').replace(/"/g, '""')}"`,
+      b.status,
+      b.createdAt
+    ]);
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `aurelian_bookings_${format(new Date(), 'yyyy-MM-dd')}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast('Bookings exported to CSV');
+  };
 
   // --- Analytics ---
   const today = format(new Date(), 'yyyy-MM-dd');
@@ -796,100 +857,134 @@ export default function Admin() {
                   {/* ======================== BOOKINGS TAB ======================== */}
                   {activeTab === 'bookings' && (
                     <div className="flex-1 flex flex-col">
-                      <motion.div variants={itemVariants} className="flex flex-col gap-6 lg:flex-row lg:items-center justify-between mb-8 shrink-0">
-                        <div className="flex flex-wrap gap-2 bg-[#0a0a0a] p-1.5 rounded-2xl border border-[#ffffff15]" role="group" aria-label="Filter bookings by status">
-                          {STATUS_FILTERS.map(sf => (
-                            <button
-                              key={sf}
-                              onClick={() => setStatusFilter(sf)}
-                              aria-pressed={statusFilter === sf}
-                              className={`px-5 py-2.5 rounded-xl text-[10px] uppercase tracking-widest font-sans transition-all focus:outline-none ${
-                                statusFilter === sf
-                                  ? 'bg-[#C5A059] text-black shadow-[0_0_10px_rgba(197,160,89,0.3)]'
-                                  : 'text-[#888] hover:text-white hover:bg-[#ffffff05]'
-                              }`}
-                            >
-                              {sf}
-                            </button>
-                          ))}
+                      <motion.div variants={itemVariants} className="flex flex-col gap-4 lg:flex-row lg:items-center justify-between mb-6 shrink-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <div className="flex flex-wrap gap-1.5 bg-[#0a0a0a] p-1.5 rounded-xl border border-[#1f1f1f]" role="group" aria-label="Filter bookings by status">
+                            {STATUS_FILTERS.map(sf => {
+                              const countForFilter = sf === 'ALL' ? bookings.length : bookings.filter(b => b.status === sf).length;
+                              return (
+                                <button
+                                  key={sf}
+                                  onClick={() => setStatusFilter(sf)}
+                                  aria-pressed={statusFilter === sf}
+                                  className={`px-3.5 py-2 rounded-lg text-[10px] uppercase tracking-widest font-sans font-medium transition-all focus:outline-none flex items-center gap-1.5 cursor-pointer ${
+                                    statusFilter === sf
+                                      ? 'bg-[#E5C378] text-black shadow-[0_0_12px_rgba(229,195,120,0.3)]'
+                                      : 'text-[#888888] hover:text-white hover:bg-[#141414]'
+                                  }`}
+                                >
+                                  <span>{sf}</span>
+                                  <span className={`text-[9px] px-1.5 py-0.2 rounded-full ${statusFilter === sf ? 'bg-black/20 text-black' : 'bg-[#1c1c1c] text-[#737373]'}`}>
+                                    {countForFilter}
+                                  </span>
+                                </button>
+                              );
+                            })}
+                          </div>
+
+                          <button
+                            onClick={exportBookingsToCSV}
+                            className="px-4 py-2 rounded-xl bg-[#111111] hover:bg-[#1c1c1c] text-[#d4d4d4] hover:text-white border border-[#262626] font-sans text-xs uppercase tracking-wider transition-all flex items-center gap-2 shadow-sm"
+                            title="Export filtered bookings to CSV"
+                          >
+                            <Download size={14} className="text-[#E5C378]" />
+                            <span>Export CSV</span>
+                          </button>
                         </div>
+
                         <div className="relative w-full lg:w-80">
+                          <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#525252]" />
                           <input
                             type="search"
-                            placeholder="Search bookings..."
+                            placeholder="Search customer, service..."
                             value={bookingSearch}
                             onChange={e => setBookingSearch(e.target.value)}
                             aria-label="Search bookings by customer or service"
-                            className="w-full px-5 py-3.5 rounded-2xl bg-[#0a0a0a] border border-[#ffffff15] text-white placeholder-[#555] focus:outline-none focus:border-[#C5A059] focus:shadow-[0_0_15px_rgba(197,160,89,0.1)] font-sans text-xs tracking-wider transition-all"
+                            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#0a0a0a] border border-[#1f1f1f] text-white placeholder-[#525252] focus:outline-none focus:border-[#E5C378] font-sans text-xs tracking-wider transition-all"
                           />
+                          {bookingSearch && (
+                            <button
+                              onClick={() => setBookingSearch('')}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#737373] hover:text-white p-1"
+                            >
+                              <X size={12} />
+                            </button>
+                          )}
                         </div>
                       </motion.div>
 
-                      <motion.div variants={itemVariants} className="flex-1 flex flex-col overflow-hidden rounded-2xl border border-[#ffffff15] bg-[#0a0a0a] shadow-2xl min-h-[400px]">
+                      <motion.div variants={itemVariants} className="flex-1 flex flex-col overflow-hidden rounded-xl border border-[#1f1f1f] bg-[#0a0a0a] shadow-2xl min-h-[400px]">
                         <div className="flex-1 overflow-x-auto overflow-y-auto custom-scrollbar">
                           <table className="w-full text-left font-sans text-sm min-w-[800px]" aria-label="Bookings table">
-                            <thead className="border-b border-[#ffffff15] bg-[#111] sticky top-0 z-10 shadow-[0_10px_20px_rgba(0,0,0,0.2)]">
-                            <tr>
-                              <th scope="col" className="px-8 py-5 font-sans text-[10px] uppercase tracking-[0.2em] text-[#666] font-normal">Date & Time</th>
-                              <th scope="col" className="px-8 py-5 font-sans text-[10px] uppercase tracking-[0.2em] text-[#666] font-normal">Customer</th>
-                              <th scope="col" className="px-8 py-5 font-sans text-[10px] uppercase tracking-[0.2em] text-[#666] font-normal">Service</th>
-                              <th scope="col" className="px-8 py-5 font-sans text-[10px] uppercase tracking-[0.2em] text-[#666] font-normal">Status</th>
-                              <th scope="col" className="px-8 py-5 font-sans text-[10px] uppercase tracking-[0.2em] text-[#666] font-normal text-right">Actions</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-[#ffffff08]">
-                            {filteredBookings.length === 0 ? (
+                            <thead className="border-b border-[#1f1f1f] bg-[#0e0e0e] sticky top-0 z-10">
                               <tr>
-                                <td colSpan={5} className="px-8 py-24 text-center text-[#555] font-sans text-[11px] uppercase tracking-widest">
-                                  {bookingSearch || statusFilter !== 'ALL' ? 'No bookings match your filters' : 'No bookings found'}
-                                </td>
+                                <th scope="col" className="px-6 py-4 font-sans text-[10px] uppercase tracking-[0.2em] text-[#737373] font-medium">Date & Time</th>
+                                <th scope="col" className="px-6 py-4 font-sans text-[10px] uppercase tracking-[0.2em] text-[#737373] font-medium">Customer</th>
+                                <th scope="col" className="px-6 py-4 font-sans text-[10px] uppercase tracking-[0.2em] text-[#737373] font-medium">Service</th>
+                                <th scope="col" className="px-6 py-4 font-sans text-[10px] uppercase tracking-[0.2em] text-[#737373] font-medium">Status</th>
+                                <th scope="col" className="px-6 py-4 font-sans text-[10px] uppercase tracking-[0.2em] text-[#737373] font-medium text-right">Actions</th>
                               </tr>
-                            ) : filteredBookings.map((b, i) => {
-                              const customer = customerMap[b.userId];
-                              return (
-                                <motion.tr 
-                                  initial={{ opacity: 0, y: 10 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  transition={{ delay: i * 0.05 }}
-                                  key={b.id} 
-                                  className="hover:bg-[#ffffff05] transition-colors group"
-                                >
-                                  <td className="px-8 py-5">
-                                    <div className="text-white tracking-wider mb-1 text-[13px]">{format(parseISO(b.bookingDate), 'MMM d, yyyy')}</div>
-                                    <div className="text-[11px] text-[#777] tracking-widest uppercase">{b.startTime} – {b.endTime}</div>
+                            </thead>
+                            <tbody className="divide-y divide-[#171717]">
+                              {filteredBookings.length === 0 ? (
+                                <tr>
+                                  <td colSpan={5} className="px-8 py-24 text-center text-[#555] font-sans text-[11px] uppercase tracking-widest">
+                                    {bookingSearch || statusFilter !== 'ALL' ? 'No bookings match your filters' : 'No bookings found'}
                                   </td>
-                                  <td className="px-8 py-5">
-                                    <div className="text-[#C5A059] font-medium text-[14px] mb-1">{customer?.name || 'Unknown'}</div>
-                                    <div className="text-[11px] text-[#777]">{customer?.email || ''}</div>
-                                  </td>
-                                  <td className="px-8 py-5 font-light text-[#D4D4D4]">{serviceMap[b.serviceId] || 'Unknown'}</td>
-                                  <td className="px-8 py-5"><StatusBadge status={b.status} /></td>
-                                  <td className="px-8 py-5 text-right">
-                                    <div className="flex items-center justify-end gap-3 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
-                                      {b.status === 'PENDING' && (
-                                        <>
-                                          <button onClick={() => handleBookingAction(b.id, 'accept')} className="px-4 py-2 rounded-lg bg-[#C5A059]/10 text-[#C5A059] hover:bg-[#C5A059] hover:text-black text-[10px] uppercase tracking-widest transition-all">Accept</button>
-                                          <button onClick={() => handleBookingAction(b.id, 'reject')} className="px-4 py-2 rounded-lg text-[#888] hover:bg-red-500/10 hover:text-red-400 text-[10px] uppercase tracking-widest transition-all">Reject</button>
-                                        </>
-                                      )}
-                                      {b.status === 'ACCEPTED' && (
-                                        <>
-                                          <button onClick={() => handleBookingAction(b.id, 'complete')} className="px-4 py-2 rounded-lg bg-[#4ade80]/10 text-[#4ade80] hover:bg-[#4ade80] hover:text-black text-[10px] uppercase tracking-widest transition-all">Complete</button>
-                                          <button onClick={() => handleBookingAction(b.id, 'cancel')} className="px-4 py-2 rounded-lg text-[#888] hover:bg-red-500/10 hover:text-red-400 text-[10px] uppercase tracking-widest transition-all">Cancel</button>
-                                        </>
-                                      )}
-                                    </div>
-                                  </td>
-                                </motion.tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
+                                </tr>
+                              ) : paginatedBookings.map((b, i) => {
+                                const customer = customerMap[b.userId];
+                                return (
+                                  <motion.tr 
+                                    initial={{ opacity: 0, y: 8 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: i * 0.03 }}
+                                    key={b.id} 
+                                    className="hover:bg-[#121212] transition-colors group"
+                                  >
+                                    <td className="px-6 py-4">
+                                      <div className="text-white tracking-wider mb-0.5 text-xs font-medium">{format(parseISO(b.bookingDate), 'MMM d, yyyy')}</div>
+                                      <div className="text-[11px] text-[#737373] tracking-widest uppercase">{b.startTime} – {b.endTime}</div>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                      <div className="text-[#E5C378] font-medium text-sm mb-0.5">{customer?.name || 'Unknown'}</div>
+                                      <div className="text-[11px] text-[#737373]">{customer?.email || ''}</div>
+                                    </td>
+                                    <td className="px-6 py-4 font-normal text-[#d4d4d4] text-xs">{serviceMap[b.serviceId] || 'Unknown'}</td>
+                                    <td className="px-6 py-4"><StatusBadge status={b.status} /></td>
+                                    <td className="px-6 py-4 text-right">
+                                      <div className="flex items-center justify-end gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                                        {b.status === 'PENDING' && (
+                                          <>
+                                            <button onClick={() => handleBookingAction(b.id, 'accept')} className="px-3.5 py-1.5 rounded-lg bg-[#E5C378]/10 text-[#E5C378] hover:bg-[#E5C378] hover:text-black text-[10px] uppercase tracking-widest transition-all font-semibold">Accept</button>
+                                            <button onClick={() => handleBookingAction(b.id, 'reject')} className="px-3.5 py-1.5 rounded-lg text-[#888] hover:bg-red-500/10 hover:text-red-400 text-[10px] uppercase tracking-widest transition-all">Reject</button>
+                                          </>
+                                        )}
+                                        {b.status === 'ACCEPTED' && (
+                                          <>
+                                            <button onClick={() => handleBookingAction(b.id, 'complete')} className="px-3.5 py-1.5 rounded-lg bg-emerald-950/40 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500 hover:text-black text-[10px] uppercase tracking-widest transition-all font-semibold">Complete</button>
+                                            <button onClick={() => handleBookingAction(b.id, 'cancel')} className="px-3.5 py-1.5 rounded-lg text-[#888] hover:bg-red-500/10 hover:text-red-400 text-[10px] uppercase tracking-widest transition-all">Cancel</button>
+                                          </>
+                                        )}
+                                      </div>
+                                    </td>
+                                  </motion.tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
                         </div>
-                        {/* Fake footer to anchor the bottom of the table block */}
-                        <div className="shrink-0 p-4 border-t border-[#ffffff15] bg-[#0a0a0a] text-center text-[9px] uppercase tracking-[0.2em] text-[#555]">
-                          End of Bookings
-                        </div>
+                        
+                        {/* Pagination Footer */}
+                        <DataPagination
+                          currentPage={bookingPage}
+                          totalPages={bookingTotalPages}
+                          totalItems={filteredBookings.length}
+                          pageSize={bookingPageSize}
+                          onPageChange={setBookingPage}
+                          onPageSizeChange={setBookingPageSize}
+                          pageSizeOptions={[5, 10, 20, 50]}
+                        />
                       </motion.div>
                     </div>
                   )}
@@ -897,135 +992,164 @@ export default function Admin() {
                   {/* ======================== CUSTOMERS TAB ======================== */}
                   {activeTab === 'customers' && (
                     <div className="flex-1 flex flex-col">
-                      <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-6 mb-8 shrink-0">
-                        <div className="font-sans text-[11px] uppercase tracking-widest text-[#888]" aria-live="polite">
-                          <span className="text-white text-2xl mr-2">{filteredCustomers.length}</span> customer{filteredCustomers.length !== 1 ? 's' : ''}
+                      <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 shrink-0">
+                        <div className="font-sans text-xs uppercase tracking-widest text-[#737373] flex items-center gap-2" aria-live="polite">
+                          <Users size={16} className="text-[#E5C378]" />
+                          <span>
+                            <strong className="text-white text-lg font-medium mr-1.5">{filteredCustomers.length}</strong>
+                            Registered Customer{filteredCustomers.length !== 1 ? 's' : ''}
+                          </span>
                         </div>
-                        <input
-                          type="search"
-                          placeholder="Search customers..."
-                          value={customerSearch}
-                          onChange={e => setCustomerSearch(e.target.value)}
-                          className="w-full sm:w-80 px-5 py-3.5 rounded-2xl bg-[#0a0a0a] border border-[#ffffff15] text-white placeholder-[#555] focus:outline-none focus:border-[#C5A059] focus:shadow-[0_0_15px_rgba(197,160,89,0.1)] font-sans text-xs tracking-wider transition-all"
-                        />
+                        <div className="relative w-full sm:w-80">
+                          <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#525252]" />
+                          <input
+                            type="search"
+                            placeholder="Search by name or email..."
+                            value={customerSearch}
+                            onChange={e => setCustomerSearch(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#0a0a0a] border border-[#1f1f1f] text-white placeholder-[#525252] focus:outline-none focus:border-[#E5C378] font-sans text-xs tracking-wider transition-all"
+                          />
+                          {customerSearch && (
+                            <button
+                              onClick={() => setCustomerSearch('')}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#737373] hover:text-white p-1"
+                            >
+                              <X size={12} />
+                            </button>
+                          )}
+                        </div>
                       </motion.div>
 
-                      <motion.div variants={itemVariants} className="flex-1 flex flex-col overflow-hidden rounded-2xl border border-[#ffffff15] bg-[#0a0a0a] shadow-2xl min-h-[400px]">
+                      <motion.div variants={itemVariants} className="flex-1 flex flex-col overflow-hidden rounded-xl border border-[#1f1f1f] bg-[#0a0a0a] shadow-2xl min-h-[400px]">
                         <div className="flex-1 overflow-x-auto overflow-y-auto custom-scrollbar">
                           <table className="w-full text-left font-sans text-sm min-w-[700px]">
-                            <thead className="border-b border-[#ffffff15] bg-[#111] sticky top-0 z-10 shadow-[0_10px_20px_rgba(0,0,0,0.2)]">
-                            <tr>
-                              <th scope="col" className="px-8 py-5 font-sans text-[10px] uppercase tracking-[0.2em] text-[#666] font-normal">Customer</th>
-                              <th scope="col" className="px-8 py-5 font-sans text-[10px] uppercase tracking-[0.2em] text-[#666] font-normal">Role</th>
-                              <th scope="col" className="px-8 py-5 font-sans text-[10px] uppercase tracking-[0.2em] text-[#666] font-normal text-center">Bookings</th>
-                              <th scope="col" className="px-8 py-5 font-sans text-[10px] uppercase tracking-[0.2em] text-[#666] font-normal text-right">Joined</th>
-                              <th scope="col" className="px-8 py-5 font-sans text-[10px] uppercase tracking-[0.2em] text-[#666] font-normal text-right">Actions</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-[#ffffff08]">
-                            {filteredCustomers.map((c, i) => (
-                              <motion.tr 
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: i * 0.05 }}
-                                key={c.id} 
-                                className="hover:bg-[#ffffff05] transition-colors group"
-                              >
-                                <td className="px-8 py-5">
-                                  {editingCustomerId === c.id ? (
-                                    <div className="space-y-2 max-w-xs">
-                                      <input
-                                        type="text"
-                                        value={editCustomerName}
-                                        onChange={e => setEditCustomerName(e.target.value)}
-                                        placeholder="Customer Name"
-                                        className="w-full px-3 py-1.5 rounded-lg bg-[#111] border border-[#C5A059] text-white text-xs outline-none focus:shadow-[0_0_10px_rgba(197,160,89,0.2)]"
-                                        autoFocus
-                                      />
-                                      <input
-                                        type="email"
-                                        value={editCustomerEmail}
-                                        onChange={e => setEditCustomerEmail(e.target.value)}
-                                        placeholder="Customer Email"
-                                        className="w-full px-3 py-1.5 rounded-lg bg-[#111] border border-[#333] text-[#aaa] text-xs outline-none focus:border-[#C5A059]"
-                                      />
-                                    </div>
-                                  ) : (
-                                    <>
-                                      <div className="text-white font-medium text-[15px] mb-1">{c.name}</div>
-                                      <div className="text-[#777] text-xs">{c.email}</div>
-                                    </>
-                                  )}
-                                </td>
-                                <td className="px-8 py-5">
-                                  <span className={`px-3 py-1 rounded-full text-[9px] uppercase tracking-widest ${c.role === 'ADMIN' ? 'text-[#C5A059] bg-[#C5A059]/10 border border-[#C5A059]/30 shadow-[0_0_10px_rgba(197,160,89,0.2)]' : 'text-[#888] bg-[#ffffff05] border border-[#ffffff15]'}`}>
-                                    {c.role}
-                                  </span>
-                                </td>
-                                <td className="px-8 py-5 text-center">
-                                  <span className="text-white font-light text-xl">{c.bookingCount}</span>
-                                </td>
-                                <td className="px-8 py-5 text-right text-[#888] text-[13px]">
-                                  {c.createdAt ? format(new Date(c.createdAt), 'MMM d, yyyy') : 'Unknown'}
-                                </td>
-                                <td className="px-8 py-5 text-right">
-                                  <div className="flex items-center justify-end gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                            <thead className="border-b border-[#1f1f1f] bg-[#0e0e0e] sticky top-0 z-10">
+                              <tr>
+                                <th scope="col" className="px-6 py-4 font-sans text-[10px] uppercase tracking-[0.2em] text-[#737373] font-medium">Customer</th>
+                                <th scope="col" className="px-6 py-4 font-sans text-[10px] uppercase tracking-[0.2em] text-[#737373] font-medium">Role</th>
+                                <th scope="col" className="px-6 py-4 font-sans text-[10px] uppercase tracking-[0.2em] text-[#737373] font-medium text-center">Bookings</th>
+                                <th scope="col" className="px-6 py-4 font-sans text-[10px] uppercase tracking-[0.2em] text-[#737373] font-medium text-right">Joined</th>
+                                <th scope="col" className="px-6 py-4 font-sans text-[10px] uppercase tracking-[0.2em] text-[#737373] font-medium text-right">Actions</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-[#171717]">
+                              {filteredCustomers.length === 0 ? (
+                                <tr>
+                                  <td colSpan={5} className="px-8 py-24 text-center text-[#555] font-sans text-[11px] uppercase tracking-widest">
+                                    {customerSearch ? 'No customers match your search' : 'No registered customers found'}
+                                  </td>
+                                </tr>
+                              ) : paginatedCustomers.map((c, i) => (
+                                <motion.tr 
+                                  initial={{ opacity: 0, y: 8 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ delay: i * 0.03 }}
+                                  key={c.id} 
+                                  className="hover:bg-[#121212] transition-colors group"
+                                >
+                                  <td className="px-6 py-4">
                                     {editingCustomerId === c.id ? (
-                                      <>
-                                        <button
-                                          onClick={() => handleSaveCustomerEdit(c.id)}
-                                          className="px-3.5 py-1.5 rounded-lg bg-[#4ade80] text-black text-[10px] uppercase tracking-widest hover:bg-[#3baf64] transition-all font-semibold shadow-[0_0_10px_rgba(74,222,128,0.2)]"
-                                        >
-                                          Save
-                                        </button>
-                                        <button
-                                          onClick={() => setEditingCustomerId(null)}
-                                          className="px-3.5 py-1.5 rounded-lg text-[#888] hover:bg-[#ffffff10] hover:text-white text-[10px] uppercase tracking-widest transition-all"
-                                        >
-                                          Cancel
-                                        </button>
-                                      </>
+                                      <div className="space-y-2 max-w-xs">
+                                        <input
+                                          type="text"
+                                          value={editCustomerName}
+                                          onChange={e => setEditCustomerName(e.target.value)}
+                                          placeholder="Customer Name"
+                                          className="w-full px-3 py-1.5 rounded-lg bg-[#111] border border-[#E5C378] text-white text-xs outline-none focus:shadow-[0_0_10px_rgba(229,195,120,0.2)]"
+                                          autoFocus
+                                        />
+                                        <input
+                                          type="email"
+                                          value={editCustomerEmail}
+                                          onChange={e => setEditCustomerEmail(e.target.value)}
+                                          placeholder="Customer Email"
+                                          className="w-full px-3 py-1.5 rounded-lg bg-[#111] border border-[#333] text-[#aaa] text-xs outline-none focus:border-[#E5C378]"
+                                        />
+                                      </div>
                                     ) : (
                                       <>
-                                        <button
-                                          onClick={() => {
-                                            setEditingCustomerId(c.id);
-                                            setEditCustomerName(c.name || '');
-                                            setEditCustomerEmail(c.email || '');
-                                          }}
-                                          className="px-3 py-1.5 rounded-lg text-[#C5A059] hover:bg-[#C5A059]/10 text-[10px] uppercase tracking-widest transition-all"
-                                        >
-                                          Edit
-                                        </button>
-                                        {c.id !== adminUser?.id && (
-                                          <>
-                                            <ConfirmButton
-                                              label={c.role === 'ADMIN' ? 'Demote' : 'Promote'}
-                                              onConfirm={() => handleToggleRole(c.id)}
-                                              className="px-3 py-1.5 rounded-lg text-[#888] hover:bg-[#ffffff05] hover:text-white text-[10px] uppercase tracking-widest transition-all"
-                                              confirmClassName="px-3 py-1.5 rounded-lg bg-[#C5A059] text-black text-[10px] uppercase tracking-widest hover:bg-[#d4b06a] transition-all"
-                                            />
-                                            <ConfirmButton
-                                              label="Delete"
-                                              confirmLabel="Confirm?"
-                                              onConfirm={() => handleDeleteCustomer(c.id)}
-                                              className="px-3 py-1.5 rounded-lg text-red-400 hover:bg-red-500/10 text-[10px] uppercase tracking-widest transition-all"
-                                              confirmClassName="px-3 py-1.5 rounded-lg bg-red-600 text-white text-[10px] uppercase tracking-widest hover:bg-red-700 transition-all shadow-[0_0_10px_rgba(239,68,68,0.3)]"
-                                            />
-                                          </>
-                                        )}
+                                        <div className="text-white font-medium text-sm mb-0.5">{c.name}</div>
+                                        <div className="text-[#737373] text-xs font-sans">{c.email}</div>
                                       </>
                                     )}
-                                  </div>
-                                </td>
-                              </motion.tr>
-                            ))}
-                          </tbody>
-                        </table>
+                                  </td>
+                                  <td className="px-6 py-4">
+                                    <span className={`px-2.5 py-0.5 rounded-full text-[9px] uppercase tracking-widest font-sans font-medium ${c.role === 'ADMIN' ? 'text-[#E5C378] bg-[#E5C378]/10 border border-[#E5C378]/30 shadow-[0_0_8px_rgba(229,195,120,0.2)]' : 'text-[#888] bg-[#141414] border border-[#262626]'}`}>
+                                      {c.role}
+                                    </span>
+                                  </td>
+                                  <td className="px-6 py-4 text-center">
+                                    <span className="text-white font-normal text-sm">{c.bookingCount}</span>
+                                  </td>
+                                  <td className="px-6 py-4 text-right text-[#737373] text-xs font-sans">
+                                    {c.createdAt ? format(new Date(c.createdAt), 'MMM d, yyyy') : 'Unknown'}
+                                  </td>
+                                  <td className="px-6 py-4 text-right">
+                                    <div className="flex items-center justify-end gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                                      {editingCustomerId === c.id ? (
+                                        <>
+                                          <button
+                                            onClick={() => handleSaveCustomerEdit(c.id)}
+                                            className="px-3.5 py-1.5 rounded-lg bg-emerald-500 text-black text-[10px] uppercase tracking-widest hover:bg-emerald-400 transition-all font-semibold shadow-[0_0_10px_rgba(16,185,129,0.3)]"
+                                          >
+                                            Save
+                                          </button>
+                                          <button
+                                            onClick={() => setEditingCustomerId(null)}
+                                            className="px-3.5 py-1.5 rounded-lg text-[#888] hover:bg-[#1f1f1f] hover:text-white text-[10px] uppercase tracking-widest transition-all"
+                                          >
+                                            Cancel
+                                          </button>
+                                        </>
+                                      ) : (
+                                        <>
+                                          <button
+                                            onClick={() => {
+                                              setEditingCustomerId(c.id);
+                                              setEditCustomerName(c.name || '');
+                                              setEditCustomerEmail(c.email || '');
+                                            }}
+                                            className="px-3 py-1.5 rounded-lg text-[#E5C378] hover:bg-[#E5C378]/10 text-[10px] uppercase tracking-widest transition-all font-medium"
+                                          >
+                                            Edit
+                                          </button>
+                                          {c.id !== adminUser?.id && (
+                                            <>
+                                              <ConfirmButton
+                                                label={c.role === 'ADMIN' ? 'Demote' : 'Promote'}
+                                                onConfirm={() => handleToggleRole(c.id)}
+                                                className="px-3 py-1.5 rounded-lg text-[#888] hover:bg-[#1a1a1a] hover:text-white text-[10px] uppercase tracking-widest transition-all"
+                                                confirmClassName="px-3 py-1.5 rounded-lg bg-[#E5C378] text-black text-[10px] uppercase tracking-widest hover:bg-[#eed79b] transition-all"
+                                              />
+                                              <ConfirmButton
+                                                label="Delete"
+                                                confirmLabel="Confirm?"
+                                                onConfirm={() => handleDeleteCustomer(c.id)}
+                                                className="px-3 py-1.5 rounded-lg text-red-400 hover:bg-red-500/10 text-[10px] uppercase tracking-widest transition-all"
+                                                confirmClassName="px-3 py-1.5 rounded-lg bg-red-600 text-white text-[10px] uppercase tracking-widest hover:bg-red-700 transition-all shadow-[0_0_10px_rgba(239,68,68,0.3)]"
+                                              />
+                                            </>
+                                          )}
+                                        </>
+                                      )}
+                                    </div>
+                                  </td>
+                                </motion.tr>
+                              ))}
+                            </tbody>
+                          </table>
                         </div>
-                        <div className="shrink-0 p-4 border-t border-[#ffffff15] bg-[#0a0a0a] text-center text-[9px] uppercase tracking-[0.2em] text-[#555]">
-                          End of Customers
-                        </div>
+                        
+                        {/* Pagination Footer */}
+                        <DataPagination
+                          currentPage={customerPage}
+                          totalPages={customerTotalPages}
+                          totalItems={filteredCustomers.length}
+                          pageSize={customerPageSize}
+                          onPageChange={setCustomerPage}
+                          onPageSizeChange={setCustomerPageSize}
+                          pageSizeOptions={[5, 10, 20, 50]}
+                        />
                       </motion.div>
                     </div>
                   )}
