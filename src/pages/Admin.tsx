@@ -295,13 +295,18 @@ export default function Admin() {
       setNewImage(adminUser.image || '');
       
       setCheckingPassword(true);
-      authClient.listUserAccounts().then((res) => {
+      const listAccountsFn = (authClient as any).listAccounts || (authClient as any).listUserAccounts;
+      if (typeof listAccountsFn === 'function') {
+        listAccountsFn().then((res: any) => {
+          setCheckingPassword(false);
+          if (res?.data) {
+            const hasPwd = res.data.some((acc: any) => acc.providerId === 'credential' || acc.providerId === 'email' || acc.password);
+            setHasPassword(hasPwd);
+          }
+        }).catch(() => setCheckingPassword(false));
+      } else {
         setCheckingPassword(false);
-        if (res.data) {
-          const hasPwd = res.data.some((acc: any) => acc.providerId === 'credential' || acc.providerId === 'email' || acc.password);
-          setHasPassword(hasPwd);
-        }
-      }).catch(() => setCheckingPassword(false));
+      }
     }
   }, [adminUser]);
 
@@ -343,8 +348,11 @@ export default function Admin() {
         const res = await authClient.changePassword({ newPassword, currentPassword, revokeOtherSessions: true });
         error = res.error;
       } else {
-        const res = await authClient.setPassword({ newPassword });
-        error = res.error;
+        const setPwdFn = (authClient as any).setPassword || (authClient as any).resetPassword;
+        if (typeof setPwdFn === 'function') {
+          const res = await setPwdFn({ newPassword });
+          error = res.error;
+        }
       }
       if (error) {
         showToast(error.message || 'Failed to update password', 'error');

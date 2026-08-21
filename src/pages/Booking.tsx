@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   format,
   parseISO,
@@ -8,7 +8,6 @@ import {
   endOfWeek,
   eachDayOfInterval,
   isSameMonth,
-  isSameDay,
   isBefore,
   startOfDay,
   addMonths,
@@ -17,7 +16,20 @@ import {
 } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Scissors, Sparkles, User, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
+import {
+  Scissors,
+  Sparkles,
+  User,
+  ChevronLeft,
+  ChevronRight,
+  ArrowRight,
+  Clock,
+  CalendarDays,
+  Check,
+  AlertCircle,
+  ShieldCheck,
+  Zap
+} from 'lucide-react';
 
 type Service = {
   id: string;
@@ -26,24 +38,30 @@ type Service = {
 };
 
 // Fallback pricing & icon mapping based on service name
-const SERVICE_META: Record<string, { price: number; icon: 'user' | 'scissors' | 'sparkles' }> = {
-  haircut: { price: 75, icon: 'user' },
-  shaving: { price: 50, icon: 'scissors' },
-  'zat ke bal': { price: 90, icon: 'sparkles' },
+const SERVICE_META: Record<string, { price: number; icon: 'user' | 'scissors' | 'sparkles'; desc: string }> = {
+  haircut: { price: 75, icon: 'user', desc: 'Precision styling, wash & hot towel finish' },
+  shaving: { price: 50, icon: 'scissors', desc: 'Classic straight-razor shave with essential oils' },
+  'zat ke bal': { price: 90, icon: 'sparkles', desc: 'Signature full grooming & luxury scalp treatment' },
 };
 
 function getServiceIcon(name: string) {
   const meta = SERVICE_META[name.toLowerCase()];
   const iconType = meta?.icon || (name.toLowerCase().includes('shav') ? 'scissors' : name.toLowerCase().includes('hair') ? 'user' : 'sparkles');
-  if (iconType === 'scissors') return <Scissors size={26} className="text-[#E5C378]" />;
-  if (iconType === 'sparkles') return <Sparkles size={26} className="text-[#E5C378]" />;
-  return <User size={26} className="text-[#E5C378]" />;
+  if (iconType === 'scissors') return <Scissors size={22} className="text-[#E5C378]" />;
+  if (iconType === 'sparkles') return <Sparkles size={22} className="text-[#E5C378]" />;
+  return <User size={22} className="text-[#E5C378]" />;
 }
 
 function getServicePrice(name: string, duration: number): number {
   const meta = SERVICE_META[name.toLowerCase()];
   if (meta) return meta.price;
   return duration >= 30 ? 75 : 50;
+}
+
+function getServiceDescription(name: string): string {
+  const meta = SERVICE_META[name.toLowerCase()];
+  if (meta) return meta.desc;
+  return 'Premium salon service with dedicated stylist';
 }
 
 // Convert 24-hr time '10:00' to '10:00 AM'
@@ -105,7 +123,7 @@ export default function Booking() {
   }, []);
 
   // 2. Fetch availability when service or date changes
-  const fetchAvailability = React.useCallback((isRefetch = false) => {
+  const fetchAvailability = useCallback((isRefetch = false) => {
     if (!selectedService || !selectedDate) return;
     if (!isRefetch) setLoadingSlots(true);
 
@@ -186,11 +204,6 @@ export default function Booking() {
     }
   };
 
-  // Step state
-  const isStep1Done = !!selectedService;
-  const isStep2Done = !!selectedDate;
-  const isStep3Done = !!selectedTime;
-
   // Formatted date string for header: "Friday, October 20th, 2024"
   const formattedSelectedDate = useMemo(() => {
     try {
@@ -201,59 +214,69 @@ export default function Booking() {
   }, [selectedDate]);
 
   return (
-    <div className="w-full space-y-10 pb-16">
+    <div className="w-full max-w-7xl mx-auto space-y-8 pb-16">
       {/* ════════════════════════════════════════
-          HEADER & LUXURY TITLE
+          VERCEL-STYLE HEADER & BRAND
          ════════════════════════════════════════ */}
-      <div className="space-y-6">
-        <div className="flex flex-wrap items-baseline gap-3">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-brand font-semibold text-[#E5C378] tracking-[0.2em] uppercase">
-            AURELIAN
-          </h1>
-          <span className="text-xl sm:text-2xl font-serif text-[#cccccc] font-light tracking-wide italic">
-            Luxury Booking Interface V1
-          </span>
+      <div className="space-y-6 border-b border-[#1a1a1a] pb-6">
+        <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-4">
+          <div className="flex flex-wrap items-baseline gap-3">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-brand font-semibold text-[#E5C378] tracking-[0.25em] uppercase">
+              AURELIAN
+            </h1>
+            <span className="text-lg sm:text-xl font-serif text-[#888888] font-light tracking-wide italic">
+              Luxury Booking Interface V1
+            </span>
+          </div>
+
+          {/* Instant confirmation badge */}
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#141414] border border-[#262626] text-[10px] uppercase font-sans tracking-widest text-[#a1a1a1] shrink-0 self-start sm:self-auto">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#4ade80] opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#4ade80]"></span>
+            </span>
+            <span>Instant Confirmation</span>
+          </div>
         </div>
 
-        {/* TOP STEP PROGRESS INDICATORS */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+        {/* TOP STEP PROGRESS INDICATORS (Geist Style) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
           {/* Step 1 Bar */}
           <div className="space-y-2">
-            <div className="h-[3px] w-full rounded-full bg-[#E5C378] shadow-[0_0_10px_rgba(229,195,120,0.5)] transition-all" />
-            <div className="font-sans text-[11px] uppercase tracking-[0.18em] text-[#E5C378] font-medium">
-              Step 01 (Select Service)
+            <div className="h-[2px] w-full rounded-full bg-[#E5C378] shadow-[0_0_8px_rgba(229,195,120,0.4)] transition-all" />
+            <div className="flex items-center justify-between text-[11px] font-sans uppercase tracking-[0.15em]">
+              <span className="text-[#E5C378] font-medium">Step 01 (Select Service)</span>
+              {selectedService && <Check size={12} className="text-[#E5C378]" />}
             </div>
           </div>
 
           {/* Step 2 Bar */}
           <div className="space-y-2">
             <div
-              className={`h-[3px] w-full rounded-full transition-all ${
-                isStep2Done ? 'bg-[#E5C378] shadow-[0_0_10px_rgba(229,195,120,0.5)]' : 'bg-[#222]'
+              className={`h-[2px] w-full rounded-full transition-all ${
+                selectedDate ? 'bg-[#E5C378] shadow-[0_0_8px_rgba(229,195,120,0.4)]' : 'bg-[#222222]'
               }`}
             />
-            <div
-              className={`font-sans text-[11px] uppercase tracking-[0.18em] transition-colors ${
-                isStep2Done ? 'text-[#E5C378] font-medium' : 'text-[#666]'
-              }`}
-            >
-              Step 02 (Choose Date)
+            <div className="flex items-center justify-between text-[11px] font-sans uppercase tracking-[0.15em]">
+              <span className={selectedDate ? 'text-[#E5C378] font-medium' : 'text-[#666666]'}>
+                Step 02 (Choose Date)
+              </span>
+              {selectedDate && <Check size={12} className="text-[#E5C378]" />}
             </div>
           </div>
 
           {/* Step 3 Bar */}
           <div className="space-y-2">
             <div
-              className={`h-[3px] w-full rounded-full transition-all ${
-                isStep3Done ? 'bg-[#E5C378] shadow-[0_0_10px_rgba(229,195,120,0.5)]' : 'bg-[#222]'
+              className={`h-[2px] w-full rounded-full transition-all ${
+                selectedTime ? 'bg-[#E5C378] shadow-[0_0_8px_rgba(229,195,120,0.4)]' : 'bg-[#222222]'
               }`}
             />
-            <div
-              className={`font-sans text-[11px] uppercase tracking-[0.18em] transition-colors ${
-                isStep3Done ? 'text-[#E5C378] font-medium' : 'text-[#666]'
-              }`}
-            >
-              Step 03 (Available Slots)
+            <div className="flex items-center justify-between text-[11px] font-sans uppercase tracking-[0.15em]">
+              <span className={selectedTime ? 'text-[#E5C378] font-medium' : 'text-[#666666]'}>
+                Step 03 (Available Slots)
+              </span>
+              {selectedTime && <Check size={12} className="text-[#E5C378]" />}
             </div>
           </div>
         </div>
@@ -268,12 +291,17 @@ export default function Booking() {
           {/* ──────────────────────────────────────
               STEP 01: SELECT SERVICE
              ────────────────────────────────────── */}
-          <div className="space-y-6">
-            <h2 className="text-2xl sm:text-3xl font-serif text-[#E5C378] font-normal tracking-wide">
-              Step 01: Select Service
-            </h2>
+          <div className="space-y-5">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl sm:text-2xl font-serif text-[#E5C378] font-normal tracking-wide">
+                Step 01: Select Service
+              </h2>
+              <span className="font-sans text-[10px] uppercase tracking-widest text-[#737373]">
+                {services.length} services available
+              </span>
+            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {services.map((service) => {
                 const isSelected = selectedService?.id === service.id;
                 const price = getServicePrice(service.name, service.durationMinutes);
@@ -281,26 +309,30 @@ export default function Booking() {
                 return (
                   <motion.div
                     key={service.id}
-                    whileHover={{ y: -3 }}
+                    whileHover={{ y: -2 }}
                     onClick={() => setSelectedService(service)}
-                    className={`relative rounded-xl p-6 flex flex-col items-center justify-between text-center transition-all cursor-pointer min-h-[220px] ${
+                    className={`relative rounded-xl p-5 flex flex-col justify-between text-center transition-all cursor-pointer min-h-[220px] select-none ${
                       isSelected
-                        ? 'bg-[#0d0d0d] border-2 border-[#E5C378] shadow-[0_0_30px_rgba(229,195,120,0.15)] ring-1 ring-[#E5C378]/40'
-                        : 'bg-[#0e0e0e] border border-[#222222] hover:border-[#383838]'
+                        ? 'bg-[#0e0d09] border border-[#E5C378] shadow-[0_0_25px_rgba(229,195,120,0.12)] ring-1 ring-[#E5C378]/30'
+                        : 'bg-[#0a0a0a] border border-[#1f1f1f] hover:border-[#383838]'
                     }`}
                   >
-                    {/* Icon */}
-                    <div className="w-14 h-14 rounded-full flex items-center justify-center mb-4 bg-gradient-to-b from-[#E5C378]/10 to-transparent">
-                      {getServiceIcon(service.name)}
-                    </div>
+                    {/* Top Icon and Name */}
+                    <div>
+                      <div className="w-12 h-12 rounded-full mx-auto flex items-center justify-center mb-3.5 bg-[#141414] border border-[#222222]">
+                        {getServiceIcon(service.name)}
+                      </div>
 
-                    {/* Service Name & Subtitle */}
-                    <div className="space-y-1.5 mb-6">
-                      <h3 className="font-sans text-sm font-semibold uppercase tracking-[0.2em] text-white">
+                      <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-white mb-1.5">
                         {service.name}
                       </h3>
-                      <p className="font-sans text-xs text-[#888888] tracking-wider">
-                        {service.durationMinutes} min - ${price}
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#141414] border border-[#262626] text-[10px] text-[#a1a1a1] font-sans tracking-wider mb-3">
+                        <span>{service.durationMinutes} min</span>
+                        <span>•</span>
+                        <span className="text-[#E5C378] font-medium">${price}</span>
+                      </div>
+                      <p className="text-[11px] text-[#666666] font-sans line-clamp-2 leading-relaxed px-1">
+                        {getServiceDescription(service.name)}
                       </p>
                     </div>
 
@@ -311,10 +343,10 @@ export default function Booking() {
                         e.stopPropagation();
                         setSelectedService(service);
                       }}
-                      className={`w-full py-2.5 rounded-lg font-sans text-xs uppercase tracking-[0.2em] transition-all ${
+                      className={`w-full py-2 rounded-lg font-sans text-[10px] uppercase tracking-[0.2em] font-semibold transition-all mt-4 ${
                         isSelected
-                          ? 'bg-[#E5C378] text-black font-bold shadow-[0_0_15px_rgba(229,195,120,0.4)]'
-                          : 'bg-[#141414] border border-[#262626] text-[#E5C378] font-medium hover:border-[#E5C378]/60 hover:bg-[#1a1a1a]'
+                          ? 'bg-[#E5C378] text-black shadow-[0_0_15px_rgba(229,195,120,0.3)]'
+                          : 'bg-[#121212] border border-[#262626] text-[#E5C378] hover:border-[#E5C378]/60 hover:bg-[#1a1a1a]'
                       }`}
                     >
                       {isSelected ? 'SELECTED' : 'SELECT'}
@@ -328,44 +360,44 @@ export default function Booking() {
           {/* ──────────────────────────────────────
               STEP 02: CHOOSE DATE
              ────────────────────────────────────── */}
-          <div className="space-y-6">
+          <div className="space-y-5">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <h2 className="text-2xl sm:text-3xl font-serif text-[#E5C378] font-normal tracking-wide">
+              <h2 className="text-xl sm:text-2xl font-serif text-[#E5C378] font-normal tracking-wide">
                 Step 02: Choose Date
               </h2>
               <div className="font-sans text-xs tracking-wider">
-                <span className="text-[#888888]">Selected: </span>
-                <span className="text-[#E5C378] font-medium font-serif text-sm">{formattedSelectedDate}</span>
+                <span className="text-[#737373]">Selected: </span>
+                <span className="text-[#E5C378] font-medium font-serif">{formattedSelectedDate}</span>
               </div>
             </div>
 
-            {/* MONTH CALENDAR CONTAINER */}
-            <div className="bg-[#0e0e0e] border border-[#222222] rounded-xl p-6 sm:p-8 shadow-2xl">
+            {/* MONTH CALENDAR CONTAINER (Geist Style) */}
+            <div className="bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl p-6 shadow-xl">
               {/* Calendar Month Navigation */}
-              <div className="flex items-center justify-between mb-8 pb-4 border-b border-[#1a1a1a]">
+              <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#171717]">
                 <button
                   type="button"
                   onClick={handlePrevMonth}
-                  className="p-2 rounded-lg text-[#888888] hover:text-white hover:bg-[#1a1a1a] transition-colors"
+                  className="p-2 rounded-lg text-[#737373] hover:text-white hover:bg-[#171717] transition-colors"
                   aria-label="Previous month"
                 >
-                  <ChevronLeft size={20} />
+                  <ChevronLeft size={18} />
                 </button>
-                <div className="font-sans text-xs font-semibold uppercase tracking-[0.3em] text-white">
+                <div className="font-sans text-xs font-semibold uppercase tracking-[0.25em] text-white">
                   {format(currentMonth, 'MMMM yyyy')}
                 </div>
                 <button
                   type="button"
                   onClick={handleNextMonth}
-                  className="p-2 rounded-lg text-[#888888] hover:text-white hover:bg-[#1a1a1a] transition-colors"
+                  className="p-2 rounded-lg text-[#737373] hover:text-white hover:bg-[#171717] transition-colors"
                   aria-label="Next month"
                 >
-                  <ChevronRight size={20} />
+                  <ChevronRight size={18} />
                 </button>
               </div>
 
               {/* Day of Week Headers */}
-              <div className="grid grid-cols-7 gap-2 mb-4 text-center font-sans text-[11px] uppercase tracking-[0.2em] text-[#666666] font-medium">
+              <div className="grid grid-cols-7 gap-2 mb-3 text-center font-sans text-[10px] uppercase tracking-[0.2em] text-[#666666] font-medium">
                 <div>SUN</div>
                 <div>MON</div>
                 <div>TUE</div>
@@ -376,7 +408,7 @@ export default function Booking() {
               </div>
 
               {/* Calendar Days Grid */}
-              <div className="grid grid-cols-7 gap-2 sm:gap-3 text-center">
+              <div className="grid grid-cols-7 gap-2 text-center">
                 {calendarDays.map((day, idx) => {
                   const isCurrentMonth = isSameMonth(day, currentMonth);
                   const isDayPast = isBefore(day, startOfDay(new Date()));
@@ -384,14 +416,14 @@ export default function Booking() {
                   const isSelected = selectedDate === dateStr;
 
                   if (!isCurrentMonth) {
-                    return <div key={idx} className="py-3 text-sm opacity-0 pointer-events-none" />;
+                    return <div key={idx} className="py-3 text-xs opacity-0 pointer-events-none" />;
                   }
 
                   if (isDayPast) {
                     return (
                       <div
                         key={idx}
-                        className="py-3 font-sans text-sm text-[#333333] cursor-not-allowed select-none rounded-lg"
+                        className="py-3 font-sans text-xs text-[#2e2e2e] cursor-not-allowed select-none rounded-lg"
                       >
                         {format(day, 'd')}
                       </div>
@@ -405,10 +437,10 @@ export default function Booking() {
                       whileTap={{ scale: 0.95 }}
                       type="button"
                       onClick={() => setSelectedDate(dateStr)}
-                      className={`py-3 rounded-lg font-sans text-sm transition-all duration-200 ${
+                      className={`py-3 rounded-lg font-sans text-xs font-medium transition-all duration-150 ${
                         isSelected
-                          ? 'bg-[#E5C378] text-black font-bold shadow-[0_0_20px_rgba(229,195,120,0.5)]'
-                          : 'text-[#cccccc] hover:text-white hover:bg-[#1c1c1c]'
+                          ? 'bg-[#E5C378] text-black font-bold shadow-[0_0_15px_rgba(229,195,120,0.4)]'
+                          : 'text-[#d4d4d4] hover:text-white hover:bg-[#171717]'
                       }`}
                     >
                       {format(day, 'd')}
@@ -422,26 +454,46 @@ export default function Booking() {
 
         {/* RIGHT COLUMN: STEP 03 (AVAILABLE SLOTS + CONFIRMATION) */}
         <div className="lg:col-span-4">
-          <div className="bg-[#0e0e0e] border border-[#222222] rounded-xl p-6 sm:p-8 flex flex-col justify-between min-h-[580px] shadow-2xl sticky top-8">
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-serif text-[#E5C378] font-normal tracking-wide mb-6">
-                Step 03: Available Slots
-              </h2>
+          <div className="bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl p-6 flex flex-col justify-between min-h-[560px] shadow-2xl sticky top-8">
+            <div className="space-y-5">
+              <div className="flex items-center justify-between pb-3 border-b border-[#171717]">
+                <h2 className="text-xl font-serif text-[#E5C378] font-normal tracking-wide">
+                  Step 03: Available Slots
+                </h2>
+                <span className="font-sans text-[10px] uppercase tracking-widest text-[#737373]">
+                  {slots.length} open
+                </span>
+              </div>
 
-              {/* Time Slots 2-Col Grid */}
+              {/* Summary of Active Choice */}
+              {selectedService && (
+                <div className="p-3.5 rounded-lg bg-[#111111] border border-[#1c1c1c] text-xs space-y-1">
+                  <div className="flex items-center justify-between font-medium text-white">
+                    <span>{selectedService.name}</span>
+                    <span className="text-[#E5C378] font-serif">${getServicePrice(selectedService.name, selectedService.durationMinutes)}</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-[10px] text-[#737373] font-sans tracking-wide">
+                    <span className="flex items-center gap-1"><Clock size={11} /> {selectedService.durationMinutes} min</span>
+                    <span>•</span>
+                    <span className="flex items-center gap-1"><CalendarDays size={11} /> {format(parseISO(selectedDate), 'MMM d')}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Time Slots Grid */}
               {loadingSlots ? (
                 <div className="py-20 flex flex-col items-center justify-center gap-3">
                   <div className="w-2.5 h-2.5 rounded-full bg-[#E5C378] animate-ping" />
-                  <span className="font-sans text-[11px] uppercase tracking-widest text-[#888]">
-                    Loading slots...
+                  <span className="font-sans text-[10px] uppercase tracking-widest text-[#737373]">
+                    Checking availability...
                   </span>
                 </div>
               ) : slots.length === 0 ? (
-                <div className="py-16 text-center font-sans text-xs uppercase tracking-widest text-[#666]">
+                <div className="py-16 text-center font-sans text-xs uppercase tracking-widest text-[#666666] bg-[#111111] rounded-lg border border-[#1a1a1a] p-4">
                   No slots available for this date.
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-3.5 mt-4">
+                <div className="grid grid-cols-2 gap-2.5">
                   {slots.map((timeStr) => {
                     const isSelected = selectedTime === timeStr;
                     const formatted = formatTime12(timeStr);
@@ -449,14 +501,14 @@ export default function Booking() {
                     return (
                       <motion.button
                         key={timeStr}
-                        whileHover={{ scale: 1.03 }}
-                        whileTap={{ scale: 0.97 }}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
                         type="button"
                         onClick={() => setSelectedTime(timeStr)}
-                        className={`py-4 px-2 rounded-lg font-sans text-xs uppercase tracking-wider font-semibold transition-all text-center ${
+                        className={`py-3.5 px-2 rounded-lg font-sans text-xs uppercase tracking-wider font-semibold transition-all text-center ${
                           isSelected
-                            ? 'bg-[#E5C378] text-black shadow-[0_0_20px_rgba(229,195,120,0.4)]'
-                            : 'bg-[#141414] border border-[#262626] text-white hover:border-[#E5C378]/50 hover:bg-[#1a1a1a]'
+                            ? 'bg-[#E5C378] text-black shadow-[0_0_15px_rgba(229,195,120,0.35)]'
+                            : 'bg-[#111111] border border-[#222222] text-[#d4d4d4] hover:border-[#E5C378]/50 hover:bg-[#171717] hover:text-white'
                         }`}
                       >
                         {formatted}
@@ -468,7 +520,7 @@ export default function Booking() {
             </div>
 
             {/* Bottom Action Area */}
-            <div className="pt-8 mt-8 border-t border-[#1f1f1f] space-y-4">
+            <div className="pt-6 mt-6 border-t border-[#171717] space-y-4">
               {/* Error Message */}
               <AnimatePresence>
                 {error && (
@@ -476,31 +528,37 @@ export default function Booking() {
                     initial={{ opacity: 0, y: -5 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
-                    className="p-3 bg-red-950/40 border border-red-500/30 text-red-400 font-sans text-[11px] uppercase tracking-wider text-center rounded-lg"
+                    className="p-3 bg-red-950/40 border border-red-500/30 text-red-400 font-sans text-[10px] uppercase tracking-wider text-center rounded-lg flex items-center justify-center gap-2"
                   >
-                    {error}
+                    <AlertCircle size={14} className="shrink-0" />
+                    <span>{error}</span>
                   </motion.div>
                 )}
               </AnimatePresence>
 
               {/* Confirm Booking CTA */}
               <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
                 type="button"
                 onClick={handleBooking}
                 disabled={!selectedService || !selectedDate || !selectedTime || bookingLoading}
-                className="w-full py-4 px-6 rounded-lg bg-[#E5C378] hover:bg-[#edd495] disabled:opacity-40 disabled:hover:bg-[#E5C378] text-black font-sans text-xs font-bold uppercase tracking-[0.2em] shadow-[0_0_25px_rgba(229,195,120,0.3)] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+                className="w-full py-3.5 px-6 rounded-lg bg-[#E5C378] hover:bg-[#edd495] disabled:opacity-40 disabled:hover:bg-[#E5C378] text-black font-sans text-xs font-bold uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(229,195,120,0.25)] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
               >
                 {bookingLoading ? (
-                  <span>Processing...</span>
+                  <span>Reserving Appointment...</span>
                 ) : (
                   <>
                     <span>Confirm Booking</span>
-                    <ArrowRight size={16} />
+                    <ArrowRight size={14} />
                   </>
                 )}
               </motion.button>
+
+              <div className="flex items-center justify-center gap-2 text-[9px] text-[#666666] font-sans uppercase tracking-widest text-center">
+                <ShieldCheck size={12} className="text-[#4ade80]" />
+                <span>Instant Confirmation & Zero Delay</span>
+              </div>
             </div>
           </div>
         </div>

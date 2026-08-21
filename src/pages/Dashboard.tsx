@@ -3,8 +3,9 @@ import { format, parseISO, formatDistanceToNow, differenceInMinutes, isToday, is
 import { motion, AnimatePresence } from 'motion/react';
 import {
   CalendarDays, Clock, User, History, Settings, Camera,
-  ArrowRight, Phone, Sparkles, TrendingUp, ChevronDown, ChevronUp,
-  Zap, Timer, MapPin, CheckCircle, XCircle, AlertCircle, Star
+  ArrowRight, Phone, Sparkles, TrendingUp, ChevronDown,
+  Zap, Timer, MapPin, CheckCircle, XCircle, AlertCircle, Star,
+  ShieldCheck, RefreshCw
 } from 'lucide-react';
 import { authClient } from '../lib/auth';
 import { useNavigate } from 'react-router-dom';
@@ -31,12 +32,12 @@ type ShopSettings = {
 // --- Animation Variants ---
 const containerVariants = {
   initial: { opacity: 0 },
-  animate: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.1 } },
+  animate: { opacity: 1, transition: { staggerChildren: 0.06, delayChildren: 0.05 } },
 };
 
 const itemVariants = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } },
+  initial: { opacity: 0, y: 15 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } },
 };
 
 // --- Helper: Time Greeting ---
@@ -47,20 +48,20 @@ function getGreeting(): string {
   return 'Good evening';
 }
 
-// --- StatusBadge ---
+// --- StatusBadge (Geist Style) ---
 function StatusBadge({ status }: { status: string }) {
   const colors: Record<string, string> = {
-    PENDING: 'text-[#C5A059] border-[#C5A059]/50 bg-[#C5A059]/10',
-    ACCEPTED: 'text-[#4ade80] border-[#4ade80]/50 bg-[#4ade80]/10',
-    REJECTED: 'text-red-400 border-red-400/50 bg-red-400/10',
-    CANCELLED: 'text-[#555] border-[#555] bg-[#ffffff05]',
-    COMPLETED: 'text-[#D4D4D4] border-[#ffffff30] bg-[#ffffff05]',
+    PENDING: 'text-[#E5C378] border-[#E5C378]/40 bg-[#E5C378]/10',
+    ACCEPTED: 'text-[#4ade80] border-[#4ade80]/40 bg-[#4ade80]/10',
+    REJECTED: 'text-red-400 border-red-400/40 bg-red-400/10',
+    CANCELLED: 'text-[#737373] border-[#2e2e2e] bg-[#141414]',
+    COMPLETED: 'text-[#d4d4d4] border-[#2e2e2e] bg-[#141414]',
   };
-  const isPulse = status === 'PENDING' || status === 'ACCEPTED';
-  const dotColor = status === 'PENDING' ? 'bg-[#C5A059]' : status === 'ACCEPTED' ? 'bg-[#4ade80]' : '';
+  const isPulse = status === 'ACCEPTED' || status === 'PENDING';
+  const dotColor = status === 'ACCEPTED' ? 'bg-[#4ade80]' : 'bg-[#E5C378]';
 
   return (
-    <span className={`border rounded-full px-3 py-1.5 text-[9px] uppercase tracking-[0.2em] font-sans inline-flex items-center gap-2 ${colors[status] || colors.PENDING}`}>
+    <span className={`border rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.15em] font-sans inline-flex items-center gap-1.5 font-medium ${colors[status] || colors.PENDING}`}>
       {isPulse && (
         <span className="relative flex h-1.5 w-1.5">
           <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${dotColor}`}></span>
@@ -72,79 +73,59 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-// --- Toast ---
+// --- Toast (Geist Minimal) ---
 function Toast({ message, type, onDone }: { message: string; type: 'success' | 'error'; onDone: () => void }) {
   useEffect(() => { const t = setTimeout(onDone, 3000); return () => clearTimeout(t); }, [onDone]);
   return (
     <motion.div
-      initial={{ opacity: 0, y: -20, scale: 0.9 }}
+      initial={{ opacity: 0, y: -15, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: -20, scale: 0.9 }}
-      className={`fixed top-6 right-6 z-50 px-6 py-4 rounded-xl border ${type === 'error' ? 'bg-[#2a0808] border-red-500/30 text-red-400' : 'bg-[#111] border-[#C5A059]/30 text-[#C5A059]'} font-sans text-xs uppercase tracking-widest shadow-[0_10px_40px_rgba(0,0,0,0.8)]`}
+      exit={{ opacity: 0, y: -15, scale: 0.95 }}
+      className={`fixed top-6 right-6 z-50 px-5 py-3.5 rounded-xl border ${
+        type === 'error' ? 'bg-[#1c0808] border-red-500/30 text-red-400' : 'bg-[#111111] border-[#E5C378]/40 text-[#E5C378]'
+      } font-sans text-xs uppercase tracking-widest shadow-2xl flex items-center gap-3`}
       role="alert"
     >
-      <div className="flex items-center gap-3">
-        <div className={`w-2 h-2 rounded-full animate-pulse ${type === 'error' ? 'bg-red-500' : 'bg-[#C5A059]'}`} />
-        {message}
-      </div>
+      <div className={`w-2 h-2 rounded-full ${type === 'error' ? 'bg-red-500' : 'bg-[#E5C378]'}`} />
+      <span>{message}</span>
     </motion.div>
   );
 }
 
-// --- Sparkline Mini Card ---
+// --- Stat Card with Sparkline ---
 function StatCard({ label, value, subtext, icon, accent = false, pathData }: {
   label: string; value: string | number; subtext?: string; icon: React.ReactNode; accent?: boolean; pathData: string;
 }) {
   return (
     <motion.div
       variants={itemVariants}
-      whileHover={{ y: -4, boxShadow: '0 12px 30px rgba(197,160,89,0.08)' }}
-      className="relative overflow-hidden rounded-2xl bg-[#0a0a0a] border border-[#ffffff12] p-5 sm:p-6 flex flex-col justify-between min-h-[140px] transition-all group"
+      whileHover={{ y: -2 }}
+      className="relative overflow-hidden rounded-xl bg-[#0a0a0a] border border-[#1f1f1f] hover:border-[#383838] p-5 flex flex-col justify-between min-h-[135px] transition-all group"
     >
-      <div className="flex items-center gap-2 text-[#777] z-10">
-        {icon}
-        <span className="font-sans text-[10px] uppercase tracking-wider">{label}</span>
+      <div className="flex items-center justify-between z-10">
+        <span className="font-sans text-[11px] uppercase tracking-wider text-[#737373] font-medium">{label}</span>
+        <div className="text-[#555555] group-hover:text-[#E5C378] transition-colors">{icon}</div>
       </div>
-      <div className="z-10 mt-3">
-        <motion.span
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.2, type: 'spring' }}
-          className={`text-3xl sm:text-4xl font-light block ${accent ? 'text-[#C5A059]' : 'text-white'}`}
-        >
+      <div className="z-10 mt-2">
+        <span className={`text-3xl font-sans font-semibold tracking-tight block ${accent ? 'text-[#E5C378]' : 'text-white'}`}>
           {value}
-        </motion.span>
+        </span>
         {subtext && (
-          <span className="font-sans text-[9px] uppercase tracking-widest text-[#555] mt-1 block">{subtext}</span>
+          <span className="font-sans text-[10px] uppercase tracking-wider text-[#737373] mt-1 block truncate">{subtext}</span>
         )}
       </div>
 
       {/* Sparkline */}
-      <div className="absolute bottom-0 left-0 right-0 h-14 opacity-30 group-hover:opacity-70 transition-opacity duration-500">
+      <div className="absolute bottom-0 left-0 right-0 h-12 opacity-25 group-hover:opacity-60 transition-opacity duration-500 pointer-events-none">
         <svg viewBox="0 0 100 40" preserveAspectRatio="none" className="w-full h-full">
           <defs>
             <linearGradient id={`sg-${label.replace(/\s+/g, '')}`} x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor="#C5A059" stopOpacity="0.4" />
-              <stop offset="100%" stopColor="#C5A059" stopOpacity="0" />
+              <stop offset="0%" stopColor="#E5C378" stopOpacity="0.4" />
+              <stop offset="100%" stopColor="#E5C378" stopOpacity="0" />
             </linearGradient>
           </defs>
-          <motion.path
-            initial={{ pathLength: 0, opacity: 0 }}
-            animate={{ pathLength: 1, opacity: 1 }}
-            transition={{ duration: 1.5, ease: "easeInOut" }}
-            d={`${pathData} L100,40 L0,40 Z`}
-            fill={`url(#sg-${label.replace(/\s+/g, '')})`}
-          />
-          <motion.path
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 1.5, ease: "easeInOut" }}
-            d={pathData}
-            fill="none"
-            stroke="#C5A059"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-          />
+          <path d={`${pathData} L100,40 L0,40 Z`} fill={`url(#sg-${label.replace(/\s+/g, '')})`} />
+          <path d={pathData} fill="none" stroke="#E5C378" strokeWidth="1.5" strokeLinecap="round" />
         </svg>
       </div>
     </motion.div>
@@ -189,9 +170,9 @@ export default function Dashboard() {
     const res = await fetch(`/api/bookings/${id}`, { method: 'DELETE' });
     if (res.ok) {
       setBookings(bookings.map(b => b.id === id ? { ...b, status: 'CANCELLED' } : b));
-      setToast({ message: 'Booking cancelled', type: 'success' });
+      setToast({ message: 'Appointment cancelled', type: 'success' });
     } else {
-      setToast({ message: 'Failed to cancel booking', type: 'error' });
+      setToast({ message: 'Failed to cancel appointment', type: 'error' });
     }
     setConfirmingCancel(null);
   };
@@ -233,9 +214,9 @@ export default function Dashboard() {
   // Member since
   const memberSince = user?.createdAt
     ? format(new Date(user.createdAt), 'MMM yyyy')
-    : 'N/A';
+    : 'Active';
 
-  // Recent activity (last 5 bookings by creation date)
+  // Recent activity
   const recentActivity = useMemo(() =>
     [...bookings]
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
@@ -264,36 +245,32 @@ export default function Dashboard() {
   // --- Loading State ---
   if (loading || isPending) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="flex items-center gap-3">
-          <div className="w-2 h-2 rounded-full bg-[#C5A059] animate-bounce" style={{ animationDelay: '0ms' }} />
-          <div className="w-2 h-2 rounded-full bg-[#C5A059] animate-bounce" style={{ animationDelay: '150ms' }} />
-          <div className="w-2 h-2 rounded-full bg-[#C5A059] animate-bounce" style={{ animationDelay: '300ms' }} />
-        </div>
+      <div className="flex flex-col items-center justify-center h-64 gap-3">
+        <div className="w-6 h-6 rounded-full border-2 border-[#E5C378] border-t-transparent animate-spin" />
+        <span className="font-sans text-xs uppercase tracking-widest text-[#737373]">Loading dashboard...</span>
       </div>
     );
   }
 
-  // --- Activity status icon ---
   const getActivityIcon = (status: string) => {
     switch (status) {
       case 'COMPLETED': return <CheckCircle size={14} className="text-[#4ade80]" />;
-      case 'CANCELLED': return <XCircle size={14} className="text-[#555]" />;
+      case 'CANCELLED': return <XCircle size={14} className="text-[#737373]" />;
       case 'REJECTED': return <XCircle size={14} className="text-red-400" />;
       case 'ACCEPTED': return <CheckCircle size={14} className="text-[#4ade80]" />;
-      case 'PENDING': return <AlertCircle size={14} className="text-[#C5A059]" />;
-      default: return <Clock size={14} className="text-[#555]" />;
+      case 'PENDING': return <AlertCircle size={14} className="text-[#E5C378]" />;
+      default: return <Clock size={14} className="text-[#737373]" />;
     }
   };
 
   const getActivityLabel = (b: Booking) => {
     const sName = services[b.serviceId] || 'Service';
     switch (b.status) {
-      case 'PENDING': return `Booked ${sName} — awaiting confirmation`;
       case 'ACCEPTED': return `${sName} confirmed`;
+      case 'PENDING': return `${sName} scheduled`;
       case 'COMPLETED': return `${sName} completed`;
       case 'CANCELLED': return `${sName} cancelled`;
-      case 'REJECTED': return `${sName} was declined`;
+      case 'REJECTED': return `${sName} declined`;
       default: return `${sName}`;
     }
   };
@@ -303,7 +280,7 @@ export default function Dashboard() {
       variants={containerVariants}
       initial="initial"
       animate="animate"
-      className="w-full space-y-8"
+      className="w-full max-w-7xl mx-auto space-y-8 pb-16"
     >
       {/* Toast */}
       <AnimatePresence>
@@ -311,51 +288,60 @@ export default function Dashboard() {
       </AnimatePresence>
 
       {/* ════════════════════════════════════════
-          1. WELCOME BANNER
+          1. WELCOME BANNER (Geist Style)
          ════════════════════════════════════════ */}
       <motion.div
         variants={itemVariants}
-        className="relative p-8 sm:p-10 bg-[#0a0a0a] border border-[#ffffff12] rounded-3xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.5)]"
+        className="relative p-6 sm:p-8 bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl overflow-hidden shadow-xl"
       >
-        {/* Decorative gradient orbs */}
-        <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-bl from-[#C5A059]/15 to-transparent blur-3xl rounded-full pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-[#C5A059]/8 to-transparent blur-3xl rounded-full pointer-events-none" />
-        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#C5A059]/30 to-transparent" />
-
-        <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-          <div className="flex items-center gap-5">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
             {/* Avatar */}
             <div className="shrink-0 relative group cursor-pointer" onClick={() => navigate('/settings')}>
-              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full p-[2px] bg-gradient-to-b from-[#C5A059] to-[#C5A059]/20">
-                <div className="w-full h-full rounded-full bg-[#111] flex items-center justify-center overflow-hidden">
+              <div className="w-14 h-14 rounded-full p-[2px] bg-[#1a1a1a] border border-[#2e2e2e] group-hover:border-[#E5C378] transition-colors">
+                <div className="w-full h-full rounded-full bg-[#111111] flex items-center justify-center overflow-hidden">
                   {user?.image ? (
                     <img src={user.image} alt={user.name} className="w-full h-full object-cover" />
                   ) : (
-                    <User size={28} className="text-[#888] group-hover:text-[#C5A059] transition-colors" />
+                    <User size={22} className="text-[#888888] group-hover:text-[#E5C378] transition-colors" />
                   )}
                 </div>
-              </div>
-              <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <Camera size={16} className="text-white" />
               </div>
             </div>
 
             {/* Greeting */}
             <div>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-light text-white tracking-wide mb-1">
-                {getGreeting()}, <span className="font-medium italic text-[#C5A059]">{user?.name?.split(' ')[0] || 'Guest'}</span>
+              <h1 className="text-xl sm:text-2xl font-light text-white tracking-wide">
+                {getGreeting()}, <span className="font-medium text-[#E5C378]">{user?.name?.split(' ')[0] || 'Client'}</span>
               </h1>
-              <div className="flex items-center gap-3 text-[#666] font-sans text-[10px] uppercase tracking-widest">
-                <CalendarDays size={12} className="text-[#C5A059]" />
-                {format(new Date(), 'EEEE, MMMM d, yyyy')}
+              <div className="flex flex-wrap items-center gap-2.5 text-[#737373] font-sans text-[11px] uppercase tracking-wider mt-1">
+                <CalendarDays size={12} className="text-[#E5C378]" />
+                <span>{format(new Date(), 'EEEE, MMMM d, yyyy')}</span>
                 {nextAppointment && (
                   <>
-                    <span className="w-1 h-1 rounded-full bg-[#444]" />
-                    <span className="text-[#C5A059]">Next: {nextAppointmentCountdown}</span>
+                    <span>•</span>
+                    <span className="text-[#E5C378] font-medium">Next appointment {nextAppointmentCountdown}</span>
                   </>
                 )}
               </div>
             </div>
+          </div>
+
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <button
+              onClick={() => navigate('/booking')}
+              className="flex-1 sm:flex-none px-5 py-2.5 bg-[#E5C378] hover:bg-[#edd495] text-black font-sans text-xs font-semibold uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(229,195,120,0.25)]"
+            >
+              <CalendarDays size={14} />
+              Book Appointment
+            </button>
+            <button
+              onClick={() => navigate('/settings')}
+              className="p-2.5 bg-[#141414] hover:bg-[#1f1f1f] text-[#888888] hover:text-white border border-[#222222] rounded-lg transition-colors"
+              title="Settings"
+            >
+              <Settings size={16} />
+            </button>
           </div>
         </div>
       </motion.div>
@@ -368,401 +354,275 @@ export default function Dashboard() {
           label="Next Appointment"
           value={nextAppointment ? format(parseISO(nextAppointment.bookingDate), 'MMM d') : '—'}
           subtext={nextAppointment ? `${nextAppointment.startTime} · ${services[nextAppointment.serviceId] || 'Service'}` : 'None scheduled'}
-          icon={<CalendarDays size={14} />}
+          icon={<CalendarDays size={16} />}
           accent={!!nextAppointment}
           pathData={spark1}
         />
         <StatCard
           label="Total Visits"
           value={completedCount}
-          subtext={completedCount === 1 ? '1 completed session' : `${completedCount} completed sessions`}
-          icon={<TrendingUp size={14} />}
+          subtext={`${completedCount} completed sessions`}
+          icon={<TrendingUp size={16} />}
           pathData={spark2}
         />
         <StatCard
           label="Active Bookings"
           value={activeCount}
-          subtext={activeCount > 0 ? 'Pending or confirmed' : 'No active bookings'}
-          icon={<Zap size={14} />}
+          subtext={activeCount > 0 ? 'Confirmed appointments' : 'No active bookings'}
+          icon={<Zap size={16} />}
           accent={activeCount > 0}
           pathData={spark3}
         />
         <StatCard
-          label="Member Since"
+          label="Membership"
           value={memberSince}
-          subtext="Valued client"
-          icon={<Star size={14} />}
+          subtext="Verified client"
+          icon={<Star size={16} />}
           pathData={spark4}
         />
       </motion.div>
 
       {/* ════════════════════════════════════════
-          3. QUICK ACTIONS BAR
+          3. TODAY'S SCHEDULE + SHOP INFO (2-col)
          ════════════════════════════════════════ */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <motion.button
-          whileHover={{ y: -2, boxShadow: '0 8px 25px rgba(197,160,89,0.15)' }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => navigate('/booking')}
-          className="flex items-center justify-center gap-3 px-6 py-4 bg-[#C5A059] text-black rounded-2xl font-sans text-[10px] uppercase tracking-widest hover:bg-[#d4b06a] transition-all shadow-[0_0_20px_rgba(197,160,89,0.15)]"
-        >
-          <CalendarDays size={16} />
-          Book Appointment
-          <ArrowRight size={14} />
-        </motion.button>
-        <motion.button
-          whileHover={{ y: -2 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => navigate('/settings')}
-          className="flex items-center justify-center gap-3 px-6 py-4 bg-[#0a0a0a] border border-[#ffffff12] text-[#888] rounded-2xl font-sans text-[10px] uppercase tracking-widest hover:text-white hover:border-[#ffffff30] transition-all"
-        >
-          <Settings size={16} />
-          Account Settings
-        </motion.button>
-        <motion.button
-          whileHover={{ y: -2 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => setToast({ message: 'Contact: info@aurelian.com', type: 'success' })}
-          className="flex items-center justify-center gap-3 px-6 py-4 bg-[#0a0a0a] border border-[#ffffff12] text-[#888] rounded-2xl font-sans text-[10px] uppercase tracking-widest hover:text-white hover:border-[#ffffff30] transition-all"
-        >
-          <Phone size={16} />
-          Contact Us
-        </motion.button>
-      </motion.div>
-
-      {/* ════════════════════════════════════════
-          4. TODAY'S APPOINTMENT + SHOP INFO (2-col)
-         ════════════════════════════════════════ */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-
+      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Today's Schedule */}
-        <div className="lg:col-span-3 bg-[#0a0a0a] border border-[#ffffff12] rounded-2xl p-6 sm:p-8 relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#C5A059]/20 to-transparent" />
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-8 rounded-full bg-[#C5A059]/10 flex items-center justify-center">
-              <Sparkles size={14} className="text-[#C5A059]" />
+        <div className="lg:col-span-7 bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl p-6 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between pb-4 mb-4 border-b border-[#171717]">
+              <div className="flex items-center gap-2.5">
+                <Sparkles size={16} className="text-[#E5C378]" />
+                <h3 className="font-sans text-xs uppercase tracking-[0.2em] text-white font-medium">Today's Schedule</h3>
+              </div>
+              <span className="font-sans text-[10px] uppercase tracking-widest text-[#737373]">
+                {format(new Date(), 'MMM d')}
+              </span>
             </div>
-            <h3 className="font-sans text-[10px] uppercase tracking-[0.3em] text-[#888]">Today's Schedule</h3>
-            <span className="ml-auto font-sans text-[9px] uppercase tracking-widest text-[#555]">
-              {format(new Date(), 'MMM d')}
-            </span>
-          </div>
 
-          {todayBookings.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 text-center">
-              <motion.div
-                animate={{ y: [0, -6, 0] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                className="w-14 h-14 rounded-full bg-[#111] border border-[#ffffff10] flex items-center justify-center mb-4"
-              >
-                <CalendarDays size={22} className="text-[#555]" />
-              </motion.div>
-              <p className="text-lg font-light text-[#555] italic mb-1">No appointments today</p>
-              <p className="font-sans text-[9px] uppercase tracking-widest text-[#444]">Enjoy your free day!</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {todayBookings.map((b) => {
-                // Parse time for countdown
-                let countdown = '';
-                try {
-                  const [h, m] = b.startTime.split(':').map(Number);
-                  const aptTime = new Date();
-                  aptTime.setHours(h, m, 0, 0);
-                  if (isFuture(aptTime)) {
-                    const mins = differenceInMinutes(aptTime, new Date());
-                    const hrs = Math.floor(mins / 60);
-                    const remMins = mins % 60;
-                    countdown = hrs > 0 ? `Starts in ${hrs}h ${remMins}m` : `Starts in ${remMins}m`;
-                  } else {
-                    countdown = 'In progress';
-                  }
-                } catch { /* ignore */ }
-
-                return (
-                  <motion.div
+            {todayBookings.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-10 text-center">
+                <div className="w-12 h-12 rounded-full bg-[#141414] border border-[#222222] flex items-center justify-center mb-3">
+                  <CalendarDays size={20} className="text-[#666666]" />
+                </div>
+                <p className="text-sm text-[#888888] font-sans mb-1">No appointments scheduled for today</p>
+                <p className="font-sans text-[10px] uppercase tracking-wider text-[#555555]">Your schedule is clear</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {todayBookings.map((b) => (
+                  <div
                     key={b.id}
-                    whileHover={{ x: 3 }}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-xl bg-[#111] border border-[#ffffff10] hover:border-[#C5A059]/30 transition-all group"
+                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-lg bg-[#111111] border border-[#1c1c1c] hover:border-[#2e2e2e] transition-colors"
                   >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="text-lg font-light text-white">{services[b.serviceId] || 'Service'}</span>
+                    <div>
+                      <div className="flex items-center gap-3 mb-1">
+                        <span className="text-sm font-medium text-white">{services[b.serviceId] || 'Service'}</span>
                         <StatusBadge status={b.status} />
                       </div>
-                      <div className="flex items-center gap-3 font-sans text-[10px] uppercase tracking-widest text-[#666]">
-                        <Clock size={12} className="text-[#C5A059]" />
+                      <div className="flex items-center gap-2 font-sans text-xs text-[#737373]">
+                        <Clock size={12} className="text-[#E5C378]" />
                         <span>{b.startTime}{b.endTime ? ` – ${b.endTime}` : ''}</span>
-                        {countdown && (
-                          <>
-                            <span className="w-1 h-1 rounded-full bg-[#444]" />
-                            <span className="text-[#C5A059]">
-                              <Timer size={10} className="inline mr-1 -mt-0.5" />
-                              {countdown}
-                            </span>
-                          </>
-                        )}
                       </div>
                     </div>
                     {(b.status === 'ACCEPTED' || b.status === 'PENDING') && (
-                      <div className="shrink-0">
+                      <div>
                         {confirmingCancel === b.id ? (
-                          <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            className="flex items-center gap-2 bg-[#0a0a0a] p-1.5 rounded-xl border border-[#ffffff15]"
-                          >
-                            <span className="text-[9px] uppercase tracking-widest text-[#888] px-2">Cancel?</span>
-                            <button onClick={() => handleCancel(b.id)} className="px-4 py-2 rounded-lg bg-red-500/10 text-red-400 border border-red-500/30 text-[9px] uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all">Yes</button>
-                            <button onClick={() => setConfirmingCancel(null)} className="px-4 py-2 rounded-lg text-[#888] text-[9px] uppercase tracking-widest hover:text-white transition-colors">No</button>
-                          </motion.div>
+                          <div className="flex items-center gap-2 bg-[#171717] p-1 rounded-lg border border-[#262626]">
+                            <span className="text-[10px] uppercase tracking-wider text-[#888888] px-1">Cancel?</span>
+                            <button onClick={() => handleCancel(b.id)} className="px-3 py-1 rounded bg-red-500/20 text-red-400 border border-red-500/30 text-[10px] uppercase tracking-wider hover:bg-red-500 hover:text-white transition-colors">Yes</button>
+                            <button onClick={() => setConfirmingCancel(null)} className="px-2 py-1 text-[#888888] text-[10px] uppercase tracking-wider hover:text-white">No</button>
+                          </div>
                         ) : (
-                          <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
+                          <button
                             onClick={() => setConfirmingCancel(b.id)}
-                            className="px-5 py-2.5 border border-[#ffffff15] rounded-xl text-[#888] font-sans text-[9px] uppercase tracking-widest hover:border-red-500/30 hover:text-red-400 transition-all opacity-0 group-hover:opacity-100"
+                            className="px-3 py-1.5 border border-[#222222] rounded-lg text-[#737373] font-sans text-[10px] uppercase tracking-wider hover:border-red-500/40 hover:text-red-400 transition-colors"
                           >
                             Cancel
-                          </motion.button>
+                          </button>
                         )}
                       </div>
                     )}
-                  </motion.div>
-                );
-              })}
-            </div>
-          )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Shop Info Widget */}
-        <div className="lg:col-span-2 bg-[#0a0a0a] border border-[#ffffff12] rounded-2xl p-6 sm:p-8 flex flex-col">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-8 rounded-full bg-[#C5A059]/10 flex items-center justify-center">
-              <MapPin size={14} className="text-[#C5A059]" />
-            </div>
-            <h3 className="font-sans text-[10px] uppercase tracking-[0.3em] text-[#888]">Shop Info</h3>
-          </div>
-
-          <div className="space-y-5 flex-1">
-            {/* Open / Closed Badge */}
-            {isShopOpen !== null && (
-              <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border text-[9px] uppercase tracking-widest font-sans ${isShopOpen
-                  ? 'text-[#4ade80] border-[#4ade80]/30 bg-[#4ade80]/10'
-                  : 'text-red-400 border-red-400/30 bg-red-400/10'
+        <div className="lg:col-span-5 bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl p-6 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between pb-4 mb-4 border-b border-[#171717]">
+              <div className="flex items-center gap-2.5">
+                <MapPin size={16} className="text-[#E5C378]" />
+                <h3 className="font-sans text-xs uppercase tracking-[0.2em] text-white font-medium">Salon Hours</h3>
+              </div>
+              {isShopOpen !== null && (
+                <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] uppercase tracking-wider font-sans font-medium ${
+                  isShopOpen ? 'text-[#4ade80] bg-[#4ade80]/10 border border-[#4ade80]/30' : 'text-red-400 bg-red-400/10 border border-red-400/30'
                 }`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${isShopOpen ? 'bg-[#4ade80] animate-pulse' : 'bg-red-400'}`} />
-                {isShopOpen ? 'Open Now' : 'Closed'}
-              </div>
-            )}
+                  <span className={`w-1.5 h-1.5 rounded-full ${isShopOpen ? 'bg-[#4ade80]' : 'bg-red-400'}`} />
+                  {isShopOpen ? 'Open Now' : 'Closed'}
+                </span>
+              )}
+            </div>
 
-            {/* Hours */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="font-sans text-[9px] uppercase tracking-widest text-[#555]">Opens</span>
-                <span className="text-white font-light text-sm">
-                  {shopSettings.openingTime || '—'}
-                </span>
+            <div className="space-y-3 font-sans text-xs">
+              <div className="flex items-center justify-between py-1">
+                <span className="text-[#737373] uppercase tracking-wider text-[11px]">Opening Hours</span>
+                <span className="text-white font-medium">{shopSettings.openingTime || '09:00'} – {shopSettings.closingTime || '18:00'}</span>
               </div>
-              <div className="w-full h-[1px] bg-[#ffffff08]" />
-              <div className="flex items-center justify-between">
-                <span className="font-sans text-[9px] uppercase tracking-widest text-[#555]">Closes</span>
-                <span className="text-white font-light text-sm">
-                  {shopSettings.closingTime || '—'}
-                </span>
+              <div className="w-full h-[1px] bg-[#141414]" />
+              <div className="flex items-center justify-between py-1">
+                <span className="text-[#737373] uppercase tracking-wider text-[11px]">Slot Interval</span>
+                <span className="text-white font-medium">{shopSettings.slotDurationMinutes || 30} minutes</span>
               </div>
-              <div className="w-full h-[1px] bg-[#ffffff08]" />
-              <div className="flex items-center justify-between">
-                <span className="font-sans text-[9px] uppercase tracking-widest text-[#555]">Slot Duration</span>
-                <span className="text-white font-light text-sm">
-                  {shopSettings.slotDurationMinutes ? `${shopSettings.slotDurationMinutes} min` : '—'}
-                </span>
+              <div className="w-full h-[1px] bg-[#141414]" />
+              <div className="flex items-center justify-between py-1">
+                <span className="text-[#737373] uppercase tracking-wider text-[11px]">Location</span>
+                <span className="text-white font-medium">Aurelian Salon & Spa</span>
               </div>
             </div>
           </div>
 
-          {/* Book CTA in shop info */}
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+          <button
             onClick={() => navigate('/booking')}
-            className="mt-6 w-full py-3.5 rounded-xl border border-[#C5A059]/30 text-[#C5A059] font-sans text-[9px] uppercase tracking-widest hover:bg-[#C5A059]/10 transition-all"
+            className="mt-6 w-full py-2.5 rounded-lg border border-[#222222] hover:border-[#E5C378] hover:bg-[#141414] text-[#E5C378] font-sans text-xs uppercase tracking-wider font-medium transition-all"
           >
-            Book a Slot
-          </motion.button>
+            Check Available Slots →
+          </button>
         </div>
       </motion.div>
 
       {/* ════════════════════════════════════════
-          5. UPCOMING APPOINTMENTS (Card Grid)
+          4. UPCOMING APPOINTMENTS (Card Grid)
          ════════════════════════════════════════ */}
-      <motion.div variants={itemVariants}>
-        <div className="flex items-center gap-3 mb-6">
-          <CalendarDays size={14} className="text-[#C5A059]" />
-          <h2 className="font-sans text-[10px] uppercase tracking-[0.4em] text-[#888]">Upcoming Appointments</h2>
-          <span className="ml-auto font-sans text-[9px] uppercase tracking-widest text-[#555]">{upcoming.length} total</span>
+      <motion.div variants={itemVariants} className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <CalendarDays size={16} className="text-[#E5C378]" />
+            <h2 className="font-sans text-xs uppercase tracking-[0.2em] text-white font-medium">Upcoming Appointments</h2>
+          </div>
+          <span className="font-sans text-[10px] uppercase tracking-widest text-[#737373]">{upcoming.length} scheduled</span>
         </div>
 
         {upcoming.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="p-12 sm:p-16 bg-[#0a0a0a] border border-[#ffffff12] flex flex-col items-center justify-center text-center rounded-2xl relative overflow-hidden"
-          >
-            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#C5A059]/20 to-transparent" />
-            <motion.div
-              animate={{ y: [0, -8, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              className="w-16 h-16 rounded-full bg-[#C5A059]/10 border border-[#C5A059]/20 flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(197,160,89,0.1)]"
-            >
-              <CalendarDays size={24} className="text-[#C5A059]" />
-            </motion.div>
-            <h3 className="text-xl sm:text-2xl font-light text-white italic mb-2">Your Schedule is Clear</h3>
-            <p className="font-sans text-[10px] uppercase tracking-widest text-[#555] mb-8">No upcoming appointments booked.</p>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+          <div className="p-8 sm:p-12 bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl text-center space-y-4">
+            <div className="w-12 h-12 rounded-full bg-[#141414] border border-[#222222] mx-auto flex items-center justify-center">
+              <CalendarDays size={20} className="text-[#666666]" />
+            </div>
+            <div>
+              <h3 className="text-base text-white font-medium mb-1">No upcoming appointments</h3>
+              <p className="font-sans text-xs text-[#737373]">Select a service and reserve your preferred time slot.</p>
+            </div>
+            <button
               onClick={() => navigate('/booking')}
-              className="px-8 py-4 bg-[#C5A059] text-black font-sans text-[10px] uppercase tracking-widest rounded-xl hover:bg-[#d4b06a] transition-all shadow-[0_0_20px_rgba(197,160,89,0.15)]"
+              className="px-5 py-2.5 bg-[#E5C378] hover:bg-[#edd495] text-black font-sans text-xs font-semibold uppercase tracking-wider rounded-lg transition-all inline-flex items-center gap-2"
             >
-              Book Appointment
-            </motion.button>
-          </motion.div>
+              <span>Book Appointment</span>
+              <ArrowRight size={14} />
+            </button>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {upcoming.map((b, i) => (
-              <motion.div
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.06 }}
-                whileHover={{ y: -3, borderColor: 'rgba(197,160,89,0.3)' }}
+            {upcoming.map((b) => (
+              <div
                 key={b.id}
-                className="p-6 bg-[#0a0a0a] border border-[#ffffff12] rounded-2xl transition-all hover:shadow-[0_10px_30px_rgba(0,0,0,0.4)] group relative overflow-hidden"
+                className="p-5 bg-[#0a0a0a] border border-[#1f1f1f] hover:border-[#2e2e2e] rounded-xl transition-all space-y-4"
               >
-                {/* Top accent line */}
-                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#C5A059]/0 via-[#C5A059]/30 to-[#C5A059]/0 opacity-0 group-hover:opacity-100 transition-opacity" />
-
-                <div className="flex items-start justify-between gap-4 mb-4">
+                <div className="flex items-start justify-between gap-4">
                   <div>
-                    <h4 className="text-lg font-light text-white mb-1">{services[b.serviceId] || 'Service'}</h4>
+                    <h4 className="text-base font-medium text-white mb-1.5">{services[b.serviceId] || 'Service'}</h4>
                     <StatusBadge status={b.status} />
                   </div>
                   <div className="text-right">
-                    <div className="text-sm font-light text-[#C5A059]">{format(parseISO(b.bookingDate), 'MMM d')}</div>
-                    <div className="font-sans text-[10px] text-[#666] tracking-wider">{format(parseISO(b.bookingDate), 'EEEE')}</div>
+                    <div className="text-sm font-semibold text-[#E5C378] font-sans">{format(parseISO(b.bookingDate), 'MMM d, yyyy')}</div>
+                    <div className="font-sans text-[11px] text-[#737373] uppercase tracking-wider">{format(parseISO(b.bookingDate), 'EEEE')}</div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 text-[#666] font-sans text-[10px] uppercase tracking-widest mb-5">
-                  <Clock size={12} className="text-[#C5A059]" />
-                  {b.startTime}{b.endTime ? ` – ${b.endTime}` : ''}
+                <div className="flex items-center gap-2 font-sans text-xs text-[#a1a1a1]">
+                  <Clock size={13} className="text-[#E5C378]" />
+                  <span>{b.startTime}{b.endTime ? ` – ${b.endTime}` : ''}</span>
                 </div>
 
-                {/* Actions */}
                 {(b.status === 'ACCEPTED' || b.status === 'PENDING') && (
-                  <div className="pt-4 border-t border-[#ffffff08]">
+                  <div className="pt-3 border-t border-[#171717] flex justify-end">
                     {confirmingCancel === b.id ? (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="flex items-center gap-2"
-                      >
-                        <span className="text-[9px] uppercase tracking-widest text-[#888]">Cancel this booking?</span>
-                        <button onClick={() => handleCancel(b.id)} className="ml-auto px-4 py-2 rounded-lg bg-red-500/10 text-red-400 border border-red-500/30 text-[9px] uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all">Yes</button>
-                        <button onClick={() => setConfirmingCancel(null)} className="px-4 py-2 rounded-lg text-[#888] text-[9px] uppercase tracking-widest hover:text-white transition-colors">No</button>
-                      </motion.div>
+                      <div className="flex items-center gap-2 bg-[#141414] p-1.5 rounded-lg border border-[#222222]">
+                        <span className="text-[10px] uppercase tracking-wider text-[#888888] px-2">Cancel booking?</span>
+                        <button onClick={() => handleCancel(b.id)} className="px-3 py-1 rounded bg-red-500/20 text-red-400 border border-red-500/30 text-[10px] uppercase tracking-wider hover:bg-red-500 hover:text-white transition-colors">Yes</button>
+                        <button onClick={() => setConfirmingCancel(null)} className="px-2 py-1 text-[#888888] text-[10px] uppercase tracking-wider hover:text-white">No</button>
+                      </div>
                     ) : (
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
+                      <button
                         onClick={() => setConfirmingCancel(b.id)}
-                        className="w-full py-2.5 border border-[#ffffff12] rounded-xl text-[#666] font-sans text-[9px] uppercase tracking-widest hover:border-red-500/30 hover:text-red-400 transition-all"
+                        className="px-3 py-1.5 border border-[#222222] rounded-lg text-[#737373] font-sans text-[10px] uppercase tracking-wider hover:border-red-500/40 hover:text-red-400 transition-colors"
                       >
-                        Cancel Booking
-                      </motion.button>
+                        Cancel Appointment
+                      </button>
                     )}
                   </div>
                 )}
-              </motion.div>
+              </div>
             ))}
           </div>
         )}
       </motion.div>
 
       {/* ════════════════════════════════════════
-          6. ACTIVITY TIMELINE
+          5. RECENT ACTIVITY TIMELINE
          ════════════════════════════════════════ */}
       {recentActivity.length > 0 && (
-        <motion.div variants={itemVariants}>
-          <div className="flex items-center gap-3 mb-6">
-            <History size={14} className="text-[#C5A059]" />
-            <h2 className="font-sans text-[10px] uppercase tracking-[0.4em] text-[#888]">Recent Activity</h2>
+        <motion.div variants={itemVariants} className="space-y-4">
+          <div className="flex items-center gap-2.5">
+            <History size={16} className="text-[#E5C378]" />
+            <h2 className="font-sans text-xs uppercase tracking-[0.2em] text-white font-medium">Recent Activity</h2>
           </div>
 
-          <div className="bg-[#0a0a0a] border border-[#ffffff12] rounded-2xl p-6 sm:p-8">
-            <div className="relative">
-              {/* Timeline line */}
-              <div className="absolute left-[6px] top-2 bottom-2 w-[1px] bg-gradient-to-b from-[#C5A059]/30 via-[#ffffff10] to-transparent" />
-
-              <div className="space-y-6">
-                {recentActivity.map((b, i) => (
-                  <motion.div
-                    key={b.id}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.08 }}
-                    className="flex items-start gap-4 pl-6 relative"
-                  >
-                    {/* Dot */}
-                    <div className="absolute left-0 top-1 z-10">
-                      {getActivityIcon(b.status)}
-                    </div>
-
-                    <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                      <div>
-                        <p className="text-sm text-[#D4D4D4] font-light">{getActivityLabel(b)}</p>
-                        <p className="font-sans text-[9px] uppercase tracking-widest text-[#555] mt-0.5">
-                          {format(parseISO(b.bookingDate), 'MMM d, yyyy')} · {b.startTime}
-                        </p>
-                      </div>
-                      <span className="font-sans text-[9px] uppercase tracking-widest text-[#444] shrink-0">
-                        {formatDistanceToNow(new Date(b.createdAt), { addSuffix: true })}
+          <div className="bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl p-5 sm:p-6">
+            <div className="space-y-4">
+              {recentActivity.map((b) => (
+                <div key={b.id} className="flex items-start gap-3.5 pb-3 border-b border-[#141414] last:border-b-0 last:pb-0">
+                  <div className="mt-0.5">{getActivityIcon(b.status)}</div>
+                  <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                    <div>
+                      <span className="text-xs text-white font-medium">{getActivityLabel(b)}</span>
+                      <span className="text-[11px] text-[#737373] block font-sans">
+                        {format(parseISO(b.bookingDate), 'MMM d, yyyy')} at {b.startTime}
                       </span>
                     </div>
-                  </motion.div>
-                ))}
-              </div>
+                    <span className="font-sans text-[10px] uppercase tracking-wider text-[#555555] shrink-0">
+                      {formatDistanceToNow(new Date(b.createdAt), { addSuffix: true })}
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </motion.div>
       )}
 
       {/* ════════════════════════════════════════
-          7. PAST HISTORY (Collapsible)
+          6. PAST HISTORY (Collapsible)
          ════════════════════════════════════════ */}
       {past.length > 0 && (
         <motion.div variants={itemVariants}>
-          <motion.button
-            whileHover={{ backgroundColor: 'rgba(255,255,255,0.02)' }}
+          <button
             onClick={() => setShowPastHistory(!showPastHistory)}
-            className="w-full flex items-center justify-between gap-4 px-6 py-4 bg-[#0a0a0a] border border-[#ffffff12] rounded-2xl transition-all group"
+            className="w-full flex items-center justify-between p-4 bg-[#0a0a0a] border border-[#1f1f1f] hover:border-[#2e2e2e] rounded-xl transition-colors"
           >
             <div className="flex items-center gap-3">
-              <History size={14} className="text-[#C5A059]" />
-              <span className="font-sans text-[10px] uppercase tracking-[0.3em] text-[#888]">
+              <History size={14} className="text-[#E5C378]" />
+              <span className="font-sans text-xs uppercase tracking-[0.2em] text-white font-medium">
                 Past History
               </span>
-              <span className="font-sans text-[9px] uppercase tracking-widest text-[#555] bg-[#ffffff08] px-2.5 py-1 rounded-full">
+              <span className="font-sans text-[10px] text-[#737373] bg-[#141414] border border-[#222222] px-2 py-0.5 rounded-full">
                 {past.length}
               </span>
             </div>
-            <motion.div
-              animate={{ rotate: showPastHistory ? 180 : 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <ChevronDown size={16} className="text-[#555]" />
-            </motion.div>
-          </motion.button>
+            <ChevronDown size={16} className={`text-[#737373] transition-transform duration-200 ${showPastHistory ? 'rotate-180' : ''}`} />
+          </button>
 
           <AnimatePresence>
             {showPastHistory && (
@@ -770,34 +630,26 @@ export default function Dashboard() {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                className="overflow-hidden"
+                className="overflow-hidden mt-3"
               >
-                <div className="mt-3 bg-[#0a0a0a] border border-[#ffffff12] rounded-2xl overflow-hidden">
-                  <div className="divide-y divide-[#ffffff08]">
-                    {past.map((b, i) => (
-                      <motion.div
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.04 }}
-                        key={b.id}
-                        className="px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-[#ffffff03] transition-colors"
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className="w-8 h-8 rounded-full bg-[#111] border border-[#ffffff08] flex items-center justify-center shrink-0">
-                            {getActivityIcon(b.status)}
-                          </div>
-                          <div>
-                            <div className="text-sm font-light text-[#D4D4D4]">{services[b.serviceId] || 'Service'}</div>
-                            <div className="font-sans text-[9px] text-[#555] uppercase tracking-widest">
-                              {format(parseISO(b.bookingDate), 'MMM d, yyyy')} · {b.startTime}
-                            </div>
+                <div className="bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl divide-y divide-[#141414]">
+                  {past.map((b) => (
+                    <div
+                      key={b.id}
+                      className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-[#111111] transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        {getActivityIcon(b.status)}
+                        <div>
+                          <div className="text-xs font-medium text-white">{services[b.serviceId] || 'Service'}</div>
+                          <div className="font-sans text-[11px] text-[#737373]">
+                            {format(parseISO(b.bookingDate), 'MMM d, yyyy')} · {b.startTime}
                           </div>
                         </div>
-                        <StatusBadge status={b.status} />
-                      </motion.div>
-                    ))}
-                  </div>
+                      </div>
+                      <StatusBadge status={b.status} />
+                    </div>
+                  ))}
                 </div>
               </motion.div>
             )}
