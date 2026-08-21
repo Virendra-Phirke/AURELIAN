@@ -20,7 +20,19 @@ class RedisMock {
     this.map.set(key, { value, expiresAt });
     return "OK";
   }
-  async del(key: string) { this.map.delete(key); }
+  async del(...keys: string[]) {
+    for (const k of keys) {
+      this.map.delete(k);
+    }
+  }
+  async keys(pattern?: string) {
+    if (!pattern || pattern === '*') return Array.from(this.map.keys());
+    const regex = new RegExp('^' + pattern.replace(/\*/g, '.*') + '$');
+    return Array.from(this.map.keys()).filter(k => regex.test(k));
+  }
+  async flushall() {
+    this.map.clear();
+  }
   async incr(key: string) {
     const item = await this.get(key);
     const val = (parseInt(item || "0") + 1).toString();

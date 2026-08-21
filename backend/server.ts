@@ -87,22 +87,8 @@ async function startServer() {
         await db.insert(services).values([
           { name: 'Haircut', durationMinutes: 30, price: 75 },
           { name: 'Shaving', durationMinutes: 20, price: 50 },
-          { name: 'Zat Ke Bal', durationMinutes: 30, price: 90 }
         ]);
-        console.log("Seeded default services.");
-      } else {
-        if (existingServices.length === 2 && !existingServices.some(s => s.name.toLowerCase() === 'zat ke bal')) {
-          await db.insert(services).values([
-            { name: 'Zat Ke Bal', durationMinutes: 30, price: 90 }
-          ]);
-        }
-        // Update any services that currently have 0 or null price to standard defaults
-        for (const svc of existingServices) {
-          if (!svc.price || svc.price === 0) {
-            const defaultPrice = svc.name.toLowerCase().includes('shav') ? 50 : svc.name.toLowerCase().includes('zat') ? 90 : 75;
-            await db.update(services).set({ price: defaultPrice }).where(eq(services.id, svc.id));
-          }
-        }
+        console.log("Seeded initial default services.");
       }
 
       // Ensure database-level unique constraint on active booking slots

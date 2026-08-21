@@ -110,28 +110,15 @@ export default function Booking() {
     fetch('/api/services')
       .then((r) => r.json())
       .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
+        if (Array.isArray(data)) {
           setServices(data);
-          setSelectedService(data[0]);
-        } else {
-          // Fallback defaults matching mockup if DB has no services
-          const defaults: Service[] = [
-            { id: '1', name: 'Haircut', durationMinutes: 30 },
-            { id: '2', name: 'Shaving', durationMinutes: 20 },
-            { id: '3', name: 'Zat Ke Bal', durationMinutes: 30 },
-          ];
-          setServices(defaults);
-          setSelectedService(defaults[1]); // Default to Shaving like mockup
+          if (data.length > 0) {
+            setSelectedService(data[0]);
+          }
         }
       })
       .catch(() => {
-        const defaults: Service[] = [
-          { id: '1', name: 'Haircut', durationMinutes: 30 },
-          { id: '2', name: 'Shaving', durationMinutes: 20 },
-          { id: '3', name: 'Zat Ke Bal', durationMinutes: 30 },
-        ];
-        setServices(defaults);
-        setSelectedService(defaults[1]);
+        setServices([]);
       });
   }, []);
 
