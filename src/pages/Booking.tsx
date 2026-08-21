@@ -352,24 +352,24 @@ export default function Booking() {
                       onClick={() => setSelectedService(service)}
                       className={`relative overflow-hidden rounded-2xl p-5 flex flex-col justify-between text-center transition-all cursor-pointer min-h-[220px] select-none ${
                         isSelected
-                          ? 'bg-[var(--color-primary)]/10 border-2 border-[var(--color-primary)] shadow-[0_0_25px_rgba(229,195,120,0.15)]'
-                          : 'bg-[var(--color-card-bg)] border border-[var(--color-border)] hover:border-[var(--color-primary)]/50 shadow-md'
+                          ? 'bg-[var(--color-primary)]/10 shadow-[0_0_35px_rgba(229,195,120,0.22)]'
+                          : 'bg-[var(--color-card-bg)] hover:bg-[var(--color-surface-hover)] shadow-md'
                       }`}
                     >
                       {isSelected && (
-                        <BorderBeam size={90} duration={8} colorFrom="var(--color-primary)" borderWidth={1.5} />
+                        <BorderBeam size={100} duration={7} colorFrom="var(--color-primary)" borderWidth={2} />
                       )}
 
                       {/* Top Icon and Name */}
                       <div>
-                        <div className="w-12 h-12 rounded-full mx-auto flex items-center justify-center mb-3.5 bg-[var(--color-surface-raised)] border border-[var(--color-border)]">
+                        <div className="w-12 h-12 rounded-full mx-auto flex items-center justify-center mb-3.5 bg-[var(--color-surface-raised)]">
                           {getServiceIcon(service.name)}
                         </div>
 
                         <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-primary-text)] mb-1.5">
                           {service.name}
                         </h3>
-                        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[var(--color-surface-raised)] border border-[var(--color-border)] text-[10px] text-[var(--color-secondary-text)] font-sans tracking-wider mb-3">
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[var(--color-surface-raised)] text-[10px] text-[var(--color-secondary-text)] font-sans tracking-wider mb-3">
                           <span>{service.durationMinutes} min</span>
                           <span>•</span>
                           <span className="text-[var(--color-primary)] font-semibold">${price}</span>
@@ -389,7 +389,7 @@ export default function Booking() {
                         className={`w-full py-2.5 rounded-xl font-sans text-[10px] uppercase tracking-widest font-semibold transition-all mt-4 cursor-pointer ${
                           isSelected
                             ? 'bg-[var(--color-primary)] text-black shadow-md'
-                            : 'bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-primary-text)] border border-[var(--color-border)]'
+                            : 'bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-primary-text)]'
                         }`}
                       >
                         {isSelected ? 'Selected' : 'Select'}
@@ -555,7 +555,7 @@ export default function Booking() {
                         className={`py-3.5 px-2 rounded-xl font-sans text-xs uppercase tracking-wider font-semibold transition-all text-center cursor-pointer ${
                           isSelected
                             ? 'bg-[var(--color-primary)] text-black shadow-[0_0_15px_rgba(229,195,120,0.35)]'
-                            : 'bg-[var(--color-surface-raised)] border border-[var(--color-border)] text-[var(--color-body-text)] hover:border-[var(--color-primary)]/50 hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-primary-text)]'
+                            : 'bg-[var(--color-surface-raised)] text-[var(--color-body-text)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-primary-text)]'
                         }`}
                       >
                         {formatted}
