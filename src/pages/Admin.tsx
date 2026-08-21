@@ -899,10 +899,10 @@ export default function Admin() {
               {/* Charges */}
               <div className="space-y-1.5">
                 <label className="block font-sans text-[10px] sm:text-[11px] uppercase tracking-wider text-[var(--color-primary-text)] font-semibold">
-                  Charges / Price ($) <span className="text-red-500">*</span>
+                  Charges / Price ({settings.currencySymbol || '$'}) <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-primary)] font-bold text-sm">$</span>
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-primary)] font-bold text-sm">{settings.currencySymbol || '$'}</span>
                   <input
                     type="number"
                     min={0}
@@ -1057,10 +1057,10 @@ export default function Admin() {
                 {/* Charges */}
                 <div className="space-y-1.5">
                   <label className="block font-sans text-[10px] sm:text-[11px] uppercase tracking-wider text-[var(--color-primary-text)] font-semibold">
-                    Charges / Price ($) <span className="text-red-500">*</span>
+                    Charges / Price ({settings.currencySymbol || '$'}) <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
-                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-primary)] font-bold text-sm">$</span>
+                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-primary)] font-bold text-sm">{settings.currencySymbol || '$'}</span>
                     <input
                       type="number"
                       min={0}
@@ -1860,7 +1860,7 @@ export default function Admin() {
                                     <div className="text-[var(--color-secondary-text)] text-xs font-sans flex items-center gap-2 mt-0.5">
                                       <span>{s.durationMinutes} <span className="text-[10px] font-semibold">MIN</span></span>
                                       <span>•</span>
-                                      <span className="text-[var(--color-primary)] font-semibold font-sans">${s.price !== undefined && s.price !== null ? s.price : (s.name.toLowerCase().includes('shav') ? 50 : s.name.toLowerCase().includes('zat') ? 90 : 75)}</span>
+                                      <span className="text-[var(--color-primary)] font-semibold font-sans">{(settings.currencySymbol || '$')}{s.price !== undefined && s.price !== null ? s.price : (s.name.toLowerCase().includes('shav') ? 50 : 75)}</span>
                                     </div>
                                   </div>
                                 </div>
@@ -2260,19 +2260,25 @@ export default function Admin() {
                             <h3 className="font-serif text-sm font-medium text-[var(--color-primary-text)]">Pricing Currency</h3>
                           </div>
                           <p className="text-[10px] text-[var(--color-secondary-text)] font-sans">Currency symbol used across services and customer checkout</p>
-                          <div className="flex gap-2">
-                            {['$', '€', '£', '₹', 'AED'].map(curr => (
+                          <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                            {[
+                              { symbol: '$', label: '$ USD' },
+                              { symbol: '€', label: '€ EUR' },
+                              { symbol: '£', label: '£ GBP' },
+                              { symbol: '₹', label: '₹ INR' },
+                              { symbol: 'AED', label: 'AED' },
+                            ].map(curr => (
                               <button
-                                key={curr}
+                                key={curr.symbol}
                                 type="button"
-                                onClick={() => setSettings({ ...settings, currencySymbol: curr })}
-                                className={`flex-1 py-2 rounded-xl font-bold font-sans text-xs border transition-all cursor-pointer ${
-                                  (settings.currencySymbol || '$') === curr
-                                    ? 'bg-[var(--color-primary)] text-black border-[var(--color-primary)]'
+                                onClick={() => setSettings({ ...settings, currencySymbol: curr.symbol })}
+                                className={`flex-1 min-w-[50px] py-2 px-1 rounded-xl font-bold font-sans text-xs border transition-all cursor-pointer text-center ${
+                                  (settings.currencySymbol || '$') === curr.symbol
+                                    ? 'bg-[var(--color-primary)] text-black border-[var(--color-primary)] shadow-sm'
                                     : 'bg-[var(--color-surface-raised)] text-[var(--color-secondary-text)] border-[var(--color-border)] hover:text-[var(--color-primary-text)]'
                                 }`}
                               >
-                                {curr}
+                                {curr.label}
                               </button>
                             ))}
                           </div>

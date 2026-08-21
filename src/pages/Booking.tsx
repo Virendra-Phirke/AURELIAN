@@ -444,7 +444,7 @@ export default function Booking() {
                       {/* Right: Price & Action */}
                       <div className="flex items-center gap-3 shrink-0">
                         <span className="font-serif text-sm sm:text-base font-bold text-[var(--color-primary)]">
-                          ${price}
+                          {(shopSettings?.currencySymbol || '$')}{price}
                         </span>
 
                         <button
@@ -578,7 +578,7 @@ export default function Booking() {
                 <div className="p-2.5 sm:p-3 rounded-xl bg-[var(--color-surface-raised)] border border-[var(--color-border)] text-xs space-y-1">
                   <div className="flex items-center justify-between font-semibold text-[var(--color-primary-text)]">
                     <span className="truncate">{selectedService.name}</span>
-                    <span className="text-[var(--color-primary)] font-serif shrink-0">${getServicePrice(selectedService.name, selectedService.durationMinutes)}</span>
+                    <span className="text-[var(--color-primary)] font-serif shrink-0">{(shopSettings?.currencySymbol || '$')}{getServicePrice(selectedService.name, selectedService.durationMinutes)}</span>
                   </div>
                   <div className="flex items-center gap-2 text-[10px] text-[var(--color-secondary-text)] font-sans tracking-wide">
                     <span className="flex items-center gap-1"><Clock size={11} /> {selectedService.durationMinutes} min</span>

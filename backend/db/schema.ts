@@ -110,7 +110,7 @@ export const shopSettings = pgTable("shop_settings", {
   breakEndTime: varchar("breakEndTime", { length: 5 }).default("14:00"),
   breakEnabled: boolean("breakEnabled").default(false).notNull(),
   closedDays: text("closedDays").default("0").notNull(), // Comma-separated day numbers: 0=Sun, 1=Mon, ..., 6=Sat
-  currencySymbol: varchar("currencySymbol", { length: 5 }).default("$").notNull(),
+  currencySymbol: varchar("currencySymbol", { length: 15 }).default("$").notNull(),
   announcementText: text("announcementText").default(""),
   announcementActive: boolean("announcementActive").default(false).notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().notNull(),

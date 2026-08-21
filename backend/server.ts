@@ -77,7 +77,8 @@ async function startServer() {
         ALTER TABLE "shop_settings" ADD COLUMN IF NOT EXISTS "breakEndTime" varchar(5) DEFAULT '14:00';
         ALTER TABLE "shop_settings" ADD COLUMN IF NOT EXISTS "breakEnabled" boolean DEFAULT false;
         ALTER TABLE "shop_settings" ADD COLUMN IF NOT EXISTS "closedDays" text DEFAULT '0';
-        ALTER TABLE "shop_settings" ADD COLUMN IF NOT EXISTS "currencySymbol" varchar(5) DEFAULT '$';
+        ALTER TABLE "shop_settings" ADD COLUMN IF NOT EXISTS "currencySymbol" varchar(15) DEFAULT '$';
+        ALTER TABLE "shop_settings" ALTER COLUMN "currencySymbol" TYPE varchar(15);
         ALTER TABLE "shop_settings" ADD COLUMN IF NOT EXISTS "announcementText" text DEFAULT '';
         ALTER TABLE "shop_settings" ADD COLUMN IF NOT EXISTS "announcementActive" boolean DEFAULT false;
       `);
