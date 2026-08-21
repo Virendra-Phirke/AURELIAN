@@ -45,9 +45,13 @@ export async function signInWithOAuthPopup(
 
   try {
     // 2. Request authorization URL without redirecting parent window
+    const fullCallbackURL = callbackURL.startsWith('http') 
+      ? callbackURL 
+      : `${window.location.origin}${callbackURL.startsWith('/') ? '' : '/'}${callbackURL}`;
+
     const res = await authClient.signIn.social({
       provider,
-      callbackURL,
+      callbackURL: fullCallbackURL,
       disableRedirect: true,
     });
 

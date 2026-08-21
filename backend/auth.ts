@@ -39,6 +39,14 @@ export const auth = betterAuth({
         "http://localhost:3000",
         "http://localhost:5173",
     ].filter(Boolean) as string[],
+    advanced: {
+        useSecureCookies: process.env.NODE_ENV === "production" || !!process.env.VERCEL,
+        defaultCookieAttributes: {
+            sameSite: "lax",
+            secure: process.env.NODE_ENV === "production" || !!process.env.VERCEL,
+            httpOnly: true,
+        }
+    },
     emailAndPassword: {  
         enabled: true,
         minPasswordLength: 4,

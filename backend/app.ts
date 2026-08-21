@@ -7,6 +7,9 @@ import { apiRouter } from './routes/api.js';
 export function createApp() {
   const app = express();
 
+  // Trust proxy for Vercel / reverse proxies to properly detect HTTPS and secure cookies
+  app.set('trust proxy', true);
+
   // Security Headers
   app.use((req, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -14,7 +17,10 @@ export function createApp() {
     next();
   });
 
-  app.use(cors());
+  app.use(cors({
+    origin: true,
+    credentials: true,
+  }));
 
   // Better Auth handler - mounted before express.json()
   const authHandler = toNodeHandler(auth);
