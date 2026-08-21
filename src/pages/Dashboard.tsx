@@ -504,7 +504,7 @@ export default function Dashboard() {
                         )}
                       </div>
                     </div>
-                    {b.status === 'PENDING' && (
+                    {(b.status === 'ACCEPTED' || b.status === 'PENDING') && (
                       <div className="shrink-0">
                         {confirmingCancel === b.id ? (
                           <motion.div
@@ -659,7 +659,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* Actions */}
-                {b.status === 'PENDING' && (
+                {(b.status === 'ACCEPTED' || b.status === 'PENDING') && (
                   <div className="pt-4 border-t border-[#ffffff08]">
                     {confirmingCancel === b.id ? (
                       <motion.div

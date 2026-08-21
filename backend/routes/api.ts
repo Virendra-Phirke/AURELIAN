@@ -123,7 +123,7 @@ apiRouter.get("/availability", rateLimit("avail", 300, 60), async (req, res) => 
 });
 
 // --- CUSTOMER ROUTES ---
-apiRouter.post("/bookings", rateLimit("create_booking", 5, 60), requireAuth, async (req, res) => {
+apiRouter.post("/bookings", rateLimit("create_booking", 10, 60), requireAuth, async (req, res) => {
     const schema = z.object({ serviceId: z.string(), date: z.string(), time: z.string(), note: z.string().optional() });
     const parseRes = schema.safeParse(req.body);
     if (!parseRes.success) return res.status(400).json({ error: "Invalid data" });
@@ -132,34 +132,96 @@ apiRouter.post("/bookings", rateLimit("create_booking", 5, 60), requireAuth, asy
     const u = (req as any).user;
 
     const lockKey = `lock:booking:${date}:${time}`;
-    const lock = await redisClient.set(lockKey, "LOCKED", { NX: true, EX: 10 });
-    if (!lock) return res.status(409).json({ error: "Slot is currently being booked" });
+    const lock = await redisClient.set(lockKey, "LOCKED", { NX: true, EX: 5 });
+    if (!lock) {
+        return res.status(409).json({ error: "This slot is currently being processed. Please try again in a moment." });
+    }
 
     try {
-        const svc = await db.select().from(services).where(eq(services.id, serviceId)).limit(1);
-        if (!svc.length) throw new Error("Service not found");
+        const result = await db.transaction(async (tx) => {
+            // 1. PostgreSQL transaction-level advisory lock to serialize concurrent requests on the same slot
+            await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${`slot:${date}:${time}`}))`);
 
-        const endTime = format(addMinutes(parse(`${date} ${time}`, "yyyy-MM-dd HH:mm", new Date()), svc[0].durationMinutes), "HH:mm");
+            // 2. Fetch service details
+            const svc = await tx.select().from(services).where(and(eq(services.id, serviceId), eq(services.active, true))).limit(1);
+            if (!svc.length) throw new Error("Service not found or inactive");
 
-        // DB Level constraint check conceptually
-        const existing = await db.select().from(bookings).where(and(eq(bookings.bookingDate, date), eq(bookings.startTime, time)));
-        if (existing.some(b => b.status === 'ACCEPTED' || b.status === 'PENDING')) {
-            throw new Error("Slot unavailable");
-        }
+            const newStart = parse(`${date} ${time}`, "yyyy-MM-dd HH:mm", new Date());
+            const newEnd = addMinutes(newStart, svc[0].durationMinutes);
+            const endTime = format(newEnd, "HH:mm");
 
-        const b = await db.insert(bookings).values({
-            userId: u.id,
-            serviceId: svc[0].id,
-            bookingDate: date,
-            startTime: time,
-            endTime,
-            customerNote: note,
-            status: "PENDING"
-        }).returning();
+            // 3. Check shop settings
+            const settings = await tx.select().from(shopSettings).limit(1);
+            const shop = settings[0] || { openingTime: "09:00", closingTime: "18:00", slotDurationMinutes: 30, minimumAdvanceMinutes: 60, maximumAdvanceDays: 30 };
 
-        // Invalidate cache
-        await redisClient.del(`availability:${date}:${svc[0].name}`);
-        res.json(b[0]);
+            const shopOpen = parse(`${date} ${shop.openingTime}`, "yyyy-MM-dd HH:mm", new Date());
+            const shopClose = parse(`${date} ${shop.closingTime}`, "yyyy-MM-dd HH:mm", new Date());
+
+            if (isBefore(newStart, shopOpen) || isBefore(shopClose, newEnd)) {
+                throw new Error("Selected time is outside shop operating hours");
+            }
+
+            // Check minimum advance
+            const now = new Date();
+            const minAdvance = addMinutes(now, shop.minimumAdvanceMinutes);
+            if (isBefore(newStart, minAdvance)) {
+                throw new Error(`Bookings require at least ${shop.minimumAdvanceMinutes} minutes advance notice`);
+            }
+
+            // 4. Check holidays
+            const holidays = await tx.select().from(shopHolidays).where(eq(shopHolidays.date, date));
+            if (holidays.length > 0) {
+                throw new Error("The salon is closed on this date");
+            }
+
+            // 5. Check shop breaks
+            const dayOfWeek = parse(date, "yyyy-MM-dd", new Date()).getDay();
+            const breaks = await tx.select().from(shopBreaks).where(and(eq(shopBreaks.dayOfWeek, dayOfWeek), eq(shopBreaks.active, true)));
+            for (const b of breaks) {
+                const bStart = parse(`${date} ${b.startTime}`, "yyyy-MM-dd HH:mm", new Date());
+                const bEnd = parse(`${date} ${b.endTime}`, "yyyy-MM-dd HH:mm", new Date());
+                if ((newStart >= bStart && newStart < bEnd) || (newEnd > bStart && newEnd <= bEnd) || (newStart <= bStart && newEnd >= bEnd)) {
+                    throw new Error("Selected time coincides with a shop break");
+                }
+            }
+
+            // 6. Concurrency Check: Check for ANY overlapping bookings (ACCEPTED or PENDING)
+            const activeBookings = await tx.select().from(bookings).where(
+                and(
+                    eq(bookings.bookingDate, date),
+                    sql`${bookings.status} IN ('ACCEPTED', 'PENDING')`
+                )
+            );
+
+            for (const b of activeBookings) {
+                const bStart = parse(`${date} ${b.startTime}`, "yyyy-MM-dd HH:mm", new Date());
+                const bEnd = parse(`${date} ${b.endTime}`, "yyyy-MM-dd HH:mm", new Date());
+
+                // Overlap condition: (StartA < EndB) and (EndA > StartB)
+                if (newStart < bEnd && newEnd > bStart) {
+                    throw new Error("This slot has just been booked by another user. Please select another time.");
+                }
+            }
+
+            // 7. Instant Booking: insert with status ACCEPTED immediately (no admin confirmation required)
+            const created = await tx.insert(bookings).values({
+                userId: u.id,
+                serviceId: svc[0].id,
+                bookingDate: date,
+                startTime: time,
+                endTime,
+                customerNote: note,
+                status: "ACCEPTED",
+                acceptedAt: new Date()
+            }).returning();
+
+            return { booking: created[0], serviceName: svc[0].name };
+        });
+
+        // 8. Invalidate availability cache immediately
+        await redisClient.del(`availability:${date}:${result.serviceName}`);
+
+        res.status(201).json(result.booking);
     } catch (err: any) {
         res.status(400).json({ error: err.message || "Booking failed" });
     } finally {
