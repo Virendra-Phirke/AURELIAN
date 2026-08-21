@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { User, Shield, AlertCircle, Camera, Check, Key, Lock, Mail, ArrowRight } from 'lucide-react';
+import { User, Shield, AlertCircle, Camera, Check, Key, Lock, Mail, ArrowRight, Sun, Moon, Laptop } from 'lucide-react';
 import { authClient } from '../lib/auth';
+import { useTheme } from '../lib/theme';
+import { ThemeToggle } from '../components/magicui/theme-toggle';
 
 // Toast for feedback
 function Toast({ message, type, onDone }: { message: string; type: 'success' | 'error'; onDone: () => void }) {
@@ -26,6 +28,7 @@ export default function Settings() {
   const { data: sessionData } = authClient.useSession();
   const session = sessionData as any;
   const user = session?.user;
+  const { theme, setTheme } = useTheme();
 
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
@@ -321,6 +324,58 @@ export default function Settings() {
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Theme & Appearance */}
+          <div className="bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl p-6 sm:p-8 shadow-xl space-y-4">
+            <div className="flex items-center justify-between pb-4 border-b border-[#171717]">
+              <div className="flex items-center gap-2.5">
+                <Sun size={16} className="text-[#E5C378]" />
+                <h2 className="text-white font-sans text-xs uppercase tracking-[0.2em] font-medium">Appearance & Theme</h2>
+              </div>
+              <ThemeToggle showLabel />
+            </div>
+
+            <div className="grid grid-cols-3 gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setTheme('dark')}
+                className={`p-3.5 rounded-xl border flex flex-col items-center gap-2 transition-all cursor-pointer ${
+                  theme === 'dark'
+                    ? 'border-[#E5C378] bg-[#141414] text-[#E5C378] shadow-[0_0_12px_rgba(229,195,120,0.2)]'
+                    : 'border-[#222222] bg-[#0d0d0d] text-[#737373] hover:text-white hover:border-[#333333]'
+                }`}
+              >
+                <Moon size={18} />
+                <span className="font-sans text-[10px] uppercase tracking-wider font-semibold">Dark</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setTheme('light')}
+                className={`p-3.5 rounded-xl border flex flex-col items-center gap-2 transition-all cursor-pointer ${
+                  theme === 'light'
+                    ? 'border-[#E5C378] bg-[#141414] text-[#E5C378] shadow-[0_0_12px_rgba(229,195,120,0.2)]'
+                    : 'border-[#222222] bg-[#0d0d0d] text-[#737373] hover:text-white hover:border-[#333333]'
+                }`}
+              >
+                <Sun size={18} />
+                <span className="font-sans text-[10px] uppercase tracking-wider font-semibold">Light</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setTheme('system')}
+                className={`p-3.5 rounded-xl border flex flex-col items-center gap-2 transition-all cursor-pointer ${
+                  theme === 'system'
+                    ? 'border-[#E5C378] bg-[#141414] text-[#E5C378] shadow-[0_0_12px_rgba(229,195,120,0.2)]'
+                    : 'border-[#222222] bg-[#0d0d0d] text-[#737373] hover:text-white hover:border-[#333333]'
+                }`}
+              >
+                <Laptop size={18} />
+                <span className="font-sans text-[10px] uppercase tracking-wider font-semibold">System</span>
+              </button>
+            </div>
           </div>
 
           <div className="bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl p-5 flex items-center justify-between gap-4 shadow-xl">

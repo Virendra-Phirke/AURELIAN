@@ -10,6 +10,7 @@ import Dashboard from './pages/Dashboard';
 import Settings from './pages/Settings';
 import Admin from './pages/Admin';
 import { authClient } from './lib/auth';
+import { ThemeProvider } from './lib/theme';
 
 function ProtectedRoute({ children, adminOnly = false, blockAdmin = false }: { children: React.ReactNode, adminOnly?: boolean, blockAdmin?: boolean }) {
   const { data, isPending } = authClient.useSession();
@@ -25,38 +26,40 @@ function ProtectedRoute({ children, adminOnly = false, blockAdmin = false }: { c
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Layout />}>
-        <Route index element={<Navigate to="/booking" replace />} />
-        <Route path="login" element={<Login />} />
-        <Route path="register" element={<Register />} />
-        <Route path="forgot-password" element={<ForgotPassword />} />
-        <Route path="reset-password" element={<ResetPassword />} />
-        
-        <Route path="booking" element={
-          <ProtectedRoute blockAdmin={true}>
-            <Booking />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="dashboard" element={
-          <ProtectedRoute blockAdmin={true}>
-            <Dashboard />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="settings" element={
-          <ProtectedRoute>
-            <Settings />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="admin" element={
-          <ProtectedRoute adminOnly={true}>
-            <Admin />
-          </ProtectedRoute>
-        } />
-      </Route>
-    </Routes>
+    <ThemeProvider defaultTheme="dark" storageKey="aurelian-ui-theme">
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Navigate to="/booking" replace />} />
+          <Route path="login" element={<Login />} />
+          <Route path="register" element={<Register />} />
+          <Route path="forgot-password" element={<ForgotPassword />} />
+          <Route path="reset-password" element={<ResetPassword />} />
+          
+          <Route path="booking" element={
+            <ProtectedRoute blockAdmin={true}>
+              <Booking />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="dashboard" element={
+            <ProtectedRoute blockAdmin={true}>
+              <Dashboard />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="settings" element={
+            <ProtectedRoute>
+              <Settings />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="admin" element={
+            <ProtectedRoute adminOnly={true}>
+              <Admin />
+            </ProtectedRoute>
+          } />
+        </Route>
+      </Routes>
+    </ThemeProvider>
   );
 }

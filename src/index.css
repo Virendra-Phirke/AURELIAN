@@ -1,20 +1,48 @@
 @import "tailwindcss";
 
 @theme {
+  --color-bg: var(--color-bg);
+  --color-surface: var(--color-surface);
+  --color-surface-raised: var(--color-surface-raised);
+  --color-primary: var(--color-primary);
+  --color-primary-hover: var(--color-primary-hover);
+  --color-primary-text: var(--color-primary-text);
+  --color-body-text: var(--color-body-text);
+  --color-secondary-text: var(--color-secondary-text);
+  --color-muted-text: var(--color-muted-text);
+  --color-border: var(--color-border);
+  --color-border-light: var(--color-border-light);
+  --font-brand: 'Cinzel', serif;
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+:root, html.dark, [data-theme="dark"] {
   --color-bg: #050505;
   --color-surface: #0a0a0a;
   --color-surface-raised: #111111;
-  --color-primary: #C5A059;
-  --color-primary-hover: #d4b06a;
+  --color-primary: #E5C378;
+  --color-primary-hover: #edd495;
   --color-primary-text: #FFFFFF;
   --color-body-text: #D4D4D4;
   --color-secondary-text: #888888;
   --color-muted-text: #555555;
   --color-border: #ffffff15;
   --color-border-light: #ffffff08;
-  --font-brand: 'Cinzel', serif;
-  --font-serif: 'Playfair Display', Georgia, serif;
-  --font-sans: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+html.light, [data-theme="light"] {
+  --color-bg: #F7F5F0;
+  --color-surface: #FFFFFF;
+  --color-surface-raised: #EFECE3;
+  --color-primary: #B88E3E;
+  --color-primary-hover: #A0782E;
+  --color-primary-text: #1A1A1A;
+  --color-body-text: #2D2D2D;
+  --color-secondary-text: #666666;
+  --color-muted-text: #999999;
+  --color-border: #00000015;
+  --color-border-light: #00000008;
 }
 
 .font-brand {

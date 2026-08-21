@@ -4,6 +4,7 @@ import { CalendarDays, LayoutDashboard, LogOut, LogIn, Shield, Settings, User } 
 import { authClient } from '../lib/auth';
 import { motion, AnimatePresence } from 'motion/react';
 import { Particles } from './magicui/particles';
+import { ThemeToggle } from './magicui/theme-toggle';
 import { Badge } from './ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar';
 
@@ -27,10 +28,11 @@ export default function Layout() {
   if (isAuthPage) {
     return (
       <div className="h-full flex flex-col bg-[var(--color-bg)] overflow-y-auto">
-        <header className="shrink-0 h-16 sm:h-20 border-b border-[var(--color-border)] px-6 sm:px-12 flex items-center">
+        <header className="shrink-0 h-16 sm:h-20 border-b border-[var(--color-border)] px-6 sm:px-12 flex items-center justify-between">
           <Link to="/" className="text-xl sm:text-2xl tracking-[0.3em] font-light text-white uppercase">
             AURELIAN
           </Link>
+          <ThemeToggle />
         </header>
         <main className="flex-1 flex items-center justify-center p-4 sm:p-8">
           <Outlet />
@@ -48,10 +50,11 @@ export default function Layout() {
           <Link to="/" className="text-xl sm:text-2xl tracking-[0.3em] font-light text-white uppercase">
             AURELIAN
           </Link>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
             <span className="hidden sm:inline-block font-sans text-[9px] uppercase tracking-widest text-[#C5A059] border border-[#C5A059]/30 bg-[#C5A059]/10 px-3 py-1 rounded-full">
               <Shield size={10} className="inline mr-1 -mt-0.5" /> Admin
             </span>
+            <ThemeToggle />
             <button
               onClick={handleLogout}
               className="flex items-center gap-2 font-sans text-[11px] uppercase tracking-widest text-[#888] hover:text-white transition-colors"
@@ -78,11 +81,14 @@ export default function Layout() {
         <Link to="/" className="text-lg tracking-[0.3em] font-light text-white uppercase">
           AURELIAN
         </Link>
-        {session?.user && (
-          <button onClick={handleLogout} className="text-[#888] hover:text-[#C5A059] transition-colors p-2">
-            <LogOut size={18} />
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          {session?.user && (
+            <button onClick={handleLogout} className="text-[#888] hover:text-[#C5A059] transition-colors p-2">
+              <LogOut size={18} />
+            </button>
+          )}
+        </div>
       </header>
 
       {/* Desktop Sidebar */}
@@ -157,12 +163,15 @@ export default function Layout() {
                 {session.user.name || 'Vishal Patil'}
               </div>
             </div>
-            <button
-              onClick={handleLogout}
-              className="w-full py-2.5 rounded-lg text-[#777] hover:text-white hover:border-[#E5C378] border border-[#262626] bg-[#0e0e0e] font-sans text-[10px] uppercase tracking-[0.25em] transition-all"
-            >
-              Logout
-            </button>
+            <div className="flex items-center gap-2 w-full">
+              <ThemeToggle className="shrink-0" />
+              <button
+                onClick={handleLogout}
+                className="flex-1 py-2.5 rounded-lg text-[#777] hover:text-white hover:border-[#E5C378] border border-[#262626] bg-[#0e0e0e] font-sans text-[10px] uppercase tracking-[0.25em] transition-all"
+              >
+                Logout
+              </button>
+            </div>
           </div>
         )}
       </motion.aside>
