@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { User, Mail, Lock, ArrowRight } from 'lucide-react';
 import GoogleOneTap from '../components/GoogleOneTap';
+import { signInWithOAuthPopup } from '../lib/oauthPopup';
 
 const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -48,10 +49,7 @@ export default function Register() {
   };
 
   const handleOAuth = async (provider: 'google' | 'github') => {
-    await authClient.signIn.social({
-      provider,
-      callbackURL: "/booking"
-    });
+    await signInWithOAuthPopup(provider, '/booking');
   };
 
   const inputClass = (hasError: boolean) =>

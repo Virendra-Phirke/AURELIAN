@@ -271,6 +271,11 @@ export default function Admin() {
   const [editServiceName, setEditServiceName] = useState('');
   const [editServiceDuration, setEditServiceDuration] = useState(30);
 
+  // Customer Edit form
+  const [editingCustomerId, setEditingCustomerId] = useState<string | null>(null);
+  const [editCustomerName, setEditCustomerName] = useState('');
+  const [editCustomerEmail, setEditCustomerEmail] = useState('');
+
   // Toast
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const showToast = useCallback((message: string, type: 'success' | 'error' = 'success') => {
@@ -440,6 +445,26 @@ export default function Admin() {
     } else {
       const data = await res.json();
       showToast(data.error || 'Failed to update role', 'error');
+    }
+  };
+
+  const handleSaveCustomerEdit = async (id: string) => {
+    if (!editCustomerName.trim()) return showToast('Customer name cannot be empty', 'error');
+    const res = await fetch(`/api/admin/customers/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: editCustomerName.trim(),
+        email: editCustomerEmail.trim() || undefined
+      }),
+    });
+    if (res.ok) {
+      fetchAll();
+      setEditingCustomerId(null);
+      showToast('Customer updated successfully');
+    } else {
+      const data = await res.json();
+      showToast(data.error || 'Failed to update customer', 'error');
     }
   };
 
@@ -907,8 +932,30 @@ export default function Admin() {
                                 className="hover:bg-[#ffffff05] transition-colors group"
                               >
                                 <td className="px-8 py-5">
-                                  <div className="text-white font-medium text-[15px] mb-1">{c.name}</div>
-                                  <div className="text-[#777] text-xs">{c.email}</div>
+                                  {editingCustomerId === c.id ? (
+                                    <div className="space-y-2 max-w-xs">
+                                      <input
+                                        type="text"
+                                        value={editCustomerName}
+                                        onChange={e => setEditCustomerName(e.target.value)}
+                                        placeholder="Customer Name"
+                                        className="w-full px-3 py-1.5 rounded-lg bg-[#111] border border-[#C5A059] text-white text-xs outline-none focus:shadow-[0_0_10px_rgba(197,160,89,0.2)]"
+                                        autoFocus
+                                      />
+                                      <input
+                                        type="email"
+                                        value={editCustomerEmail}
+                                        onChange={e => setEditCustomerEmail(e.target.value)}
+                                        placeholder="Customer Email"
+                                        className="w-full px-3 py-1.5 rounded-lg bg-[#111] border border-[#333] text-[#aaa] text-xs outline-none focus:border-[#C5A059]"
+                                      />
+                                    </div>
+                                  ) : (
+                                    <>
+                                      <div className="text-white font-medium text-[15px] mb-1">{c.name}</div>
+                                      <div className="text-[#777] text-xs">{c.email}</div>
+                                    </>
+                                  )}
                                 </td>
                                 <td className="px-8 py-5">
                                   <span className={`px-3 py-1 rounded-full text-[9px] uppercase tracking-widest ${c.role === 'ADMIN' ? 'text-[#C5A059] bg-[#C5A059]/10 border border-[#C5A059]/30 shadow-[0_0_10px_rgba(197,160,89,0.2)]' : 'text-[#888] bg-[#ffffff05] border border-[#ffffff15]'}`}>
@@ -923,12 +970,52 @@ export default function Admin() {
                                 </td>
                                 <td className="px-8 py-5 text-right">
                                   <div className="flex items-center justify-end gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <ConfirmButton
-                                      label={c.role === 'ADMIN' ? 'Demote' : 'Promote'}
-                                      onConfirm={() => handleToggleRole(c.id)}
-                                      className="px-4 py-2 rounded-lg text-[#888] hover:bg-[#ffffff05] hover:text-white text-[10px] uppercase tracking-widest transition-all"
-                                      confirmClassName="px-4 py-2 rounded-lg bg-[#C5A059] text-black text-[10px] uppercase tracking-widest hover:bg-[#d4b06a] transition-all"
-                                    />
+                                    {editingCustomerId === c.id ? (
+                                      <>
+                                        <button
+                                          onClick={() => handleSaveCustomerEdit(c.id)}
+                                          className="px-3.5 py-1.5 rounded-lg bg-[#4ade80] text-black text-[10px] uppercase tracking-widest hover:bg-[#3baf64] transition-all font-semibold shadow-[0_0_10px_rgba(74,222,128,0.2)]"
+                                        >
+                                          Save
+                                        </button>
+                                        <button
+                                          onClick={() => setEditingCustomerId(null)}
+                                          className="px-3.5 py-1.5 rounded-lg text-[#888] hover:bg-[#ffffff10] hover:text-white text-[10px] uppercase tracking-widest transition-all"
+                                        >
+                                          Cancel
+                                        </button>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <button
+                                          onClick={() => {
+                                            setEditingCustomerId(c.id);
+                                            setEditCustomerName(c.name || '');
+                                            setEditCustomerEmail(c.email || '');
+                                          }}
+                                          className="px-3 py-1.5 rounded-lg text-[#C5A059] hover:bg-[#C5A059]/10 text-[10px] uppercase tracking-widest transition-all"
+                                        >
+                                          Edit
+                                        </button>
+                                        {c.id !== adminUser?.id && (
+                                          <>
+                                            <ConfirmButton
+                                              label={c.role === 'ADMIN' ? 'Demote' : 'Promote'}
+                                              onConfirm={() => handleToggleRole(c.id)}
+                                              className="px-3 py-1.5 rounded-lg text-[#888] hover:bg-[#ffffff05] hover:text-white text-[10px] uppercase tracking-widest transition-all"
+                                              confirmClassName="px-3 py-1.5 rounded-lg bg-[#C5A059] text-black text-[10px] uppercase tracking-widest hover:bg-[#d4b06a] transition-all"
+                                            />
+                                            <ConfirmButton
+                                              label="Delete"
+                                              confirmLabel="Confirm?"
+                                              onConfirm={() => handleDeleteCustomer(c.id)}
+                                              className="px-3 py-1.5 rounded-lg text-red-400 hover:bg-red-500/10 text-[10px] uppercase tracking-widest transition-all"
+                                              confirmClassName="px-3 py-1.5 rounded-lg bg-red-600 text-white text-[10px] uppercase tracking-widest hover:bg-red-700 transition-all shadow-[0_0_10px_rgba(239,68,68,0.3)]"
+                                            />
+                                          </>
+                                        )}
+                                      </>
+                                    )}
                                   </div>
                                 </td>
                               </motion.tr>

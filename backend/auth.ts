@@ -3,7 +3,7 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "./db/index.js";
 import * as schema from "./db/schema.js";
-import { twoFactor, emailOTP, oneTap } from "better-auth/plugins";
+import { twoFactor, emailOTP, oneTap, oauthPopup } from "better-auth/plugins";
 
 export const auth = betterAuth({
     database: drizzleAdapter(db, {
@@ -64,6 +64,7 @@ export const auth = betterAuth({
         }),
         oneTap({
             clientId: process.env.GOOGLE_CLIENT_ID || "746469864617-u982sdj01nksir0dqgohgmkj8op44bdj.apps.googleusercontent.com",
-        })
+        }),
+        oauthPopup()
     ]
 });

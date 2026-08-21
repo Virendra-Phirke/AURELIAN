@@ -307,6 +307,31 @@ apiRouter.delete("/admin/customers/:id", requireAdmin, async (req, res) => {
     }
 });
 
+// Admin: Update customer (modify name, email, role)
+apiRouter.patch("/admin/customers/:id", requireAdmin, async (req, res) => {
+    const targetId = req.params.id as string;
+    const schema = z.object({
+        name: z.string().min(1).optional(),
+        email: z.string().email().optional(),
+        role: z.enum(["USER", "ADMIN"]).optional()
+    });
+    const parsed = schema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ error: "Invalid customer data" });
+
+    try {
+        const updated = await db.update(user).set({
+            ...parsed.data,
+            updatedAt: new Date()
+        }).where(eq(user.id, targetId)).returning();
+
+        if (!updated.length) return res.status(404).json({ error: "Customer not found" });
+        res.json(updated[0]);
+    } catch (err: any) {
+        console.error("Update customer error:", err);
+        res.status(500).json({ error: "Failed to update customer" });
+    }
+});
+
 apiRouter.post("/admin/bookings/:id/:action", requireAdmin, async (req, res) => {
     const { id, action } = req.params as { id: string, action: string };
     const validActions: Record<string, "ACCEPTED" | "REJECTED" | "CANCELLED" | "COMPLETED"> = {

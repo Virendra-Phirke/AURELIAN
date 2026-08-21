@@ -8,6 +8,8 @@ import { z } from 'zod';
 import { Mail, Lock, ArrowRight } from 'lucide-react';
 import GoogleOneTap from '../components/GoogleOneTap';
 
+import { signInWithOAuthPopup } from '../lib/oauthPopup';
+
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(1, 'Password is required'),
@@ -75,10 +77,7 @@ export default function Login() {
   };
 
   const handleOAuth = async (provider: 'google' | 'github') => {
-    await authClient.signIn.social({
-      provider,
-      callbackURL: "/booking"
-    });
+    await signInWithOAuthPopup(provider, '/booking');
   };
 
   const handleSendOtp = async (e: React.FormEvent) => {
