@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useTheme } from '../../lib/theme';
 
 export interface Polyhedron3DProps {
@@ -8,7 +8,7 @@ export interface Polyhedron3DProps {
   dotColor?: string;
   /** Inner glowing core or extra nested polyhedron */
   nested?: boolean;
-  /** Base scale size of the polyhedron */
+  /** Relative scale multiplier (default 1.0) */
   size?: number;
   /** Rotation speed multiplier */
   speed?: number;
@@ -22,16 +22,16 @@ export interface Polyhedron3DProps {
 
 /**
  * Polyhedron3D Component
- * Directly implementing the mathematical Icosahedron wireframe projection
- * from https://framer.com/m/Polyhedron-xMDsFB.js@Mz68XkceecyOpV0kRceV
+ * Pure mathematical Icosahedron wireframe projection that automatically
+ * fits within its container with zero clipping or awkward bounding box cutoff.
  */
 export function Polyhedron3D({
   wireColor,
   dotColor,
   nested = true,
-  size = 280,
-  speed = 1,
-  interactive = true,
+  size = 1.0,
+  speed = 1.0,
+  interactive = false,
   className = '',
   style = {},
 }: Polyhedron3DProps) {
@@ -41,7 +41,7 @@ export function Polyhedron3D({
 
   const defaultWire = isDark ? '#e5c378' : '#c4972a';
   const activeWire = wireColor || defaultWire;
-  const activeDot = dotColor || activeWire;
+  const activeDot = dotColor || (isDark ? '#fff0c0' : '#8a6a00');
 
   const mouseOffset = useRef({ x: 0, y: 0, targetX: 0, targetY: 0 });
   const isDragging = useRef(false);
@@ -61,15 +61,27 @@ export function Polyhedron3D({
 
     // Golden ratio
     const t = (1 + Math.sqrt(5)) / 2;
+    // Vertex normalization constant (max distance from origin = sqrt(1 + t^2) ≈ 1.90211)
+    const vertexNorm = Math.sqrt(1 + t * t);
 
-    // Outer icosahedron vertices (normalized)
+    // Normalized outer icosahedron vertices (unit radius = 1)
     const rawVertices = [
-      [-1,  t,  0], [ 1,  t,  0], [-1, -t,  0], [ 1, -t,  0],
-      [ 0, -1,  t], [ 0,  1,  t], [ 0, -1, -t], [ 0,  1, -t],
-      [ t,  0, -1], [ t,  0,  1], [-t,  0, -1], [-t,  0,  1],
+      [-1 / vertexNorm,  t / vertexNorm,  0],
+      [ 1 / vertexNorm,  t / vertexNorm,  0],
+      [-1 / vertexNorm, -t / vertexNorm,  0],
+      [ 1 / vertexNorm, -t / vertexNorm,  0],
+      [ 0, -1 / vertexNorm,  t / vertexNorm],
+      [ 0,  1 / vertexNorm,  t / vertexNorm],
+      [ 0, -1 / vertexNorm, -t / vertexNorm],
+      [ 0,  1 / vertexNorm, -t / vertexNorm],
+      [ t / vertexNorm,  0, -1 / vertexNorm],
+      [ t / vertexNorm,  0,  1 / vertexNorm],
+      [-t / vertexNorm,  0, -1 / vertexNorm],
+      [-t / vertexNorm,  0,  1 / vertexNorm],
     ];
 
-    // Compute edges based on euclidean distance between vertices ~ 2
+    // Compute edges where euclidean distance is ~ (2 / vertexNorm) ≈ 1.05146
+    const edgeTarget = 2 / vertexNorm;
     const edges: Array<[number, number]> = [];
     for (let i = 0; i < rawVertices.length; i++) {
       for (let j = i + 1; j < rawVertices.length; j++) {
@@ -77,14 +89,14 @@ export function Polyhedron3D({
         const dy = rawVertices[i][1] - rawVertices[j][1];
         const dz = rawVertices[i][2] - rawVertices[j][2];
         const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-        if (Math.abs(dist - 2) < 0.1) {
+        if (Math.abs(dist - edgeTarget) < 0.08) {
           edges.push([i, j]);
         }
       }
     }
 
-    // Inner nested icosahedron vertices (scaled down 0.55x)
-    const innerVertices = rawVertices.map(([x, y, z]) => [x * 0.55, y * 0.55, z * 0.55]);
+    // Inner nested icosahedron vertices (scaled down 0.52x)
+    const innerVertices = rawVertices.map(([x, y, z]) => [x * 0.52, y * 0.52, z * 0.52]);
 
     const renderFrame = (now: number) => {
       const rect = canvas.getBoundingClientRect();
@@ -112,10 +124,18 @@ export function Polyhedron3D({
 
       const cx = width / 2;
       const cy = height / 2;
-      const fov = 400;
+      const minDim = Math.min(width, height);
+
+      // Normalize size scale factor so the model NEVER exceeds container bounds
+      // If user passed a large pixel value like 180 or 120, convert it to a relative proportion, else use scale multiplier
+      const scaleMultiplier = size > 5 ? (size / Math.max(width, 1)) * 0.8 : (typeof size === 'number' ? size : 1.0);
+      // Safe base radius = 38% of container dimension, leaving 12% margin around edges
+      const baseRadius = minDim * 0.38 * Math.min(scaleMultiplier, 1.0);
+
+      const fov = minDim * 2.5;
 
       // Project vertices to 2D screen space
-      const projectSet = (verts: number[][], currentSize: number) => {
+      const projectSet = (verts: number[][]) => {
         return verts.map(([vx, vy, vz]) => {
           // Rotate Y
           let x = vx * Math.cos(angleY) + vz * Math.sin(angleY);
@@ -127,26 +147,29 @@ export function Polyhedron3D({
           z = y * Math.sin(angleX) + z * Math.cos(angleX);
           y = yRot;
 
-          const scale = fov / (fov + z * (currentSize / 2));
+          // Perspective division
+          const scale = fov / (fov + z * baseRadius);
           return {
-            x: cx + x * (currentSize / 2) * scale,
-            y: cy + y * (currentSize / 2) * scale,
+            x: cx + x * baseRadius * scale,
+            y: cy + y * baseRadius * scale,
             z: z,
           };
         });
       };
 
-      const outerPoints = projectSet(rawVertices, size);
+      const outerPoints = projectSet(rawVertices);
 
-      // Draw outer edges
+      // Line width adapted to canvas size
+      const baseLineWidth = Math.max(1, Math.min(2, minDim * 0.015));
+      ctx.lineWidth = baseLineWidth;
       ctx.strokeStyle = activeWire;
-      ctx.lineWidth = 1.5;
 
+      // Draw outer edges with depth-dependent alpha
       edges.forEach(([i, j]) => {
         const p1 = outerPoints[i];
         const p2 = outerPoints[j];
         const avgZ = (p1.z + p2.z) / 2;
-        const alpha = Math.max(0.12, Math.min(1, (avgZ + 2) / 4));
+        const alpha = Math.max(0.15, Math.min(1.0, (avgZ + 1.2) / 2.4));
         ctx.globalAlpha = alpha * 0.85;
         ctx.beginPath();
         ctx.moveTo(p1.x, p1.y);
@@ -155,33 +178,34 @@ export function Polyhedron3D({
       });
 
       // Draw outer vertex nodes (Titik Simpul)
+      const dotRadius = Math.max(1.8, Math.min(3.5, minDim * 0.028));
       outerPoints.forEach((p) => {
-        const alpha = Math.max(0.25, (p.z + 2) / 4);
+        const alpha = Math.max(0.25, (p.z + 1.2) / 2.4);
         ctx.globalAlpha = alpha;
         ctx.fillStyle = activeDot;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, 3.5, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, dotRadius, 0, Math.PI * 2);
         ctx.fill();
 
-        // Subtle glow aura on closer vertices
-        if (p.z > 0.4) {
-          ctx.globalAlpha = alpha * 0.35;
+        // Subtle glowing halo on foreground nodes
+        if (p.z > 0.3 && minDim > 80) {
+          ctx.globalAlpha = alpha * 0.3;
           ctx.beginPath();
-          ctx.arc(p.x, p.y, 7, 0, Math.PI * 2);
+          ctx.arc(p.x, p.y, dotRadius * 2, 0, Math.PI * 2);
           ctx.fill();
         }
       });
 
-      // Nested inner core polyhedron for ultra-luxury aesthetic
-      if (nested) {
-        const innerPoints = projectSet(innerVertices, size);
-        ctx.lineWidth = 1.0;
+      // Nested inner core polyhedron for bespoke aesthetic
+      if (nested && minDim >= 60) {
+        const innerPoints = projectSet(innerVertices);
+        ctx.lineWidth = Math.max(0.8, baseLineWidth * 0.7);
 
         edges.forEach(([i, j]) => {
           const p1 = innerPoints[i];
           const p2 = innerPoints[j];
           const avgZ = (p1.z + p2.z) / 2;
-          const alpha = Math.max(0.08, Math.min(0.6, (avgZ + 2) / 4));
+          const alpha = Math.max(0.08, Math.min(0.5, (avgZ + 1.2) / 2.4));
           ctx.globalAlpha = alpha * 0.5;
           ctx.beginPath();
           ctx.moveTo(p1.x, p1.y);
@@ -190,11 +214,11 @@ export function Polyhedron3D({
         });
 
         innerPoints.forEach((p) => {
-          const alpha = Math.max(0.15, (p.z + 2) / 4);
-          ctx.globalAlpha = alpha * 0.7;
+          const alpha = Math.max(0.15, (p.z + 1.2) / 2.4);
+          ctx.globalAlpha = alpha * 0.6;
           ctx.fillStyle = activeDot;
           ctx.beginPath();
-          ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+          ctx.arc(p.x, p.y, Math.max(1.2, dotRadius * 0.6), 0, Math.PI * 2);
           ctx.fill();
         });
       }
@@ -228,7 +252,7 @@ export function Polyhedron3D({
 
     animationFrameId = requestAnimationFrame(draw);
 
-    // Mouse / Touch interaction handlers
+    // Mouse / Touch interaction handlers (if interactive)
     const onMouseDown = (e: MouseEvent) => {
       if (!interactive) return;
       isDragging.current = true;
@@ -256,55 +280,33 @@ export function Polyhedron3D({
       isDragging.current = false;
     };
 
-    const onTouchStart = (e: TouchEvent) => {
-      if (!interactive || e.touches.length === 0) return;
-      isDragging.current = true;
-      lastMousePos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    };
-
-    const onTouchMove = (e: TouchEvent) => {
-      if (!interactive || !isDragging.current || e.touches.length === 0) return;
-      const dx = e.touches[0].clientX - lastMousePos.current.x;
-      const dy = e.touches[0].clientY - lastMousePos.current.y;
-      dragRotation.current.x += dx * 0.01;
-      dragRotation.current.y += dy * 0.01;
-      lastMousePos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    };
-
-    const onTouchEnd = () => {
-      isDragging.current = false;
-    };
-
-    window.addEventListener('mousedown', onMouseDown);
-    window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('mouseup', onMouseUp);
-    window.addEventListener('touchstart', onTouchStart, { passive: true });
-    window.addEventListener('touchmove', onTouchMove, { passive: true });
-    window.addEventListener('touchend', onTouchEnd);
+    if (interactive) {
+      window.addEventListener('mousedown', onMouseDown);
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+    }
 
     return () => {
       cancelAnimationFrame(animationFrameId);
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
-      window.removeEventListener('mousedown', onMouseDown);
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('mouseup', onMouseUp);
-      window.removeEventListener('touchstart', onTouchStart);
-      window.removeEventListener('touchmove', onTouchMove);
-      window.removeEventListener('touchend', onTouchEnd);
+      if (interactive) {
+        window.removeEventListener('mousedown', onMouseDown);
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+      }
     };
   }, [activeWire, activeDot, size, speed, nested, interactive]);
 
   return (
     <canvas
       ref={canvasRef}
-      className={`w-full h-full block bg-transparent cursor-grab active:cursor-grabbing ${className}`}
+      className={`w-full h-full block bg-transparent pointer-events-none ${className}`}
       style={{
         width: '100%',
         height: '100%',
         display: 'block',
         backgroundColor: 'transparent',
-        touchAction: 'none',
         ...style,
       }}
     />

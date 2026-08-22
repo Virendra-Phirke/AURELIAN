@@ -37,9 +37,9 @@ export function ScrollOrb3D({
     return (
       <div style={{ width: size, height: size }} className={`shrink-0 pointer-events-none ${className}`}>
         <Polyhedron3D
-          size={size * 0.85}
+          size={1.0}
           speed={speed}
-          nested={true}
+          nested={size >= 70}
           interactive={false}
         />
       </div>
