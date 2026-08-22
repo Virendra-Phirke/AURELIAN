@@ -36,8 +36,8 @@ export function Polyhedron3D({
   style = {},
 }: Polyhedron3DProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { theme } = useTheme();
-  const isDark = theme === 'dark' || theme === 'system';
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
 
   const defaultWire = isDark ? '#e5c378' : '#c4972a';
   const activeWire = wireColor || defaultWire;

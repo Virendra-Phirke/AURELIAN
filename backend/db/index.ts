@@ -23,4 +23,8 @@ const pool = new pg.Pool({
   keepAliveInitialDelayMillis: 10000,
 });
 
+pool.on('error', (err) => {
+  console.warn('[Postgres Pool] Idle client connection closed or reset:', err.message || err);
+});
+
 export const db = drizzle(pool, { schema });
