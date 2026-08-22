@@ -39,16 +39,17 @@ export interface LandingStats {
   totalClients: number;
   totalServices: number;
   satisfactionRate: number;
+  clientInitials?: string[];
 }
 
 const DEFAULT_SHOP: ShopSettings = {
   shopName: 'Aurelian Salon',
-  shopTagline: 'Luxury Grooming & Bespoke Styling',
+  shopTagline: 'Luxury Grooming & Styling',
   phone: '+1 (555) 234-5678',
-  email: 'concierge@aureliansalon.com',
-  address: '14 Mayfair Atelier, London / DIFC Dubai / Beverly Hills',
+  email: 'contact@aureliansalon.com',
+  address: '123 Luxury Ave, Beverly Hills, CA',
   openingTime: '09:00',
-  closingTime: '20:00',
+  closingTime: '18:00',
   slotDurationMinutes: 30,
   minimumAdvanceMinutes: 60,
   maximumAdvanceDays: 30,
@@ -57,16 +58,17 @@ const DEFAULT_SHOP: ShopSettings = {
   cancellationCutoffHours: 2,
   cancellationCutoffMinutes: 120,
   closedDays: '0',
-  currencySymbol: '₹',
+  currencySymbol: '$',
   announcementText: '',
   announcementActive: false,
 };
 
 const DEFAULT_STATS: LandingStats = {
-  totalBookings: 2400,
-  totalClients: 1850,
-  totalServices: 8,
-  satisfactionRate: 99,
+  totalBookings: 0,
+  totalClients: 0,
+  totalServices: 0,
+  satisfactionRate: 98,
+  clientInitials: ['A', 'V', 'R', 'S'],
 };
 
 export function useLandingData() {
@@ -92,15 +94,20 @@ export function useLandingData() {
           setServices(servicesRes.value);
         }
         if (shopRes.status === 'fulfilled' && shopRes.value) {
-          setShop({ ...DEFAULT_SHOP, ...shopRes.value });
+          const shopData = shopRes.value;
+          if (!shopData.currencySymbol || shopData.currencySymbol === '?') {
+            shopData.currencySymbol = '$';
+          }
+          setShop({ ...DEFAULT_SHOP, ...shopData });
         }
         if (statsRes.status === 'fulfilled' && statsRes.value) {
           setStats(prev => ({
             ...prev,
             ...statsRes.value,
-            totalBookings: statsRes.value.totalBookings > 0 ? statsRes.value.totalBookings : prev.totalBookings,
-            totalClients: statsRes.value.totalClients > 0 ? statsRes.value.totalClients : prev.totalClients,
-            totalServices: (servicesRes.status === 'fulfilled' && servicesRes.value?.length) || (statsRes.value.totalServices > 0 ? statsRes.value.totalServices : prev.totalServices),
+            totalBookings: typeof statsRes.value.totalBookings === 'number' ? statsRes.value.totalBookings : prev.totalBookings,
+            totalClients: typeof statsRes.value.totalClients === 'number' ? statsRes.value.totalClients : prev.totalClients,
+            totalServices: (servicesRes.status === 'fulfilled' && servicesRes.value?.length) || (typeof statsRes.value.totalServices === 'number' ? statsRes.value.totalServices : prev.totalServices),
+            satisfactionRate: typeof statsRes.value.satisfactionRate === 'number' ? statsRes.value.satisfactionRate : prev.satisfactionRate,
           }));
         }
       } catch (err) {

@@ -11,15 +11,6 @@ interface ServicesSectionProps {
   loading?: boolean;
 }
 
-const FALLBACK_SERVICES: ServiceItem[] = [
-  { id: '1', name: 'Signature Cut & Style', durationMinutes: 60, price: 2400, active: true },
-  { id: '2', name: 'Royal Hot Towel Shave', durationMinutes: 45, price: 1800, active: true },
-  { id: '3', name: 'Hair + Beard Mastery', durationMinutes: 90, price: 3600, active: true },
-  { id: '4', name: 'Scalp Revival Therapy', durationMinutes: 50, price: 2200, active: true },
-  { id: '5', name: 'The Grand Luxe', durationMinutes: 180, price: 8500, active: true },
-  { id: '6', name: 'Beard Shaping & Oil Ritual', durationMinutes: 40, price: 1400, active: true },
-];
-
 function getCategoryForService(name: string): string {
   const lower = name.toLowerCase();
   if (lower.includes('shav') || lower.includes('beard')) return 'Royal Shaving';
@@ -79,7 +70,7 @@ export function ServicesSection({ services: propServices, shop, loading }: Servi
     if (propServices && propServices.length > 0) {
       return propServices.filter(s => s.active !== false);
     }
-    return FALLBACK_SERVICES;
+    return [];
   }, [propServices]);
 
   const categories = useMemo(() => {
@@ -96,7 +87,7 @@ export function ServicesSection({ services: propServices, shop, loading }: Servi
     return activeServices.filter(s => getCategoryForService(s.name) === activeCategory);
   }, [activeServices, activeCategory]);
 
-  const currency = shop?.currencySymbol || '₹';
+  const currency = shop?.currencySymbol && shop.currencySymbol !== '?' ? shop.currencySymbol : '$';
 
   return (
     <section id="services" ref={ref} className="relative py-24 px-6 sm:px-10 lg:px-16">
@@ -161,8 +152,19 @@ export function ServicesSection({ services: propServices, shop, loading }: Servi
         )}
 
         {/* Services Grid with Real Database Records */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-          {filtered.map((service, i) => {
+        {filtered.length === 0 ? (
+          <div className="text-center py-16 space-y-3 rounded-2xl border" style={{ borderColor: 'rgba(229,195,120,0.1)', background: 'var(--color-surface)' }}>
+            <Scissors size={28} className="mx-auto" style={{ color: 'var(--color-primary)' }} />
+            <p className="font-brand text-lg" style={{ color: 'var(--color-primary-text)' }}>
+              {loading ? 'Curating Signature Services...' : 'Services Currently Being Prepared'}
+            </p>
+            <p className="font-sans text-xs" style={{ color: 'var(--color-secondary-text)' }}>
+              Please check back shortly or explore our bespoke booking options.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {filtered.map((service, i) => {
             const categoryName = getCategoryForService(service.name);
             const badgeName = getBadgeForService(i, service.name);
             const description = getDescriptionForService(service.name);
@@ -245,6 +247,7 @@ export function ServicesSection({ services: propServices, shop, loading }: Servi
             );
           })}
         </div>
+        )}
       </div>
     </section>
   );

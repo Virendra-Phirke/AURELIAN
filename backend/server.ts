@@ -68,6 +68,7 @@ async function startServer() {
         ALTER TABLE "shop_settings" ALTER COLUMN "currencySymbol" TYPE varchar(15);
         ALTER TABLE "shop_settings" ADD COLUMN IF NOT EXISTS "announcementText" text DEFAULT '';
         ALTER TABLE "shop_settings" ADD COLUMN IF NOT EXISTS "announcementActive" boolean DEFAULT false;
+        UPDATE "shop_settings" SET "currencySymbol" = '$' WHERE "currencySymbol" = '?' OR "currencySymbol" IS NULL OR "currencySymbol" = '';
       `);
 
       const existingServices = await db.select().from(services);

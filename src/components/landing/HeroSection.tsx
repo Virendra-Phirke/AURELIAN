@@ -21,19 +21,22 @@ export function HeroSection({ shop, stats }: HeroSectionProps) {
     }
   };
 
-  const clientCountStr = stats?.totalClients
-    ? `${stats.totalClients > 100 ? stats.totalClients.toLocaleString() + '+' : stats.totalClients}`
-    : '2,400+';
+  const clientCount = stats?.totalClients ?? 0;
+  const clientCountStr = clientCount >= 100 ? `${clientCount.toLocaleString()}+` : `${clientCount}`;
 
-  const servicesCountStr = stats?.totalServices ? `${stats.totalServices} Signature Services` : 'Bespoke Services';
+  const servicesCount = stats?.totalServices ?? 0;
+  const servicesCountStr = servicesCount > 0 ? `${servicesCount} Signature Services` : 'Bespoke Services';
+
+  const satisfactionRate = stats?.satisfactionRate ?? 98;
 
   const floatBadges = [
-    { icon: Star, label: `${stats?.satisfactionRate || 99}%`, sub: 'Satisfaction Rate', pos: 'top-8 left-6' },
+    { icon: Star, label: `${satisfactionRate}%`, sub: 'Satisfaction Rate', pos: 'top-8 left-6' },
     { icon: Users, label: clientCountStr, sub: 'Loyal Clients', pos: 'bottom-16 left-2' },
     { icon: Sparkles, label: servicesCountStr, sub: 'Crafted Packages', pos: 'top-12 right-4' },
   ];
 
-  const tagline = shop?.shopTagline || 'Bespoke Grooming & Haute Coiffure';
+  const tagline = shop?.shopTagline || 'Luxury Grooming & Styling';
+  const clientInitials = stats?.clientInitials && stats.clientInitials.length > 0 ? stats.clientInitials : ['A', 'V', 'R', 'S'];
 
   return (
     <section className="relative min-h-screen flex items-center pt-20 pb-12 px-6 sm:px-10 lg:px-16 overflow-hidden">
@@ -139,7 +142,7 @@ export function HeroSection({ shop, stats }: HeroSectionProps) {
             className="flex items-center gap-6 pt-4"
           >
             <div className="flex -space-x-2">
-              {['V', 'A', 'R', 'J'].map((l, i) => (
+              {clientInitials.map((l, i) => (
                 <div
                   key={i}
                   className="w-8 h-8 rounded-full flex items-center justify-center font-brand text-xs font-bold border-2"

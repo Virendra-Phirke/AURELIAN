@@ -59,7 +59,7 @@ apiRouter.get("/shop", rateLimit("shop", 300, 60), async (req, res) => {
         email: "contact@aureliansalon.com",
         address: "123 Luxury Ave, Beverly Hills, CA",
         openingTime: "09:00", 
-        closingTime: "19:00", 
+        closingTime: "18:00", 
         slotDurationMinutes: 30, 
         minimumAdvanceMinutes: 60, 
         maximumAdvanceDays: 30,
@@ -75,6 +75,9 @@ apiRouter.get("/shop", rateLimit("shop", 300, 60), async (req, res) => {
         announcementText: "",
         announcementActive: false
     };
+    if (!shop.currencySymbol || shop.currencySymbol === '?' || shop.currencySymbol === '') {
+        shop.currencySymbol = '$';
+    }
     await redisClient.set(cacheKey, JSON.stringify(shop), { EX: 300 });
     res.json(shop);
 });
@@ -93,18 +96,23 @@ apiRouter.get("/stats", rateLimit("stats", 300, 60), async (req, res) => {
         const totalClients = Number(usersCountRes?.count || 0);
         const totalServices = Number(servicesCountRes?.count || 0);
 
+        // Fetch recent clients from DB for live avatars
+        const recentUsers = await db.select({ name: user.name }).from(user).limit(5);
+        const clientInitials = recentUsers.map(u => (u.name || 'Client').charAt(0).toUpperCase()).filter(Boolean);
+
         const stats = {
             totalBookings,
             totalClients,
             totalServices,
             satisfactionRate: 98,
+            clientInitials: clientInitials.length > 0 ? clientInitials : ['A', 'V', 'R', 'S']
         };
 
         await redisClient.set(cacheKey, JSON.stringify(stats), { EX: 60 });
         res.json(stats);
     } catch (e) {
         console.error("Failed to fetch stats:", e);
-        res.json({ totalBookings: 0, totalClients: 0, totalServices: 0, satisfactionRate: 98 });
+        res.json({ totalBookings: 0, totalClients: 0, totalServices: 0, satisfactionRate: 98, clientInitials: ['A', 'V'] });
     }
 });
 

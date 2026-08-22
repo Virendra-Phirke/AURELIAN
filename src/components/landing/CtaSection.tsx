@@ -16,8 +16,9 @@ export function CtaSection({ shop }: CtaSectionProps) {
   const inView = useInView(ref, { once: true, margin: '-80px' });
 
   const openingTime = shop?.openingTime || '09:00';
-  const closingTime = shop?.closingTime || '20:00';
-  const cancelHours = shop?.cancellationCutoffHours || 2;
+  const closingTime = shop?.closingTime || '18:00';
+  const cancelHours = shop?.cancellationCutoffHours !== undefined ? shop.cancellationCutoffHours : 2;
+  const cancelLabel = cancelHours > 0 ? `Free ${cancelHours}h Cancellation` : 'Flexible Cancellation';
   const autoConfirmText = shop?.autoConfirmBookings ? 'Instant Slot Confirmation' : 'Priority Host Booking';
 
   // Compute realistic next available day preview
@@ -114,7 +115,7 @@ export function CtaSection({ shop }: CtaSectionProps) {
                 {[
                   { icon: CalendarDays, label: autoConfirmText },
                   { icon: Zap, label: 'Zero Double-Booking Lock' },
-                  { icon: Clock, label: `Free ${cancelHours}h Cancellation` },
+                  { icon: Clock, label: cancelLabel },
                   { icon: ShieldCheck, label: 'Bespoke Private Suite' },
                 ].map(({ icon: Icon, label }) => (
                   <div

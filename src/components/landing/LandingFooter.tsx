@@ -18,10 +18,10 @@ const NAV_LINKS = [
 
 export function LandingFooter({ shop }: LandingFooterProps) {
   const brandName = shop?.shopName || 'AURELIAN';
-  const hours = `${shop?.openingTime || '09:00'} – ${shop?.closingTime || '20:00'}`;
-  const address = shop?.address || '14 Mayfair Atelier, London / DIFC Dubai / Beverly Hills';
+  const hours = `${shop?.openingTime || '09:00'} – ${shop?.closingTime || '18:00'}`;
+  const address = shop?.address || '123 Luxury Ave, Beverly Hills, CA';
   const phone = shop?.phone || '+1 (555) 234-5678';
-  const email = shop?.email || 'concierge@aureliansalon.com';
+  const email = shop?.email || 'contact@aureliansalon.com';
 
   return (
     <footer id="locations" className="relative border-t" style={{ borderColor: 'rgba(229,195,120,0.1)', background: 'var(--color-sidebar-bg)' }}>

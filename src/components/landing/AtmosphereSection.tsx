@@ -61,11 +61,16 @@ export function AtmosphereSection({ stats }: AtmosphereSectionProps) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-100px' });
 
+  const totalBookings = stats?.totalBookings ?? 0;
+  const totalClients = stats?.totalClients ?? 0;
+  const totalServices = stats?.totalServices ?? 0;
+  const satisfactionRate = stats?.satisfactionRate ?? 98;
+
   const metrics = [
-    { end: stats?.totalBookings || 2400, label: 'Appointments Completed', suffix: '+' },
-    { end: stats?.totalClients || 1850, label: 'Registered Clients', suffix: '+' },
-    { end: stats?.satisfactionRate || 99, label: 'Client Satisfaction', suffix: '%' },
-    { end: stats?.totalServices || 8, label: 'Signature Services', suffix: '' },
+    { end: totalBookings, label: 'Appointments Completed', suffix: totalBookings >= 100 ? '+' : '' },
+    { end: totalClients, label: 'Registered Clients', suffix: totalClients >= 100 ? '+' : '' },
+    { end: satisfactionRate, label: 'Client Satisfaction', suffix: '%' },
+    { end: totalServices, label: 'Active Services', suffix: '' },
   ];
 
   return (
