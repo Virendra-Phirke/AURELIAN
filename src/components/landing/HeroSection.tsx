@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
-import { HeroCenterpiece3D } from '../3d/HeroCenterpiece3D';
 import { Star, Users, Sparkles, ChevronDown } from 'lucide-react';
 import { ShopSettings, LandingStats } from '../../lib/useLandingData';
 import { useTheme } from '../../lib/theme';
+
+const HeroCenterpiece3D = lazy(() => import('../3d/HeroCenterpiece3D'));
 
 const BADGE_DELAY = 0.1;
 
@@ -55,10 +56,7 @@ export function HeroSection({ shop, stats }: HeroSectionProps) {
         {/* Left — Text Block */}
         <div className="relative z-10 space-y-7">
           {/* Pill Tag */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+          <div
             className="inline-flex items-center gap-2 font-sans text-[10px] uppercase tracking-[0.2em] font-semibold px-5 py-2.5 rounded-full border backdrop-blur-xl"
             style={{
               color: 'var(--color-primary)',
@@ -73,13 +71,10 @@ export function HeroSection({ shop, stats }: HeroSectionProps) {
           >
             <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--color-primary)' }} />
             {tagline}
-          </motion.div>
+          </div>
 
-          {/* Headline */}
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.1 }}
+          {/* Headline - Rendered with immediate paint for lightning-fast LCP */}
+          <h1
             className="font-brand text-5xl sm:text-6xl lg:text-7xl xl:text-8xl leading-[1.0] tracking-tight"
             style={{ color: 'var(--color-primary-text)' }}
           >
@@ -88,27 +83,19 @@ export function HeroSection({ shop, stats }: HeroSectionProps) {
               of Grooming
             </span>
             Perfected
-          </motion.h1>
+          </h1>
 
           {/* Subtitle */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.25 }}
+          <p
             className="font-sans text-sm sm:text-base leading-relaxed max-w-[440px]"
             style={{ color: 'var(--color-secondary-text)' }}
           >
             {shop?.shopName || 'Aurelian'} is more than a salon — it is a private sanctuary. Every appointment is an exercise in
             haute precision, artisanal treatment rituals, and tailored aesthetic mastery conducted in private suites.
-          </motion.p>
+          </p>
 
           {/* CTAs */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.35 }}
-            className="flex flex-wrap gap-4 pt-2"
-          >
+          <div className="flex flex-wrap gap-4 pt-2">
             <Link
               to="/booking"
               className="group inline-flex items-center gap-2.5 font-sans text-xs uppercase tracking-widest font-bold px-8 py-4 rounded-full transition-all duration-300 shadow-lg cursor-pointer hover:scale-105"
@@ -141,7 +128,7 @@ export function HeroSection({ shop, stats }: HeroSectionProps) {
             >
               Explore Services
             </button>
-          </motion.div>
+          </div>
 
           {/* Divider + Credentials with Neumorphism */}
           <motion.div
@@ -239,7 +226,9 @@ export function HeroSection({ shop, stats }: HeroSectionProps) {
             </motion.div>
           ))}
 
-          <HeroCenterpiece3D />
+          <Suspense fallback={<div className="w-full h-full" />}>
+            <HeroCenterpiece3D />
+          </Suspense>
         </motion.div>
       </div>
 

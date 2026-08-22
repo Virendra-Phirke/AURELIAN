@@ -71,11 +71,20 @@ const DEFAULT_STATS: LandingStats = {
   clientInitials: ['A', 'V', 'R', 'S'],
 };
 
+export const DEFAULT_SERVICES: ServiceItem[] = [
+  { id: '1', name: 'Signature Bespoke Haircut & Consultation', durationMinutes: 45, price: 65, active: true },
+  { id: '2', name: 'Artisanal Hot Towel Shave & Facial Ritual', durationMinutes: 45, price: 70, active: true },
+  { id: '3', name: 'Master Beard Sculpting & Conditioning Oil', durationMinutes: 30, price: 45, active: true },
+  { id: '4', name: 'The Aurelian Royal Executive Sanctuary Package', durationMinutes: 90, price: 150, active: true },
+  { id: '5', name: 'Revitalizing Japanese Scalp Head Spa Treatment', durationMinutes: 30, price: 55, active: true },
+  { id: '6', name: 'Precision Styling, Botanical Wash & Finish', durationMinutes: 30, price: 40, active: true },
+];
+
 export function useLandingData() {
-  const [services, setServices] = useState<ServiceItem[]>([]);
+  const [services, setServices] = useState<ServiceItem[]>(DEFAULT_SERVICES);
   const [shop, setShop] = useState<ShopSettings>(DEFAULT_SHOP);
   const [stats, setStats] = useState<LandingStats>(DEFAULT_STATS);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     let isMounted = true;

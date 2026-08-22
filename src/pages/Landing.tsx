@@ -1,7 +1,5 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, Suspense, lazy } from 'react';
 import { motion, useScroll, useTransform } from 'motion/react';
-import { FloatingCanvas3D } from '../components/3d/FloatingCanvas3D';
-import { FloatingPolyhedronPath } from '../components/3d/FloatingPolyhedronPath';
 import { ScrollOrb3D } from '../components/3d/ScrollOrb3D';
 import { LandingHeader } from '../components/landing/LandingHeader';
 import { HeroSection } from '../components/landing/HeroSection';
@@ -12,6 +10,10 @@ import { TestimonialsSection } from '../components/landing/TestimonialsSection';
 import { CtaSection } from '../components/landing/CtaSection';
 import { LandingFooter } from '../components/landing/LandingFooter';
 import { useLandingData } from '../lib/useLandingData';
+
+// Background 3D canvases loaded lazily to ensure sub-second FCP & LCP
+const FloatingCanvas3D = lazy(() => import('../components/3d/FloatingCanvas3D').then(m => ({ default: m.FloatingCanvas3D })));
+const FloatingPolyhedronPath = lazy(() => import('../components/3d/FloatingPolyhedronPath').then(m => ({ default: m.FloatingPolyhedronPath })));
 
 // Scroll progress indicator
 function ScrollProgress() {
@@ -97,10 +99,14 @@ export default function Landing() {
   return (
     <div className="relative h-full" style={{ background: 'var(--color-bg)' }}>
       {/* Full-page WebGL 3D background */}
-      <FloatingCanvas3D />
+      <Suspense fallback={null}>
+        <FloatingCanvas3D />
+      </Suspense>
 
       {/* Continuous diagonal travel path for Polyhedrons on scroll */}
-      <FloatingPolyhedronPath />
+      <Suspense fallback={null}>
+        <FloatingPolyhedronPath />
+      </Suspense>
 
       {/* Scroll progress bar */}
       <ScrollProgress />
