@@ -204,13 +204,21 @@ apiRouter.get("/availability", rateLimit("avail", 300, 60), async (req, res) => 
             }
         }
 
-        // Check existing bookings
+        // Check existing bookings in database
         let isOccupied = false;
         for (const b of allOccupied) {
             const bStart = parse(`${date} ${b.startTime}`, "yyyy-MM-dd HH:mm", new Date());
             const bEnd = parse(`${date} ${b.endTime}`, "yyyy-MM-dd HH:mm", new Date());
             if ((current >= bStart && current < bEnd) || (slotEnd > bStart && slotEnd <= bEnd) || (current <= bStart && slotEnd >= bEnd)) {
                 isOccupied = true; break;
+            }
+        }
+
+        // Check active temporary Redis holds
+        if (!isOccupied) {
+            const activeHold = await redisClient.get(`hold:booking:${date}:${timeStr}`);
+            if (activeHold) {
+                isOccupied = true;
             }
         }
 
@@ -233,18 +241,26 @@ apiRouter.post("/bookings", rateLimit("create_booking", 10, 60), requireAuth, as
     const { serviceId, date, time, note } = parseRes.data;
     const u = (req as any).user;
 
-    const lockKey = `lock:booking:${date}:${time}`;
-    const lock = await redisClient.set(lockKey, "LOCKED", { NX: true, EX: 5 });
-    if (!lock) {
-        return res.status(409).json({ error: "This slot is currently being processed. Please try again in a moment." });
+    // -----------------------------------------------------------------
+    // LAYER 1: Fast Redis Distributed Atomic Mutex (Temporary Hold)
+    // -----------------------------------------------------------------
+    const lockKey = `hold:booking:${date}:${time}`;
+    const acquiredLock = await redisClient.set(lockKey, u.id, { NX: true, EX: 15 });
+    if (!acquiredLock) {
+        return res.status(409).json({ 
+            error: "This slot is currently being booked by another customer. Please select another time." 
+        });
     }
 
     try {
+        // -----------------------------------------------------------------
+        // LAYER 2: PostgreSQL ACID Transaction + Advisory Lock & Unique Constraint
+        // -----------------------------------------------------------------
         const result = await db.transaction(async (tx) => {
-            // 1. PostgreSQL transaction-level advisory lock to serialize concurrent requests on the same slot
+            // A. Transaction-level advisory lock to serialize concurrent attempts on identical slots
             await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${`slot:${date}:${time}`}))`);
 
-            // 2. Fetch service details
+            // B. Fetch service details
             const svc = await tx.select().from(services).where(and(eq(services.id, serviceId), eq(services.active, true))).limit(1);
             if (!svc.length) throw new Error("Service not found or inactive");
 
@@ -252,7 +268,7 @@ apiRouter.post("/bookings", rateLimit("create_booking", 10, 60), requireAuth, as
             const newEnd = addMinutes(newStart, svc[0].durationMinutes);
             const endTime = format(newEnd, "HH:mm");
 
-            // 3. Check shop settings
+            // C. Check shop operating hours
             const settings = await tx.select().from(shopSettings).limit(1);
             const shop = settings[0] || { openingTime: "09:00", closingTime: "18:00", slotDurationMinutes: 30, minimumAdvanceMinutes: 60, maximumAdvanceDays: 30 };
 
@@ -263,20 +279,20 @@ apiRouter.post("/bookings", rateLimit("create_booking", 10, 60), requireAuth, as
                 throw new Error("Selected time is outside shop operating hours");
             }
 
-            // Check minimum advance
+            // D. Check minimum advance notice
             const now = new Date();
             const minAdvance = addMinutes(now, shop.minimumAdvanceMinutes);
             if (isBefore(newStart, minAdvance)) {
                 throw new Error(`Bookings require at least ${shop.minimumAdvanceMinutes} minutes advance notice`);
             }
 
-            // 4. Check holidays
+            // E. Check holidays
             const holidays = await tx.select().from(shopHolidays).where(eq(shopHolidays.date, date));
             if (holidays.length > 0) {
                 throw new Error("The salon is closed on this date");
             }
 
-            // 5. Check shop breaks
+            // F. Check shop breaks
             const dayOfWeek = parse(date, "yyyy-MM-dd", new Date()).getDay();
             const breaks = await tx.select().from(shopBreaks).where(and(eq(shopBreaks.dayOfWeek, dayOfWeek), eq(shopBreaks.active, true)));
             for (const b of breaks) {
@@ -287,7 +303,7 @@ apiRouter.post("/bookings", rateLimit("create_booking", 10, 60), requireAuth, as
                 }
             }
 
-            // 6. Concurrency Check: Check for ANY overlapping bookings (ACCEPTED or PENDING)
+            // G. Concurrency Overlap Check: Verify no existing active booking collides with duration
             const activeBookings = await tx.select().from(bookings).where(
                 and(
                     eq(bookings.bookingDate, date),
@@ -299,13 +315,13 @@ apiRouter.post("/bookings", rateLimit("create_booking", 10, 60), requireAuth, as
                 const bStart = parse(`${date} ${b.startTime}`, "yyyy-MM-dd HH:mm", new Date());
                 const bEnd = parse(`${date} ${b.endTime}`, "yyyy-MM-dd HH:mm", new Date());
 
-                // Overlap condition: (StartA < EndB) and (EndA > StartB)
+                // Overlap formula: (StartA < EndB) and (EndA > StartB)
                 if (newStart < bEnd && newEnd > bStart) {
-                    throw new Error("This slot has just been booked by another user. Please select another time.");
+                    throw new Error("This slot has just been confirmed by another user. Please select another time.");
                 }
             }
 
-            // 7. Instant Booking: insert with status ACCEPTED immediately (no admin confirmation required)
+            // H. Permanent Booking: Insert into PostgreSQL with status ACCEPTED
             const created = await tx.insert(bookings).values({
                 userId: u.id,
                 serviceId: svc[0].id,
@@ -320,17 +336,23 @@ apiRouter.post("/bookings", rateLimit("create_booking", 10, 60), requireAuth, as
             return { booking: created[0], serviceName: svc[0].name };
         });
 
-        // 8. Invalidate availability cache immediately for this date
+        // -----------------------------------------------------------------
+        // Invalidate Redis Availability Caches Immediately
+        // -----------------------------------------------------------------
         await redisClient.del(`availability:${date}:${result.serviceName}`);
         await redisClient.del(`availability:${date}`);
 
         res.status(201).json(result.booking);
     } catch (err: any) {
+        // Handle PostgreSQL unique index violation (code 23505)
         if (err?.code === '23505' || err?.message?.includes('unique_active_booking_slot') || err?.message?.includes('duplicate key')) {
-            return res.status(409).json({ error: "This slot was just confirmed by another user. Please choose another available time." });
+            return res.status(409).json({ 
+                error: "This slot was just confirmed by another user. Please choose another available time." 
+            });
         }
         res.status(400).json({ error: err.message || "Booking failed" });
     } finally {
+        // Release the temporary Redis hold/lock
         await redisClient.del(lockKey);
     }
 });

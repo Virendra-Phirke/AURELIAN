@@ -6,22 +6,35 @@ import * as schema from './schema.js';
 import dotenv from 'dotenv';
 dotenv.config();
 
-// Direct IP connection to the Neon proxy with optimized connection pooling
-const pool = new pg.Pool({
-  host: '13.251.213.89', // Direct IP to the Neon proxy
-  database: 'neondb',
-  user: 'neondb_owner',
-  password: 'npg_fhmUEAD3jC7b', 
-  port: 5432,
-  ssl: { rejectUnauthorized: false },
-  options: 'endpoint=ep-nameless-rain-azjgrr6l-pooler', // Required SNI routing parameter for Neon
-  max: 20, // Max simultaneous connections in pool
-  min: 2,  // Keep 2 warm connections ready to avoid cold-start handshakes
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 10000,
-  keepAlive: true,
-  keepAliveInitialDelayMillis: 10000,
-});
+const connectionString = process.env.DATABASE_URL;
+
+// Connection pool supporting DATABASE_URL or discrete environment variables
+const pool = connectionString
+  ? new pg.Pool({
+      connectionString,
+      ssl: connectionString.includes('sslmode=require') || connectionString.includes('neon.tech') 
+        ? { rejectUnauthorized: false } 
+        : false,
+      max: 20,
+      min: 2,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 10000,
+      keepAlive: true,
+      keepAliveInitialDelayMillis: 10000,
+    })
+  : new pg.Pool({
+      host: process.env.DB_HOST || '127.0.0.1',
+      database: process.env.DB_NAME || 'aurelian',
+      user: process.env.DB_USER || 'postgres',
+      password: process.env.DB_PASSWORD || 'postgres',
+      port: Number(process.env.DB_PORT) || 5432,
+      max: 20,
+      min: 2,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 10000,
+      keepAlive: true,
+      keepAliveInitialDelayMillis: 10000,
+    });
 
 pool.on('error', (err) => {
   console.warn('[Postgres Pool] Idle client connection closed or reset:', err.message || err);

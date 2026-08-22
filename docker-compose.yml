@@ -1,0 +1,94 @@
+services:
+  # -----------------------------------------------------------------
+  # Aurelian Full-Stack Application (React 19 + Express API + Auth)
+  # -----------------------------------------------------------------
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: aurelian-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/aurelian
+      - REDIS_URL=redis://redis:6379
+      - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET:-ba_super_secret_docker_key_32_characters_long}
+      - BETTER_AUTH_URL=${BETTER_AUTH_URL:-http://localhost:3000}
+      - VITE_APP_URL=${VITE_APP_URL:-http://localhost:3000}
+      - RESEND_API_KEY=${RESEND_API_KEY:-}
+      - EMAIL_FROM=${EMAIL_FROM:-Aurelian <onboarding@resend.dev>}
+      - UPSTASH_REDIS_REST_URL=${UPSTASH_REDIS_REST_URL:-}
+      - UPSTASH_REDIS_REST_TOKEN=${UPSTASH_REDIS_REST_TOKEN:-}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
+      - VITE_GOOGLE_CLIENT_ID=${VITE_GOOGLE_CLIENT_ID:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - aurelian-network
+
+  # -----------------------------------------------------------------
+  # PostgreSQL Database Service (Relational Store)
+  # -----------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: aurelian-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: aurelian
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d aurelian"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - aurelian-network
+
+  # -----------------------------------------------------------------
+  # Redis Cache & Distributed Lock Service (Mutexes & Rate Limiting)
+  # -----------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: aurelian-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - aurelian-network
+
+# -------------------------------------------------------------------
+# Persistent Data Volumes
+# -------------------------------------------------------------------
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+# -------------------------------------------------------------------
+# Bridge Network
+# -------------------------------------------------------------------
+networks:
+  aurelian-network:
+    driver: bridge
