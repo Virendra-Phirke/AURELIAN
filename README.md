@@ -218,18 +218,18 @@ npm run db:push
 
 | Variable | Description | Required | Example |
 |---|---|---|---|
-| `DATABASE_URL` | Neon / PostgreSQL connection string with SSL | **Yes** | `postgresql://user:pass@ep-xyz.neon.tech/db?sslmode=require` |
-| `BETTER_AUTH_SECRET` | 32+ character random secret for signing sessions | **Yes** | `ba_super_secret_session_key` |
-| `BETTER_AUTH_URL` | Base URL for auth callbacks | **Yes** | `http://localhost:3000` or `https://aurelian-phi-brown.vercel.app` |
+| `DATABASE_URL` | Neon / PostgreSQL connection string with SSL | **Yes** | `postgresql://user:password@ep-abcd-1234.neon.tech/db?sslmode=require` |
+| `BETTER_AUTH_SECRET` | 32+ character random secret for signing sessions | **Yes** | `ba_abcd1234example_super_secret_session_key` |
+| `BETTER_AUTH_URL` | Base URL for auth callbacks | **Yes** | `http://localhost:3000` or `https://your-app-name.vercel.app` |
 | `VITE_APP_URL` | Frontend origin | Optional | `http://localhost:3000` |
-| `RESEND_API_KEY` | Resend API key for transactional emails & OTP | Optional | `re_123456789_abcdefg` |
+| `RESEND_API_KEY` | Resend API key for transactional emails & OTP | Optional | `re_abcd1234_abcdefghijklmnopqrstuvwxyz` |
 | `EMAIL_FROM` | Verified sender address in Resend | Optional | `Aurelian <onboarding@resend.dev>` |
-| `UPSTASH_REDIS_REST_URL` | Upstash Redis REST URL (for serverless edge) | Optional | `https://proper-gnat-157807.upstash.io` |
-| `UPSTASH_REDIS_REST_TOKEN` | Upstash Redis REST Token | Optional | `gQAAAAAAAmhv...` |
+| `UPSTASH_REDIS_REST_URL` | Upstash Redis REST URL (for serverless edge) | Optional | `https://abcd-example-12345.upstash.io` |
+| `UPSTASH_REDIS_REST_TOKEN` | Upstash Redis REST Token | Optional | `abcd_example_token_12345...` |
 | `REDIS_URL` | Local / Direct TCP Redis connection URL | Optional | `redis://localhost:6379` |
-| `GOOGLE_CLIENT_ID` | Google OAuth 2.0 Client ID | Optional | `746469864617-xxx.apps.googleusercontent.com` |
-| `GOOGLE_CLIENT_SECRET` | Google OAuth 2.0 Client Secret | Optional | `GOCSPX-xxx` |
-| `VITE_GOOGLE_CLIENT_ID` | Google Client ID exposed to browser for One Tap | Optional | `746469864617-xxx.apps.googleusercontent.com` |
+| `GOOGLE_CLIENT_ID` | Google OAuth 2.0 Client ID | Optional | `abcd1234example.apps.googleusercontent.com` |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth 2.0 Client Secret | Optional | `GOCSPX-abcdefghijklmnopqrstuvwxyz` |
+| `VITE_GOOGLE_CLIENT_ID` | Google Client ID exposed to browser for One Tap | Optional | `abcd1234example.apps.googleusercontent.com` |
 
 ---
 

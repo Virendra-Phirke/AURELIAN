@@ -164,7 +164,7 @@ export const auth = betterAuth({
             },
         }),
         oneTap({
-            clientId: process.env.GOOGLE_CLIENT_ID || "746469864617-u982sdj01nksir0dqgohgmkj8op44bdj.apps.googleusercontent.com",
+            clientId: process.env.GOOGLE_CLIENT_ID || "",
         }),
         oauthPopup()
     ]
