@@ -28,6 +28,25 @@ export default function GoogleOneTap({ callbackURL = '/booking' }: GoogleOneTapP
       if (!response?.credential) return;
       try {
         console.log('[Google One Tap] ID token received, verifying with backend...');
+
+        let googlePicture = '';
+        let googleName = '';
+        try {
+          const base64Url = response.credential.split('.')[1];
+          const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+          const jsonPayload = decodeURIComponent(
+            atob(base64)
+              .split('')
+              .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+              .join('')
+          );
+          const payload = JSON.parse(jsonPayload);
+          googlePicture = payload.picture || '';
+          googleName = payload.name || '';
+        } catch (e) {
+          console.warn('[Google One Tap] Could not decode JWT payload:', e);
+        }
+
         const res = await fetch('/api/auth/one-tap/callback', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -38,7 +57,16 @@ export default function GoogleOneTap({ callbackURL = '/booking' }: GoogleOneTapP
         });
 
         if (res.ok) {
-          console.log('[Google One Tap] Authentication successful! Redirecting...');
+          console.log('[Google One Tap] Authentication successful! Syncing profile picture...');
+          if (googlePicture) {
+            try {
+              await fetch('/api/user/sync-avatar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: googlePicture, name: googleName }),
+              });
+            } catch {}
+          }
           window.location.href = callbackURL;
         } else {
           const errData = await res.json().catch(() => ({}));

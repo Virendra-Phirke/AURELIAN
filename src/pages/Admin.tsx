@@ -528,6 +528,28 @@ export default function Admin() {
     }
   };
 
+  const broadcastCatalogUpdate = () => {
+    try {
+      const bc = new BroadcastChannel('aurelian_sync');
+      bc.postMessage({ type: 'services_updated' });
+      bc.close();
+    } catch {}
+    try {
+      localStorage.setItem('aurelian_service_sync', Date.now().toString());
+    } catch {}
+  };
+
+  const broadcastSettingsUpdate = () => {
+    try {
+      const bc = new BroadcastChannel('aurelian_sync');
+      bc.postMessage({ type: 'settings_updated' });
+      bc.close();
+    } catch {}
+    try {
+      localStorage.setItem('aurelian_service_sync', Date.now().toString());
+    } catch {}
+  };
+
   // --- Service actions ---
   const handleAddService = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -554,6 +576,7 @@ export default function Admin() {
         setNewServicePrice(50);
         setIsAddServiceOpen(false);
         fetchAll(false);
+        broadcastCatalogUpdate();
         showToast('Service created successfully');
       } else {
         const err = await res.json().catch(() => ({}));
@@ -595,6 +618,7 @@ export default function Admin() {
     setServiceMap(prev => ({ ...prev, [selectedServiceForSetup.id]: trimmedName }));
     const currentId = selectedServiceForSetup.id;
     setSelectedServiceForSetup(null);
+    broadcastCatalogUpdate();
     showToast('Service setup updated');
 
     try {
@@ -610,6 +634,7 @@ export default function Admin() {
       });
       if (res.ok) {
         fetchAll(false);
+        broadcastCatalogUpdate();
       } else {
         fetchAll(false);
         showToast('Failed to update service setup', 'error');
@@ -624,6 +649,7 @@ export default function Admin() {
   const handleToggleServiceActive = async (id: string, active: boolean) => {
     // Optimistic UI update (immediate toggle with 0ms delay, no screen reload)
     setAllServices(prev => prev.map(s => s.id === id ? { ...s, active: !active } : s));
+    broadcastCatalogUpdate();
     showToast(active ? 'Service deactivated' : 'Service activated');
 
     const res = await fetch(`/api/admin/services/${id}`, {
@@ -633,9 +659,11 @@ export default function Admin() {
     });
     if (res.ok) {
       fetchAll(false);
+      broadcastCatalogUpdate();
     } else {
       // Revert if error
       setAllServices(prev => prev.map(s => s.id === id ? { ...s, active: active } : s));
+      broadcastCatalogUpdate();
       showToast('Failed to update service', 'error');
     }
   };
@@ -663,11 +691,13 @@ export default function Admin() {
       delete next[id];
       return next;
     });
+    broadcastCatalogUpdate();
     showToast('Service deleted successfully');
 
     const res = await fetch(`/api/admin/services/${id}`, { method: 'DELETE' });
     if (res.ok) {
       fetchAll(false);
+      broadcastCatalogUpdate();
     } else {
       fetchAll(false);
       const data = await res.json().catch(() => ({}));
@@ -2351,9 +2381,17 @@ export default function Admin() {
                           <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full p-[2px] bg-gradient-to-b from-[var(--color-primary)] to-[var(--color-primary)]/20 flex items-center justify-center">
                             <div className="w-full h-full rounded-full bg-[var(--color-surface-raised)] flex items-center justify-center overflow-hidden relative">
                               {newImage || adminUser?.image ? (
-                                <img src={newImage || adminUser?.image} alt={adminUser?.name || 'Admin'} className="w-full h-full object-cover" />
+                                <img
+                                  src={newImage || adminUser?.image}
+                                  referrerPolicy="no-referrer"
+                                  alt={adminUser?.name || 'Admin'}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => { (e.currentTarget as HTMLElement).style.display = 'none'; }}
+                                />
                               ) : (
-                                <User size={20} className="text-[var(--color-secondary-text)] sm:w-8 sm:h-8" />
+                                <span className="font-sans text-sm sm:text-lg font-bold text-[var(--color-primary)] uppercase">
+                                  {(adminUser?.name || 'A').charAt(0).toUpperCase()}
+                                </span>
                               )}
                             </div>
                           </div>

@@ -35,14 +35,61 @@ const rateLimit = (prefix: string, limit: number, windowSec: number) => async (r
     next();
 };
 
+// -------------------------------------------------------------------------
+// REAL-TIME SERVER-SENT EVENTS (SSE) TRIGGER HUB (Zero DB Polling)
+// -------------------------------------------------------------------------
+type SSEClient = { id: string; res: express.Response };
+const sseClients = new Set<SSEClient>();
+
+export const broadcastServerEvent = (eventType: string, payload: any = {}) => {
+    const msg = `data: ${JSON.stringify({ event: eventType, payload, timestamp: Date.now() })}\n\n`;
+    for (const client of sseClients) {
+        try {
+            client.res.write(msg);
+        } catch {
+            sseClients.delete(client);
+        }
+    }
+};
+
+apiRouter.get("/events", (req, res) => {
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache, no-transform");
+    res.setHeader("Connection", "keep-alive");
+    res.setHeader("X-Accel-Buffering", "no");
+    res.flushHeaders?.();
+
+    const client: SSEClient = { id: uuidv4(), res };
+    sseClients.add(client);
+
+    // Initial handshake
+    res.write(`data: ${JSON.stringify({ event: "connected", clientId: client.id })}\n\n`);
+
+    // Keep-alive heartbeat every 25 seconds
+    const heartbeat = setInterval(() => {
+        try {
+            res.write(": heartbeat\n\n");
+        } catch {
+            clearInterval(heartbeat);
+            sseClients.delete(client);
+        }
+    }, 25000);
+
+    req.on("close", () => {
+        clearInterval(heartbeat);
+        sseClients.delete(client);
+    });
+});
+
 // --- PUBLIC ROUTES ---
 apiRouter.get("/services", rateLimit("services", 300, 60), async (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     const cacheKey = "cache:active_services";
     const cached = await redisClient.get(cacheKey);
     if (cached) return res.json(JSON.parse(cached));
 
     const data = await db.select().from(services).where(eq(services.active, true));
-    await redisClient.set(cacheKey, JSON.stringify(data), { EX: 300 });
+    await redisClient.set(cacheKey, JSON.stringify(data), { EX: 30 });
     res.json(data);
 });
 
@@ -365,6 +412,10 @@ apiRouter.post("/bookings", rateLimit("create_booking", 10, 60), requireAuth, as
         await redisClient.del(`availability:${date}:${result.serviceName}`);
         await redisClient.del(`availability:${date}`);
 
+        // Real-time Event Trigger (Push to all connected clients with 0 DB polling)
+        broadcastServerEvent("availability_updated", { date, serviceName: result.serviceName });
+        broadcastServerEvent("bookings_updated", { bookingId: result.booking.id, date });
+
         res.status(201).json(result.booking);
     } catch (err: any) {
         // Handle PostgreSQL unique index violation (code 23505)
@@ -384,6 +435,24 @@ apiRouter.get("/bookings", requireAuth, async (req, res) => {
     const u = (req as any).user;
     const b = await db.select().from(bookings).where(eq(bookings.userId, u.id)).orderBy(desc(bookings.bookingDate), desc(bookings.startTime));
     res.json(b);
+});
+
+apiRouter.post("/user/sync-avatar", requireAuth, async (req, res) => {
+    const { image, name } = req.body;
+    const u = (req as any).user;
+    if (!image) return res.status(400).json({ error: "Image URL required" });
+    
+    try {
+        const updated = await db.update(user).set({
+            image,
+            ...(name && (!u.name || u.name === 'Client') ? { name } : {}),
+            updatedAt: new Date()
+        }).where(eq(user.id, u.id)).returning();
+
+        res.json({ success: true, user: updated[0] });
+    } catch (err: any) {
+        res.status(500).json({ error: err.message || "Failed to sync avatar" });
+    }
 });
 
 apiRouter.delete("/bookings/:id", requireAuth, async (req, res) => {
@@ -522,6 +591,8 @@ apiRouter.post("/admin/bookings/:id/:action", requireAdmin, async (req, res) => 
     if (b.length) {
         const svc = await db.select().from(services).where(eq(services.id, b[0].serviceId)).limit(1);
         if (svc.length) await redisClient.del(`availability:${b[0].bookingDate}:${svc[0].name}`);
+        broadcastServerEvent("availability_updated", { bookingDate: b[0].bookingDate });
+        broadcastServerEvent("bookings_updated", { bookingId: b[0].id, action });
     }
     res.json(b[0]);
 });
@@ -536,6 +607,9 @@ apiRouter.post("/admin/services", requireAdmin, async (req, res) => {
     if (!p.success) return res.status(400).json({ error: "Invalid service data" });
     const svc = await db.insert(services).values(p.data).returning();
     await redisClient.del("cache:active_services");
+    await redisClient.del("cache:landing_stats");
+    broadcastServerEvent("services_updated", { service: svc[0] });
+    broadcastServerEvent("availability_updated", {});
     res.json(svc[0]);
 });
 
@@ -576,6 +650,9 @@ apiRouter.patch("/admin/settings", requireAdmin, async (req, res) => {
         result = s[0];
     }
     await redisClient.del("cache:shop_settings");
+    await redisClient.del("cache:landing_stats");
+    broadcastServerEvent("settings_updated", { settings: result });
+    broadcastServerEvent("availability_updated", {});
     res.json(result);
 });
 
@@ -604,6 +681,9 @@ apiRouter.patch("/admin/services/:id", requireAdmin, async (req, res) => {
 
     if (!svc.length) return res.status(404).json({ error: "Service not found" });
     await redisClient.del("cache:active_services");
+    await redisClient.del("cache:landing_stats");
+    broadcastServerEvent("services_updated", { service: svc[0] });
+    broadcastServerEvent("availability_updated", {});
     res.json(svc[0]);
 });
 
@@ -618,6 +698,9 @@ apiRouter.delete("/admin/services/:id", requireAdmin, async (req, res) => {
         await db.delete(bookings).where(eq(bookings.serviceId, serviceId));
         await db.delete(services).where(eq(services.id, serviceId));
         await redisClient.del("cache:active_services");
+        await redisClient.del("cache:landing_stats");
+        broadcastServerEvent("services_updated", { deletedId: serviceId });
+        broadcastServerEvent("availability_updated", {});
 
         res.json({ success: true, message: "Service deleted successfully" });
     } catch (e: any) {

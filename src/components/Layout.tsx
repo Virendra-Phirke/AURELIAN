@@ -186,9 +186,17 @@ export default function Layout() {
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/25 flex items-center justify-center overflow-hidden shrink-0 shadow-sm">
                 {session.user.image ? (
-                  <img src={session.user.image} alt={session.user.name} className="w-full h-full object-cover rounded-full" />
+                  <img
+                    src={session.user.image}
+                    referrerPolicy="no-referrer"
+                    alt={session.user.name || 'User'}
+                    className="w-full h-full object-cover rounded-full"
+                    onError={(e) => { (e.currentTarget as HTMLElement).style.display = 'none'; }}
+                  />
                 ) : (
-                  <User size={16} className="text-[var(--color-primary)]" />
+                  <span className="font-sans text-xs font-bold text-[var(--color-primary)] uppercase">
+                    {(session.user.name || 'C').charAt(0).toUpperCase()}
+                  </span>
                 )}
               </div>
               <div className="min-w-0 flex-1">

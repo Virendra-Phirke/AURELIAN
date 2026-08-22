@@ -89,11 +89,43 @@ export const auth = betterAuth({
             github: {
                 clientId: process.env.GITHUB_CLIENT_ID as string,
                 clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
+                mapProfileToUser: (profile: any) => ({
+                    name: profile.name || profile.login || "User",
+                    email: profile.email,
+                    image: profile.avatar_url || profile.picture || profile.image,
+                    emailVerified: true
+                })
             }
         } : {}),
         google: {
             clientId: process.env.GOOGLE_CLIENT_ID as string,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+            mapProfileToUser: (profile: any) => ({
+                name: profile.name || profile.given_name || "User",
+                email: profile.email,
+                image: profile.picture || profile.avatar_url || profile.image,
+                emailVerified: profile.email_verified ?? true
+            })
+        }
+    },
+    databaseHooks: {
+        user: {
+            create: {
+                before: async (user: any) => {
+                    if (!user.image && user.picture) {
+                        user.image = user.picture;
+                    }
+                    return { data: user };
+                }
+            },
+            update: {
+                before: async (user: any) => {
+                    if (!user.image && user.picture) {
+                        user.image = user.picture;
+                    }
+                    return { data: user };
+                }
+            }
         }
     },
     user: {

@@ -24,6 +24,7 @@ export function AvatarCircles({
             <img
               className="size-full object-cover"
               src={url.imageUrl}
+              referrerPolicy="no-referrer"
               alt={url.name || 'Avatar'}
             />
           ) : (

@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Layout from './components/Layout';
 import Landing from './pages/Landing';
@@ -46,7 +46,7 @@ function ProtectedRoute({ children, adminOnly = false, blockAdmin = false }: { c
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <StatCardSkeleton />
             <StatCardSkeleton />
-            <StatCardSkeleton />x``
+            <StatCardSkeleton />
             <StatCardSkeleton />
           </div>
           <Skeleton className="w-full h-36 rounded-2xl" />
@@ -58,19 +58,26 @@ function ProtectedRoute({ children, adminOnly = false, blockAdmin = false }: { c
         <div className="max-w-6xl mx-auto space-y-5 animate-in fade-in duration-300">
           <div className="space-y-2">
             <Skeleton className="w-48 h-6 rounded-md" />
-            <Skeleton className="w-80 h-4 rounded-md" />
+            <Skeleton className="w-32 h-4 rounded-full" />
           </div>
-          <div className="space-y-3">
-            <Skeleton className="w-full h-16 rounded-2xl" />
-            <Skeleton className="w-full h-16 rounded-2xl" />
-            <Skeleton className="w-full h-16 rounded-2xl" />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <Skeleton className="w-full h-24 rounded-2xl" />
+            <Skeleton className="w-full h-24 rounded-2xl" />
+            <Skeleton className="w-full h-24 rounded-2xl" />
           </div>
+          <Skeleton className="w-full h-64 rounded-2xl" />
         </div>
       );
     }
     return (
-      <div className="max-w-7xl mx-auto space-y-5 animate-in fade-in duration-300">
-        <Skeleton className="w-full h-24 rounded-2xl" />
+      <div className="p-4 sm:p-8 space-y-6 max-w-7xl mx-auto w-full">
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <Skeleton className="w-48 h-6 rounded-md" />
+            <Skeleton className="w-32 h-3 rounded-full" />
+          </div>
+          <Skeleton className="w-24 h-9 rounded-xl" />
+        </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <StatCardSkeleton />
           <StatCardSkeleton />
@@ -89,6 +96,18 @@ function ProtectedRoute({ children, adminOnly = false, blockAdmin = false }: { c
 }
 
 export default function App() {
+  useEffect(() => {
+    // If loaded inside an OAuth popup window, signal the opener and close immediately
+    if (window.opener && window.opener !== window) {
+      try {
+        window.opener.postMessage({ type: 'oauth_popup_done' }, window.location.origin);
+      } catch {}
+      // Close popup after a tiny delay to let the message propagate
+      setTimeout(() => window.close(), 100);
+      return;
+    }
+  }, []);
+
   return (
     <ThemeProvider defaultTheme="dark" storageKey="aurelian-ui-theme">
       <Suspense fallback={<RouteLoadingFallback />}>

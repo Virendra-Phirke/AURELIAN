@@ -9,7 +9,7 @@ import {
   subDays,
   isToday,
 } from 'date-fns';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Scissors,
@@ -21,6 +21,7 @@ import {
   Clock,
   CalendarDays,
   Check,
+  CheckCircle2,
   AlertCircle,
   ShieldCheck,
   Zap,
@@ -34,6 +35,9 @@ import { AvatarCircles } from '../components/magicui/avatar-circles';
 import { BlurFade } from '../components/magicui/blur-fade';
 import { AnimatedList } from '../components/magicui/animated-list';
 import { ServiceCardSkeleton, TimeSlotSkeleton } from '../components/ui/skeleton';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '../components/ui/dialog';
+import { formatTime12, formatTimeRange12 } from '../lib/utils';
+import { useLiveEvents } from '../lib/useLiveEvents';
 
 type Service = {
   id: string;
@@ -72,17 +76,6 @@ function getServicePrice(serviceOrName: any, duration?: number) {
   return (duration || 30) >= 45 ? 90 : (duration || 30) >= 30 ? 75 : 50;
 }
 
-function formatTime12(time24: string) {
-  try {
-    const [h, m] = time24.split(':').map(Number);
-    const period = h >= 12 ? 'PM' : 'AM';
-    const hour12 = h % 12 || 12;
-    return `${hour12}:${String(m).padStart(2, '0')} ${period}`;
-  } catch {
-    return time24;
-  }
-}
-
 export default function Booking() {
   const navigate = useNavigate();
 
@@ -101,27 +94,44 @@ export default function Booking() {
   const [bookingLoading, setBookingLoading] = useState(false);
   const [error, setError] = useState('');
   const [shopSettings, setShopSettings] = useState<any>(null);
+  const [confirmedBooking, setConfirmedBooking] = useState<{
+    id: string;
+    serviceName: string;
+    date: string;
+    startTime: string;
+    endTime?: string;
+    price?: number;
+  } | null>(null);
 
   // 1. Fetch available services & shop settings
-  useEffect(() => {
+  const fetchServicesAndSettings = useCallback(() => {
     fetch('/api/shop')
       .then((r) => r.json())
       .then((data) => setShopSettings(data))
       .catch(() => {});
+
     fetch('/api/services')
       .then((r) => r.json())
       .then((data) => {
         if (Array.isArray(data)) {
           setServices(data);
-          if (data.length > 0) {
-            setSelectedService(data[0]);
-          }
+          setSelectedService((prev) => {
+            if (!prev) return data.length > 0 ? data[0] : null;
+            const updated = data.find((s) => s.id === prev.id);
+            return updated || (data.length > 0 ? data[0] : null);
+          });
         }
       })
-      .catch(() => {
-        setServices([]);
-      });
+      .catch(() => {});
   }, []);
+
+  // Initial load & window focus check
+  useEffect(() => {
+    fetchServicesAndSettings();
+    const onFocus = () => fetchServicesAndSettings();
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+  }, [fetchServicesAndSettings]);
 
   // 2. Fetch availability when service or date changes
   const fetchAvailability = useCallback((isRefetch = false) => {
@@ -156,17 +166,22 @@ export default function Booking() {
 
   useEffect(() => {
     fetchAvailability(false);
-
-    // Live background polling every 15s to keep slots in sync
-    const interval = setInterval(() => fetchAvailability(true), 15000);
-    const onFocus = () => fetchAvailability(true);
-    window.addEventListener('focus', onFocus);
-
-    return () => {
-      clearInterval(interval);
-      window.removeEventListener('focus', onFocus);
-    };
   }, [fetchAvailability]);
+
+  // 3. Real-Time Server-Sent Event Triggers (Zero DB polling overhead)
+  useLiveEvents(useMemo(() => ({
+    services_updated: () => {
+      fetchServicesAndSettings();
+      fetchAvailability(true);
+    },
+    settings_updated: () => {
+      fetchServicesAndSettings();
+      fetchAvailability(true);
+    },
+    availability_updated: () => {
+      fetchAvailability(true);
+    },
+  }), [fetchServicesAndSettings, fetchAvailability]));
 
   // 3. 7-Day Week dates generation starting from weekStartDate (today)
   const calendarDays = useMemo(() => {
@@ -219,7 +234,21 @@ export default function Booking() {
         const data = await res.json();
         throw new Error(data.error || 'Booking failed');
       }
-      navigate('/dashboard');
+      const data = await res.json();
+
+      // Show confirmation dialog with receipt without refreshing or redirecting
+      setConfirmedBooking({
+        id: data.id,
+        serviceName: selectedService.name,
+        date: selectedDate,
+        startTime: data.startTime || selectedTime,
+        endTime: data.endTime,
+        price: getServicePrice(selectedService.name, selectedService.durationMinutes),
+      });
+
+      // Clear the selected slot and refresh availability
+      setSelectedTime(null);
+      fetchAvailability(true);
     } catch (err: any) {
       setError(err.message || 'Could not complete booking.');
       // Instantly refresh available slots from server and deselect conflicting slot
@@ -227,7 +256,7 @@ export default function Booking() {
     } finally {
       setBookingLoading(false);
     }
-  }, [selectedService, selectedDate, selectedTime, navigate, fetchAvailability]);
+  }, [selectedService, selectedDate, selectedTime, fetchAvailability, getServicePrice]);
 
   // Formatted date string for header: "Friday, October 20th, 2024"
   const formattedSelectedDate = useMemo(() => {
@@ -661,6 +690,97 @@ export default function Booking() {
           </div>
         </div>
       </div>
+
+      {/* ════════════════════════════════════════
+          SUCCESS CONFIRMATION MESSAGE BOX (NO REFRESH / NO REDIRECT)
+         ════════════════════════════════════════ */}
+      <Dialog open={!!confirmedBooking} onOpenChange={(open) => { if (!open) setConfirmedBooking(null); }}>
+        <DialogContent className="max-w-md p-5 sm:p-6 text-center" onClose={() => setConfirmedBooking(null)}>
+          <div className="flex flex-col items-center space-y-4">
+            {/* Animated Gold Check Badge */}
+            <div className="relative">
+              <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/5">
+                <CheckCircle2 size={28} className="stroke-[2.5]" />
+              </div>
+              <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--color-primary)] opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-[var(--color-primary)]"></span>
+              </span>
+            </div>
+
+            {/* Header Text */}
+            <div className="space-y-1">
+              <DialogTitle className="text-xl sm:text-2xl font-serif text-[var(--color-primary-text)] font-semibold">
+                Booking Confirmed!
+              </DialogTitle>
+              <DialogDescription className="text-xs text-[var(--color-secondary-text)] max-w-xs mx-auto">
+                Your appointment has been successfully scheduled with zero delay.
+              </DialogDescription>
+            </div>
+
+            {/* Luxury Receipt Card */}
+            {confirmedBooking && (
+              <div className="w-full text-left p-4 rounded-xl bg-[var(--color-surface-raised)] border border-[var(--color-border)] space-y-2.5 shadow-inner">
+                <div className="flex items-center justify-between pb-2 border-b border-[var(--color-border)]">
+                  <div>
+                    <span className="text-xs font-semibold text-[var(--color-primary-text)] block">
+                      {confirmedBooking.serviceName}
+                    </span>
+                    <span className="text-[10px] text-[var(--color-secondary-text)] font-sans">
+                      Aurelian Luxury Grooming
+                    </span>
+                  </div>
+                  <span className="font-serif text-sm font-bold text-[var(--color-primary)]">
+                    {(shopSettings?.currencySymbol || '$')}{confirmedBooking.price}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-[11px] font-sans">
+                  <div>
+                    <span className="text-[9px] uppercase tracking-wider text-[var(--color-muted-text)] block font-semibold">Date</span>
+                    <span className="text-[var(--color-primary-text)] font-medium">
+                      {format(parseISO(confirmedBooking.date), 'EEE, MMM d, yyyy')}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[9px] uppercase tracking-wider text-[var(--color-muted-text)] block font-semibold">Time Slot</span>
+                    <span className="text-[var(--color-primary)] font-bold">
+                      {formatTimeRange12(confirmedBooking.startTime, confirmedBooking.endTime)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-2 border-t border-[var(--color-border)] text-[10px]">
+                  <span className="text-[var(--color-secondary-text)] flex items-center gap-1">
+                    <ShieldCheck size={12} className="text-emerald-500" /> Confirmed Instantly
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 font-bold uppercase tracking-wider text-[8.5px]">
+                    ACCEPTED
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setConfirmedBooking(null)}
+                className="w-full py-2.5 px-4 rounded-xl bg-[var(--color-primary)] text-black font-sans text-xs uppercase tracking-wider font-bold hover:bg-[var(--color-primary-hover)] transition-all cursor-pointer shadow-sm text-center"
+              >
+                Book Another
+              </button>
+              <Link
+                to="/dashboard"
+                className="w-full py-2.5 px-4 rounded-xl bg-[var(--color-surface-raised)] border border-[var(--color-border)] text-[var(--color-primary-text)] font-sans text-xs uppercase tracking-wider font-semibold hover:bg-[var(--color-surface-hover)] transition-all cursor-pointer text-center flex items-center justify-center gap-1.5"
+              >
+                <span>View Dashboard</span>
+                <ArrowRight size={13} />
+              </Link>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

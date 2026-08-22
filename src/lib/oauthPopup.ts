@@ -1,5 +1,9 @@
 import { authClient } from './auth';
 
+/**
+ * Opens a centered popup for OAuth consent. After Google/GitHub redirects back,
+ * the popup auto-closes and the *original* tab navigates to callbackURL.
+ */
 export async function signInWithOAuthPopup(
   provider: 'google' | 'github',
   callbackURL: string = '/booking'
@@ -9,7 +13,7 @@ export async function signInWithOAuthPopup(
   const left = Math.max(0, Math.round(window.screenX + (window.outerWidth - width) / 2));
   const top = Math.max(0, Math.round(window.screenY + (window.outerHeight - height) / 2));
 
-  // 1. Open popup window synchronously on user gesture to avoid popup blockers
+  // 1. Open a blank popup synchronously (must be on user gesture to avoid blockers)
   const popup = window.open(
     'about:blank',
     `oauth_${provider}_popup`,
@@ -39,14 +43,14 @@ export async function signInWithOAuthPopup(
         </html>
       `);
     } catch {
-      // ignore cross-origin write notice
+      // ignore cross-origin write errors
     }
   }
 
   try {
-    // 2. Request authorization URL without redirecting parent window
-    const fullCallbackURL = callbackURL.startsWith('http') 
-      ? callbackURL 
+    // 2. Get the OAuth authorization URL from Better Auth without redirecting
+    const fullCallbackURL = callbackURL.startsWith('http')
+      ? callbackURL
       : `${window.location.origin}${callbackURL.startsWith('/') ? '' : '/'}${callbackURL}`;
 
     const res = await authClient.signIn.social({
@@ -58,48 +62,68 @@ export async function signInWithOAuthPopup(
     const targetUrl = (res as any)?.data?.url;
 
     if (targetUrl && popup && !popup.closed) {
+      // 3. Navigate the popup to the OAuth provider
       popup.location.href = targetUrl;
     } else if (targetUrl) {
+      // Popup was blocked — fall back to full redirect
       window.location.href = targetUrl;
       return;
     }
 
-    // 3. Monitor popup and session until authentication completes
-    const pollInterval = setInterval(async () => {
-      try {
-        const session = await (authClient as any).getSession({ query: {} });
-        if (session?.data?.user) {
-          clearInterval(pollInterval);
-          if (popup && !popup.closed) {
-            popup.close();
-          }
+    // 4. Wait for the popup to close OR for a postMessage signal
+    return new Promise<void>((resolve) => {
+      let resolved = false;
+      const cleanup = () => {
+        if (resolved) return;
+        resolved = true;
+        window.removeEventListener('message', onMessage);
+        clearInterval(closedPoll);
+        clearTimeout(timeout);
+      };
+
+      // Listen for the postMessage sent by the popup (from App.tsx popup detector)
+      const onMessage = (e: MessageEvent) => {
+        if (e.data?.type === 'oauth_popup_done') {
+          cleanup();
           window.location.href = callbackURL;
-          return;
+          resolve();
         }
+      };
+      window.addEventListener('message', onMessage);
 
-        if (popup?.closed) {
-          clearInterval(pollInterval);
-          // Check one final time
-          const finalSession = await (authClient as any).getSession({ query: {} });
-          if (finalSession?.data?.user) {
-            window.location.href = callbackURL;
-          }
+      // Also poll: if user manually closes popup, check session
+      const closedPoll = setInterval(async () => {
+        if (!popup || popup.closed) {
+          clearInterval(closedPoll);
+          // Give cookies a moment to propagate
+          await new Promise((r) => setTimeout(r, 300));
+          try {
+            const session = await (authClient as any).getSession({ query: {} });
+            if (session?.data?.user) {
+              cleanup();
+              window.location.href = callbackURL;
+              resolve();
+              return;
+            }
+          } catch {}
+          // If no session after popup closed, just resolve (user cancelled)
+          cleanup();
+          resolve();
         }
-      } catch {
-        // ignore polling errors
-      }
-    }, 500);
+      }, 600);
 
-    // Timeout after 3 minutes
-    setTimeout(() => {
-      clearInterval(pollInterval);
-    }, 180000);
+      // Timeout safety net: 3 minutes
+      const timeout = setTimeout(() => {
+        cleanup();
+        resolve();
+      }, 180000);
+    });
   } catch (err) {
     console.error('Error opening OAuth popup:', err);
     if (popup && !popup.closed) {
       popup.close();
     }
-    // Fallback to standard redirect if popup flow fails
+    // Fallback to standard redirect
     await authClient.signIn.social({
       provider,
       callbackURL,

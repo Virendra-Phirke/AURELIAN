@@ -17,6 +17,7 @@ import { NumberTicker } from '../components/magicui/number-ticker';
 import { SparklesText } from '../components/magicui/sparkles-text';
 import { Skeleton, StatCardSkeleton } from '../components/ui/skeleton';
 import { formatTime12, formatTimeRange12 } from '../lib/utils';
+import { useLiveEvents } from '../lib/useLiveEvents';
 
 // --- Types ---
 type Booking = {
@@ -171,6 +172,14 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => { fetchData(true); }, [fetchData]);
+
+  // Real-Time Server-Sent Event Triggers (Zero DB polling overhead)
+  useLiveEvents(useMemo(() => ({
+    bookings_updated: () => fetchData(false),
+    services_updated: () => fetchData(false),
+    settings_updated: () => fetchData(false),
+    availability_updated: () => fetchData(false),
+  }), [fetchData]));
 
   const handleCancel = useCallback(async (id: string) => {
     const res = await fetch(`/api/bookings/${id}`, { method: 'DELETE' });
@@ -379,9 +388,17 @@ export default function Dashboard() {
               <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full p-[2px] bg-[var(--color-surface-raised)] group-hover:border-[var(--color-primary)] transition-colors">
                 <div className="w-full h-full rounded-full bg-[var(--color-surface)] flex items-center justify-center overflow-hidden">
                   {user?.image ? (
-                    <img src={user.image} alt={user.name} className="w-full h-full object-cover" />
+                    <img
+                      src={user.image}
+                      referrerPolicy="no-referrer"
+                      alt={user.name || 'User'}
+                      className="w-full h-full object-cover"
+                      onError={(e) => { (e.currentTarget as HTMLElement).style.display = 'none'; }}
+                    />
                   ) : (
-                    <User size={16} className="text-[var(--color-secondary-text)] group-hover:text-[var(--color-primary)] transition-colors sm:w-5 sm:h-5" />
+                    <span className="font-sans text-xs sm:text-sm font-bold text-[var(--color-primary)] uppercase">
+                      {(user?.name || 'C').charAt(0).toUpperCase()}
+                    </span>
                   )}
                 </div>
               </div>

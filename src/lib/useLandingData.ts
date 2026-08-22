@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useLiveEvents } from './useLiveEvents';
 
 export interface ServiceItem {
   id: string;
@@ -28,10 +29,10 @@ export interface ShopSettings {
   breakStartTime?: string;
   breakEndTime?: string;
   breakEnabled?: boolean;
-  closedDays: string;
-  currencySymbol: string;
-  announcementText: string;
-  announcementActive: boolean;
+  closedDays?: string;
+  currencySymbol?: string;
+  announcementText?: string;
+  announcementActive?: boolean;
 }
 
 export interface LandingStats {
@@ -39,7 +40,7 @@ export interface LandingStats {
   totalClients: number;
   totalServices: number;
   satisfactionRate: number;
-  clientInitials?: string[];
+  clientInitials: string[];
 }
 
 const DEFAULT_SHOP: ShopSettings = {
@@ -57,6 +58,9 @@ const DEFAULT_SHOP: ShopSettings = {
   allowCancellation: true,
   cancellationCutoffHours: 2,
   cancellationCutoffMinutes: 120,
+  breakStartTime: '13:00',
+  breakEndTime: '14:00',
+  breakEnabled: false,
   closedDays: '0',
   currencySymbol: '$',
   announcementText: '',
@@ -77,45 +81,48 @@ export function useLandingData() {
   const [stats, setStats] = useState<LandingStats>(DEFAULT_STATS);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    let isMounted = true;
+  const loadData = useCallback(async () => {
+    try {
+      const [servicesRes, shopRes, statsRes] = await Promise.allSettled([
+        fetch('/api/services').then(r => (r.ok ? r.json() : [])),
+        fetch('/api/shop').then(r => (r.ok ? r.json() : null)),
+        fetch('/api/stats').then(r => (r.ok ? r.json() : null)),
+      ]);
 
-    async function loadData() {
-      try {
-        const [servicesRes, shopRes, statsRes] = await Promise.allSettled([
-          fetch('/api/services').then(r => (r.ok ? r.json() : [])),
-          fetch('/api/shop').then(r => (r.ok ? r.json() : null)),
-          fetch('/api/stats').then(r => (r.ok ? r.json() : null)),
-        ]);
-
-        if (!isMounted) return;
-
-        if (servicesRes.status === 'fulfilled' && Array.isArray(servicesRes.value)) {
-          setServices(servicesRes.value);
-        }
-        if (shopRes.status === 'fulfilled' && shopRes.value) {
-          const shopData = shopRes.value;
-          if (!shopData.currencySymbol || shopData.currencySymbol === '?') {
-            shopData.currencySymbol = '$';
-          }
-          setShop(shopData);
-        }
-        if (statsRes.status === 'fulfilled' && statsRes.value) {
-          setStats(statsRes.value);
-        }
-      } catch (err) {
-        console.error('Failed to load live database landing data:', err);
-      } finally {
-        if (isMounted) setLoading(false);
+      if (servicesRes.status === 'fulfilled' && Array.isArray(servicesRes.value)) {
+        setServices(servicesRes.value);
       }
+      if (shopRes.status === 'fulfilled' && shopRes.value) {
+        const shopData = shopRes.value;
+        if (!shopData.currencySymbol || shopData.currencySymbol === '?') {
+          shopData.currencySymbol = '$';
+        }
+        setShop(shopData);
+      }
+      if (statsRes.status === 'fulfilled' && statsRes.value) {
+        setStats(statsRes.value);
+      }
+    } catch (err) {
+      console.error('Failed to load live database landing data:', err);
+    } finally {
+      setLoading(false);
     }
-
-    loadData();
-    return () => {
-      isMounted = false;
-    };
   }, []);
+
+  useEffect(() => {
+    loadData();
+    const onFocus = () => loadData();
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+  }, [loadData]);
+
+  // Real-Time Server-Sent Event Triggers (Zero DB polling overhead)
+  useLiveEvents(useMemo(() => ({
+    services_updated: () => loadData(),
+    settings_updated: () => loadData(),
+    availability_updated: () => loadData(),
+    bookings_updated: () => loadData(),
+  }), [loadData]));
 
   return { services, shop, stats, loading };
 }
-

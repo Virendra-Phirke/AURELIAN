@@ -33,6 +33,7 @@ export function AvatarImage({
     <img
       src={src}
       alt={alt}
+      referrerPolicy="no-referrer"
       onError={() => setHasError(true)}
       className={cn('aspect-square h-full w-full object-cover', className)}
       {...props}

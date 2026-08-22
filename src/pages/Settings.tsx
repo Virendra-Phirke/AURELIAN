@@ -197,9 +197,17 @@ export default function Settings() {
             <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full p-[2px] bg-[var(--color-surface-raised)]">
               <div className="w-full h-full rounded-full bg-[var(--color-surface)] flex items-center justify-center overflow-hidden relative">
                 {newImage || user.image ? (
-                  <img src={newImage || user.image} alt={user.name} className="w-full h-full object-cover" />
+                  <img
+                    src={newImage || user.image}
+                    referrerPolicy="no-referrer"
+                    alt={user.name || 'User'}
+                    className="w-full h-full object-cover"
+                    onError={(e) => { (e.currentTarget as HTMLElement).style.display = 'none'; }}
+                  />
                 ) : (
-                  <User size={20} className="text-[var(--color-secondary-text)] sm:w-6 sm:h-6" />
+                  <span className="font-sans text-sm sm:text-base font-bold text-[var(--color-primary)] uppercase">
+                    {(user.name || 'C').charAt(0).toUpperCase()}
+                  </span>
                 )}
                 {isEditingProfile && (
                   <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
