@@ -103,9 +103,9 @@ export function FloatingCanvas3D() {
     const scene = new THREE.Scene();
     sceneRef.current = scene;
 
-    // Camera — ortho-ish wide FOV to cover full page depth
-    const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 500);
-    camera.position.z = 35;
+    // Camera — wide FOV so side-rail objects fill left/right gutters
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 500);
+    camera.position.z = 26;
 
     // Lights
     const colors = getColors();
@@ -127,14 +127,10 @@ export function FloatingCanvas3D() {
     const objects: FloatingObject[] = [];
 
     // ─────────────────────────────────────────────────────────────
-    // 40+ geometries spread in a tall Y-column to cover all sections
-    // Sections approximate positions (viewport heights):
-    //   Hero:          Y ~  8 to -8
-    //   Atmosphere:    Y ~ -8 to -20
-    //   Services:      Y ~ -20 to -36
-    //   Craftsmanship: Y ~ -36 to -50
-    //   Testimonials:  Y ~ -50 to -64
-    //   CTA/Footer:    Y ~ -64 to -78
+    // Objects clustered at EXTREME LEFT (X < -20) and RIGHT (X > 20)
+    // at CLOSE Z depth (-6 to -14) to fill the page side gutters.
+    // Two "rails" run the full page height, one per side.
+    // Y range: +12 (hero top) → -90 (footer bottom)
     // ─────────────────────────────────────────────────────────────
     const objectDefs: Array<{
       geo: THREE.BufferGeometry;
@@ -142,64 +138,77 @@ export function FloatingCanvas3D() {
       x: number; y: number; z: number;
       scale?: number;
     }> = [
-      // ── HERO ZONE ─────────────────────────────────────────────
-      { geo: new THREE.IcosahedronGeometry(1.4, 0),       type: 'metal',  x: -20, y:  8,  z: -18, scale: 1 },
-      { geo: new THREE.IcosahedronGeometry(0.8, 0),       type: 'wire',   x:  18, y: 10,  z: -22, scale: 1 },
-      { geo: new THREE.OctahedronGeometry(1.2, 0),        type: 'glass',  x: -24, y: -4,  z: -12, scale: 1 },
-      { geo: new THREE.DodecahedronGeometry(1.1, 0),      type: 'neon',   x:  22, y: -6,  z: -20, scale: 1 },
-      { geo: new THREE.TorusGeometry(1.1, 0.28, 10, 28),  type: 'wire',   x: -12, y: 14,  z: -28, scale: 1 },
-      { geo: new THREE.TetrahedronGeometry(1.3, 0),       type: 'metal',  x:  10, y: 16,  z: -16, scale: 1 },
-      { geo: new THREE.TorusGeometry(0.8, 0.18, 8, 20),   type: 'glass',  x:  26, y:  4,  z: -24, scale: 1 },
-      { geo: new THREE.BoxGeometry(1.0, 1.0, 1.0),        type: 'wire',   x: -28, y:  2,  z: -22, scale: 1 },
-      { geo: new THREE.ConeGeometry(0.9, 1.8, 6),         type: 'neon',   x:  14, y: -12, z: -14, scale: 1 },
-      { geo: new THREE.SphereGeometry(0.7, 8, 8),         type: 'glass',  x: -16, y: -14, z: -20, scale: 1 },
+      // ── LEFT RAIL — Hero ─────────────────────────────────────────
+      { geo: new THREE.IcosahedronGeometry(1.6, 0),        type: 'metal',  x: -28, y:  10, z:  -8, scale: 1.8 },
+      { geo: new THREE.TorusGeometry(1.2, 0.32, 10, 32),   type: 'wire',   x: -32, y:   4, z:  -6, scale: 1.6 },
+      { geo: new THREE.OctahedronGeometry(1.4, 0),         type: 'neon',   x: -26, y:  -2, z: -10, scale: 1.5 },
+      { geo: new THREE.DodecahedronGeometry(1.0, 0),       type: 'glass',  x: -30, y:  -8, z:  -7, scale: 2.0 },
 
-      // ── ATMOSPHERE ZONE (Y ~ -8 to -24) ──────────────────────
-      { geo: new THREE.DodecahedronGeometry(1.3, 0),      type: 'wire',   x:  24, y: -10, z: -25, scale: 1 },
-      { geo: new THREE.OctahedronGeometry(1.0, 0),        type: 'metal',  x: -22, y: -12, z: -16, scale: 1 },
-      { geo: new THREE.TorusGeometry(1.4, 0.22, 8, 30),   type: 'glass',  x:  16, y: -18, z: -30, scale: 1 },
-      { geo: new THREE.IcosahedronGeometry(0.9, 0),       type: 'neon',   x: -18, y: -20, z: -18, scale: 1 },
-      { geo: new THREE.BoxGeometry(1.2, 1.2, 1.2),        type: 'wire',   x:  26, y: -22, z: -20, scale: 1 },
-      { geo: new THREE.TetrahedronGeometry(1.0, 0),       type: 'glass',  x:  -8, y: -24, z: -22, scale: 1 },
-      { geo: new THREE.SphereGeometry(1.1, 10, 10),       type: 'metal',  x:  20, y: -26, z: -18, scale: 1 },
-      { geo: new THREE.ConeGeometry(0.8, 1.6, 5),         type: 'wire',   x: -26, y: -28, z: -24, scale: 1 },
+      // ── RIGHT RAIL — Hero ────────────────────────────────────────
+      { geo: new THREE.DodecahedronGeometry(1.3, 0),       type: 'neon',   x:  28, y:  10, z:  -9, scale: 1.7 },
+      { geo: new THREE.IcosahedronGeometry(1.1, 0),        type: 'wire',   x:  32, y:   3, z:  -6, scale: 1.8 },
+      { geo: new THREE.TorusGeometry(1.0, 0.28, 8, 28),    type: 'metal',  x:  26, y:  -3, z:  -8, scale: 1.6 },
+      { geo: new THREE.OctahedronGeometry(1.5, 0),         type: 'glass',  x:  30, y:  -9, z: -11, scale: 1.4 },
 
-      // ── SERVICES ZONE (Y ~ -28 to -44) ───────────────────────
-      { geo: new THREE.TorusGeometry(0.9, 0.2, 8, 22),    type: 'neon',   x:  18, y: -30, z: -22, scale: 1 },
-      { geo: new THREE.IcosahedronGeometry(1.2, 0),       type: 'metal',  x: -24, y: -32, z: -28, scale: 1 },
-      { geo: new THREE.DodecahedronGeometry(0.9, 0),      type: 'glass',  x:  22, y: -34, z: -16, scale: 1 },
-      { geo: new THREE.OctahedronGeometry(1.4, 0),        type: 'wire',   x: -14, y: -36, z: -26, scale: 1 },
-      { geo: new THREE.TetrahedronGeometry(1.1, 0),       type: 'neon',   x:  28, y: -38, z: -30, scale: 1 },
-      { geo: new THREE.TorusGeometry(1.2, 0.25, 10, 26),  type: 'metal',  x: -28, y: -40, z: -20, scale: 1 },
-      { geo: new THREE.BoxGeometry(0.9, 0.9, 0.9),        type: 'glass',  x:  10, y: -42, z: -24, scale: 1 },
-      { geo: new THREE.ConeGeometry(1.0, 2.0, 7),         type: 'wire',   x: -10, y: -44, z: -18, scale: 1 },
+      // ── LEFT RAIL — Atmosphere ───────────────────────────────────
+      { geo: new THREE.TetrahedronGeometry(1.4, 0),        type: 'metal',  x: -28, y: -14, z:  -7, scale: 2.0 },
+      { geo: new THREE.TorusGeometry(1.3, 0.30, 10, 30),   type: 'neon',   x: -32, y: -20, z:  -9, scale: 1.5 },
+      { geo: new THREE.BoxGeometry(1.4, 1.4, 1.4),         type: 'wire',   x: -26, y: -26, z:  -6, scale: 1.7 },
+      { geo: new THREE.IcosahedronGeometry(1.2, 0),        type: 'glass',  x: -30, y: -32, z:  -8, scale: 1.9 },
 
-      // ── CRAFTSMANSHIP ZONE (Y ~ -44 to -60) ──────────────────
-      { geo: new THREE.IcosahedronGeometry(1.0, 0),       type: 'glass',  x:  24, y: -46, z: -22, scale: 1 },
-      { geo: new THREE.SphereGeometry(0.9, 10, 10),       type: 'neon',   x: -22, y: -48, z: -20, scale: 1 },
-      { geo: new THREE.DodecahedronGeometry(1.2, 0),      type: 'metal',  x:  16, y: -50, z: -30, scale: 1 },
-      { geo: new THREE.OctahedronGeometry(0.8, 0),        type: 'wire',   x: -18, y: -52, z: -16, scale: 1 },
-      { geo: new THREE.TorusGeometry(0.8, 0.16, 8, 18),   type: 'glass',  x:  26, y: -54, z: -25, scale: 1 },
-      { geo: new THREE.TetrahedronGeometry(1.3, 0),       type: 'neon',   x: -26, y: -56, z: -22, scale: 1 },
-      { geo: new THREE.BoxGeometry(1.1, 1.1, 1.1),        type: 'metal',  x:  12, y: -58, z: -18, scale: 1 },
+      // ── RIGHT RAIL — Atmosphere ──────────────────────────────────
+      { geo: new THREE.SphereGeometry(1.2, 10, 10),        type: 'metal',  x:  28, y: -14, z:  -8, scale: 1.8 },
+      { geo: new THREE.OctahedronGeometry(1.3, 0),         type: 'wire',   x:  32, y: -21, z:  -6, scale: 1.6 },
+      { geo: new THREE.DodecahedronGeometry(1.1, 0),       type: 'neon',   x:  26, y: -27, z: -10, scale: 2.0 },
+      { geo: new THREE.TorusGeometry(1.1, 0.26, 8, 26),    type: 'glass',  x:  30, y: -33, z:  -7, scale: 1.5 },
 
-      // ── TESTIMONIALS ZONE (Y ~ -60 to -74) ───────────────────
-      { geo: new THREE.IcosahedronGeometry(1.3, 0),       type: 'wire',   x: -20, y: -60, z: -28, scale: 1 },
-      { geo: new THREE.TorusGeometry(1.0, 0.22, 10, 24),  type: 'metal',  x:  22, y: -62, z: -20, scale: 1 },
-      { geo: new THREE.DodecahedronGeometry(0.8, 0),      type: 'neon',   x: -14, y: -64, z: -22, scale: 1 },
-      { geo: new THREE.OctahedronGeometry(1.1, 0),        type: 'glass',  x:  18, y: -66, z: -26, scale: 1 },
-      { geo: new THREE.ConeGeometry(0.9, 1.8, 6),         type: 'wire',   x: -24, y: -68, z: -18, scale: 1 },
-      { geo: new THREE.SphereGeometry(1.2, 12, 12),       type: 'metal',  x:  14, y: -70, z: -30, scale: 1 },
-      { geo: new THREE.TetrahedronGeometry(0.9, 0),       type: 'glass',  x: -28, y: -72, z: -24, scale: 1 },
+      // ── LEFT RAIL — Services ──────────────────────────────────────
+      { geo: new THREE.ConeGeometry(1.1, 2.2, 7),          type: 'neon',   x: -28, y: -38, z:  -9, scale: 1.6 },
+      { geo: new THREE.IcosahedronGeometry(1.5, 0),        type: 'metal',  x: -32, y: -44, z:  -7, scale: 1.8 },
+      { geo: new THREE.TorusGeometry(1.2, 0.28, 10, 28),   type: 'wire',   x: -26, y: -50, z: -11, scale: 1.7 },
+      { geo: new THREE.OctahedronGeometry(1.3, 0),         type: 'glass',  x: -30, y: -56, z:  -8, scale: 2.0 },
 
-      // ── CTA / FOOTER ZONE (Y ~ -74 to -88) ───────────────────
-      { geo: new THREE.IcosahedronGeometry(1.5, 0),       type: 'neon',   x:  24, y: -74, z: -22, scale: 1 },
-      { geo: new THREE.TorusGeometry(1.3, 0.28, 10, 28),  type: 'wire',   x: -22, y: -76, z: -28, scale: 1 },
-      { geo: new THREE.DodecahedronGeometry(1.1, 0),      type: 'metal',  x:  16, y: -78, z: -20, scale: 1 },
-      { geo: new THREE.OctahedronGeometry(1.3, 0),        type: 'glass',  x: -18, y: -80, z: -25, scale: 1 },
-      { geo: new THREE.BoxGeometry(1.3, 1.3, 1.3),        type: 'neon',   x:  28, y: -82, z: -18, scale: 1 },
-      { geo: new THREE.TorusGeometry(0.9, 0.2, 8, 20),    type: 'metal',  x: -26, y: -84, z: -22, scale: 1 },
+      // ── RIGHT RAIL — Services ────────────────────────────────────
+      { geo: new THREE.TetrahedronGeometry(1.3, 0),        type: 'wire',   x:  28, y: -38, z:  -8, scale: 1.9 },
+      { geo: new THREE.DodecahedronGeometry(1.4, 0),       type: 'glass',  x:  32, y: -44, z: -10, scale: 1.6 },
+      { geo: new THREE.IcosahedronGeometry(1.0, 0),        type: 'neon',   x:  26, y: -50, z:  -7, scale: 2.2 },
+      { geo: new THREE.TorusGeometry(1.3, 0.30, 10, 30),   type: 'metal',  x:  30, y: -56, z:  -9, scale: 1.5 },
+
+      // ── LEFT RAIL — Craftsmanship ─────────────────────────────────
+      { geo: new THREE.SphereGeometry(1.3, 12, 12),        type: 'neon',   x: -28, y: -62, z:  -8, scale: 1.7 },
+      { geo: new THREE.BoxGeometry(1.5, 1.5, 1.5),         type: 'metal',  x: -32, y: -68, z:  -6, scale: 1.5 },
+      { geo: new THREE.IcosahedronGeometry(1.4, 0),        type: 'wire',   x: -26, y: -74, z: -10, scale: 1.8 },
+      { geo: new THREE.OctahedronGeometry(1.2, 0),         type: 'glass',  x: -30, y: -80, z:  -8, scale: 2.0 },
+
+      // ── RIGHT RAIL — Craftsmanship ───────────────────────────────
+      { geo: new THREE.DodecahedronGeometry(1.2, 0),       type: 'wire',   x:  28, y: -62, z:  -9, scale: 1.9 },
+      { geo: new THREE.TorusGeometry(1.0, 0.24, 8, 24),    type: 'neon',   x:  32, y: -68, z:  -7, scale: 1.6 },
+      { geo: new THREE.TetrahedronGeometry(1.5, 0),        type: 'metal',  x:  26, y: -74, z:  -8, scale: 1.7 },
+      { geo: new THREE.IcosahedronGeometry(1.3, 0),        type: 'glass',  x:  30, y: -80, z: -11, scale: 1.5 },
+
+      // ── EXTRA DEEP FILL — mid-page left (more coverage) ──────────
+      { geo: new THREE.TorusGeometry(0.9, 0.22, 8, 22),    type: 'neon',   x: -35, y:   0, z: -12, scale: 2.2 },
+      { geo: new THREE.OctahedronGeometry(1.0, 0),         type: 'wire',   x: -35, y: -16, z:  -9, scale: 2.0 },
+      { geo: new THREE.DodecahedronGeometry(0.9, 0),       type: 'metal',  x: -35, y: -36, z: -10, scale: 2.1 },
+      { geo: new THREE.IcosahedronGeometry(1.1, 0),        type: 'glass',  x: -35, y: -54, z:  -8, scale: 1.9 },
+      { geo: new THREE.TorusGeometry(1.2, 0.28, 10, 26),   type: 'neon',   x: -35, y: -72, z: -11, scale: 2.0 },
+
+      // ── EXTRA DEEP FILL — mid-page right (more coverage) ─────────
+      { geo: new THREE.IcosahedronGeometry(1.1, 0),        type: 'wire',   x:  35, y:   0, z: -10, scale: 2.2 },
+      { geo: new THREE.TorusGeometry(1.0, 0.26, 8, 24),    type: 'metal',  x:  35, y: -18, z:  -8, scale: 2.0 },
+      { geo: new THREE.OctahedronGeometry(1.3, 0),         type: 'neon',   x:  35, y: -36, z: -12, scale: 1.8 },
+      { geo: new THREE.DodecahedronGeometry(1.0, 0),       type: 'glass',  x:  35, y: -55, z:  -9, scale: 2.1 },
+      { geo: new THREE.BoxGeometry(1.2, 1.2, 1.2),         type: 'wire',   x:  35, y: -72, z: -10, scale: 2.0 },
+
+      // ── VERY CLOSE accent objects — peek at viewport edges ────────
+      { geo: new THREE.IcosahedronGeometry(2.0, 0),        type: 'wire',   x: -38, y:   6, z:  -5, scale: 1.0 },
+      { geo: new THREE.TorusGeometry(1.8, 0.40, 8, 32),    type: 'neon',   x:  38, y:   6, z:  -5, scale: 1.0 },
+      { geo: new THREE.OctahedronGeometry(2.2, 0),         type: 'glass',  x: -38, y: -42, z:  -5, scale: 1.0 },
+      { geo: new THREE.DodecahedronGeometry(1.8, 0),       type: 'metal',  x:  38, y: -42, z:  -5, scale: 1.0 },
+      { geo: new THREE.IcosahedronGeometry(2.0, 0),        type: 'neon',   x: -38, y: -80, z:  -5, scale: 1.0 },
+      { geo: new THREE.TorusGeometry(1.6, 0.35, 8, 28),    type: 'wire',   x:  38, y: -80, z:  -5, scale: 1.0 },
     ];
+
 
     objectDefs.forEach((def) => {
       const mat = createMaterial(def.type, colors);
@@ -392,7 +401,7 @@ export function FloatingCanvas3D() {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 w-full h-full pointer-events-none z-0"
-      style={{ opacity: 0.75 }}
+      style={{ opacity: 0.88 }}
     />
   );
 }
