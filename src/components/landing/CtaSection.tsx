@@ -103,16 +103,7 @@ export function CtaSection({ shop }: CtaSectionProps) {
               <div className="space-y-4">
                 <h2 className="font-brand text-4xl sm:text-5xl lg:text-6xl leading-tight" style={{ color: 'var(--color-primary-text)' }}>
                   Your{' '}
-                  <span
-                    style={{
-                      background: isDark
-                        ? 'linear-gradient(135deg, #e5c378 0%, #fff0c0 50%, #e5c378 100%)'
-                        : 'linear-gradient(135deg, #b8860b 0%, #996515 100%)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      backgroundClip: 'text',
-                    }}
-                  >
+                  <span className="text-gold-gradient">
                     Signature
                   </span>{' '}
                   Awaits

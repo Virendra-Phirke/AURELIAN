@@ -91,16 +91,7 @@ export function CraftsmanshipSection() {
             style={{ color: 'var(--color-primary-text)' }}
           >
             The{' '}
-            <span
-              style={{
-                background: isDark
-                  ? 'linear-gradient(135deg, #e5c378 0%, #fff0c0 100%)'
-                  : 'linear-gradient(135deg, #b8860b 0%, #996515 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
-            >
+            <span className="text-gold-gradient">
               Craftsmanship
             </span>{' '}
             Journey

@@ -108,14 +108,7 @@ export function ServicesSection({ services: propServices, shop, loading }: Servi
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <h2 className="font-brand text-4xl sm:text-5xl lg:text-6xl" style={{ color: 'var(--color-primary-text)' }}>
               Our{' '}
-              <span
-                style={{
-                  background: 'linear-gradient(135deg, var(--color-primary) 0%, #fff0c0 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}
-              >
+              <span className="text-gold-gradient">
                 Signature Services
               </span>
             </h2>
