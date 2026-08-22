@@ -116,14 +116,14 @@ export function TestimonialsSection() {
 
   return (
     <section id="membership" ref={ref} className="relative py-24 overflow-hidden">
-      {/* 3D Orb accents flanking the section */}
+      {/* 3D Polyhedron accents flanking the section */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={inView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 1, delay: 0.1 }}
         className="absolute top-4 left-6 pointer-events-none hidden lg:block"
       >
-        <ScrollOrb3D variant="ring" size={100} speed={0.7} />
+        <ScrollOrb3D variant="polyhedron" size={120} speed={0.7} />
       </motion.div>
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -131,7 +131,7 @@ export function TestimonialsSection() {
         transition={{ duration: 1, delay: 0.25 }}
         className="absolute top-4 right-6 pointer-events-none hidden lg:block"
       >
-        <ScrollOrb3D variant="star" size={100} speed={0.55} />
+        <ScrollOrb3D variant="polyhedron" size={120} speed={0.55} />
       </motion.div>
 
       <div className="space-y-12">

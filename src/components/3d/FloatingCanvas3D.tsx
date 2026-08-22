@@ -220,6 +220,19 @@ export function FloatingCanvas3D() {
         Math.random() * Math.PI * 2,
         Math.random() * Math.PI * 2
       );
+
+      // Add vertex nodes to polyhedra matching the Framer Polyhedron design
+      if (def.type === 'wire' || def.type === 'neon') {
+        const pointsMat = new THREE.PointsMaterial({
+          color: colors.primary,
+          size: 0.16,
+          transparent: true,
+          opacity: isDark() ? 0.85 : 0.6,
+        });
+        const pointsMesh = new THREE.Points(def.geo, pointsMat);
+        mesh.add(pointsMesh);
+      }
+
       scene.add(mesh);
 
       objects.push({

@@ -36,14 +36,14 @@ export function CtaSection({ shop }: CtaSectionProps) {
         }}
       />
 
-      {/* Flanking 3D orbs */}
+      {/* Flanking 3D Polyhedron models */}
       <motion.div
         initial={{ opacity: 0, x: -60 }}
         animate={inView ? { opacity: 1, x: 0 } : {}}
         transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
         className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none hidden xl:block"
       >
-        <ScrollOrb3D variant="helix" size={200} speed={0.5} />
+        <ScrollOrb3D variant="polyhedron" size={220} speed={0.6} />
       </motion.div>
       <motion.div
         initial={{ opacity: 0, x: 60 }}
@@ -51,7 +51,7 @@ export function CtaSection({ shop }: CtaSectionProps) {
         transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
         className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none hidden xl:block"
       >
-        <ScrollOrb3D variant="ring" size={200} speed={0.65} />
+        <ScrollOrb3D variant="polyhedron" size={220} speed={0.75} />
       </motion.div>
 
       <div className="max-w-4xl mx-auto relative z-10">
