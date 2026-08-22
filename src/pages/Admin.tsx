@@ -14,6 +14,7 @@ import { BorderBeam } from '../components/magicui/border-beam';
 import { BlurFade } from '../components/magicui/blur-fade';
 import { AnimatedList } from '../components/magicui/animated-list';
 import { Skeleton, StatCardSkeleton } from '../components/ui/skeleton';
+import { formatTime12, formatTimeRange12 } from '../lib/utils';
 
 // --- Types ---
 type Booking = {
@@ -1419,7 +1420,7 @@ export default function Admin() {
                                         <div className="font-sans text-[10px] text-[var(--color-secondary-text)] flex items-center gap-1.5 pt-0.5">
                                           <span>{format(parseISO(b.bookingDate), 'MMM d, yyyy')}</span>
                                           <span>•</span>
-                                          <span className="font-medium text-[var(--color-primary-text)]">{b.startTime}</span>
+                                          <span className="font-medium text-[var(--color-primary-text)]">{formatTimeRange12(b.startTime, b.endTime)}</span>
                                         </div>
                                       </div>
                                     </div>
@@ -1590,7 +1591,7 @@ export default function Admin() {
                                         </div>
                                         <div>
                                           <span className="text-[10px] uppercase tracking-wider text-[var(--color-muted-text)] block font-semibold">Scheduled</span>
-                                          <span className="text-[var(--color-secondary-text)] text-xs">{format(parseISO(b.bookingDate), 'MMM d, yyyy')} • {b.startTime}</span>
+                                          <span className="text-[var(--color-secondary-text)] text-xs">{format(parseISO(b.bookingDate), 'MMM d, yyyy')} • {formatTimeRange12(b.startTime, b.endTime)}</span>
                                         </div>
                                       </div>
 
@@ -1995,7 +1996,12 @@ export default function Admin() {
                         {/* Daily Open / Close */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
-                            <label className="block font-sans text-[10px] uppercase tracking-wider text-[var(--color-primary)] font-semibold mb-1.5">Opening Time</label>
+                            <div className="flex items-center justify-between mb-1.5">
+                              <label className="block font-sans text-[10px] uppercase tracking-wider text-[var(--color-primary)] font-semibold">Opening Time</label>
+                              <span className="font-sans text-[10px] font-bold text-[var(--color-primary-text)] bg-[var(--color-surface-raised)] px-2 py-0.5 rounded-md border border-[var(--color-border)]">
+                                {formatTime12(settings.openingTime || '09:00')}
+                              </span>
+                            </div>
                             <input
                               type="time"
                               value={settings.openingTime || '09:00'}
@@ -2004,7 +2010,12 @@ export default function Admin() {
                             />
                           </div>
                           <div>
-                            <label className="block font-sans text-[10px] uppercase tracking-wider text-[var(--color-primary)] font-semibold mb-1.5">Closing Time</label>
+                            <div className="flex items-center justify-between mb-1.5">
+                              <label className="block font-sans text-[10px] uppercase tracking-wider text-[var(--color-primary)] font-semibold">Closing Time</label>
+                              <span className="font-sans text-[10px] font-bold text-[var(--color-primary-text)] bg-[var(--color-surface-raised)] px-2 py-0.5 rounded-md border border-[var(--color-border)]">
+                                {formatTime12(settings.closingTime || '19:00')}
+                              </span>
+                            </div>
                             <input
                               type="time"
                               value={settings.closingTime || '19:00'}
@@ -2075,7 +2086,12 @@ export default function Admin() {
                           {settings.breakEnabled && (
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-[var(--color-border)]">
                               <div>
-                                <label className="block font-sans text-[10px] uppercase tracking-wider text-[var(--color-muted-text)] font-semibold mb-1">Break Start</label>
+                                <div className="flex items-center justify-between mb-1">
+                                  <label className="block font-sans text-[10px] uppercase tracking-wider text-[var(--color-muted-text)] font-semibold">Break Start</label>
+                                  <span className="font-sans text-[10px] font-bold text-[var(--color-primary-text)] bg-[var(--color-card-bg)] px-2 py-0.5 rounded-md border border-[var(--color-border)]">
+                                    {formatTime12(settings.breakStartTime || '13:00')}
+                                  </span>
+                                </div>
                                 <input
                                   type="time"
                                   value={settings.breakStartTime || '13:00'}
@@ -2084,7 +2100,12 @@ export default function Admin() {
                                 />
                               </div>
                               <div>
-                                <label className="block font-sans text-[10px] uppercase tracking-wider text-[var(--color-muted-text)] font-semibold mb-1">Break End</label>
+                                <div className="flex items-center justify-between mb-1">
+                                  <label className="block font-sans text-[10px] uppercase tracking-wider text-[var(--color-muted-text)] font-semibold">Break End</label>
+                                  <span className="font-sans text-[10px] font-bold text-[var(--color-primary-text)] bg-[var(--color-card-bg)] px-2 py-0.5 rounded-md border border-[var(--color-border)]">
+                                    {formatTime12(settings.breakEndTime || '14:00')}
+                                  </span>
+                                </div>
                                 <input
                                   type="time"
                                   value={settings.breakEndTime || '14:00'}

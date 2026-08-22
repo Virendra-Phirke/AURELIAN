@@ -16,6 +16,7 @@ import { BorderBeam } from '../components/magicui/border-beam';
 import { NumberTicker } from '../components/magicui/number-ticker';
 import { SparklesText } from '../components/magicui/sparkles-text';
 import { Skeleton, StatCardSkeleton } from '../components/ui/skeleton';
+import { formatTime12, formatTimeRange12 } from '../lib/utils';
 
 // --- Types ---
 type Booking = {
@@ -430,7 +431,7 @@ export default function Dashboard() {
         <StatCard
           label="Next Appointment"
           value={nextAppointment ? format(parseISO(nextAppointment.bookingDate), 'MMM d') : '—'}
-          subtext={nextAppointment ? `${nextAppointment.startTime} · ${services[nextAppointment.serviceId] || 'Service'}` : 'None scheduled'}
+          subtext={nextAppointment ? `${formatTimeRange12(nextAppointment.startTime, nextAppointment.endTime)} · ${services[nextAppointment.serviceId] || 'Service'}` : 'None scheduled'}
           icon={<CalendarDays size={15} />}
           accent={!!nextAppointment}
           pathData={spark1}
@@ -498,7 +499,7 @@ export default function Dashboard() {
                       </div>
                       <div className="flex items-center gap-2 font-sans text-[10px] sm:text-[11px] text-[var(--color-secondary-text)]">
                         <Clock size={11} className="text-[var(--color-primary)]" />
-                        <span>{b.startTime}{b.endTime ? ` – ${b.endTime}` : ''}</span>
+                        <span>{formatTimeRange12(b.startTime, b.endTime)}</span>
                       </div>
                     </div>
                     {(b.status === 'ACCEPTED' || b.status === 'PENDING') && (
@@ -547,7 +548,7 @@ export default function Dashboard() {
             <div className="space-y-2 font-sans text-[11px]">
               <div className="flex items-center justify-between py-0.5">
                 <span className="text-[var(--color-secondary-text)] uppercase tracking-wider text-[10px]">Opening Hours</span>
-                <span className="text-[var(--color-primary-text)] font-medium">{shopSettings.openingTime || '09:00'} – {shopSettings.closingTime || '19:00'}</span>
+                <span className="text-[var(--color-primary-text)] font-medium">{formatTime12(shopSettings.openingTime || '09:00')} – {formatTime12(shopSettings.closingTime || '19:00')}</span>
               </div>
               <div className="w-full h-[1px] bg-[var(--color-border)]" />
               <div className="flex items-center justify-between py-0.5">
@@ -621,7 +622,7 @@ export default function Dashboard() {
 
                 <div className="flex items-center gap-2 font-sans text-[10px] sm:text-[11px] text-[var(--color-secondary-text)]">
                   <Clock size={11} className="text-[var(--color-primary)]" />
-                  <span>{b.startTime}{b.endTime ? ` – ${b.endTime}` : ''}</span>
+                  <span>{formatTimeRange12(b.startTime, b.endTime)}</span>
                 </div>
 
                 {(b.status === 'ACCEPTED' || b.status === 'PENDING') && (
@@ -667,7 +668,7 @@ export default function Dashboard() {
                     <div>
                       <span className="text-xs text-[var(--color-primary-text)] font-medium">{getActivityLabel(b)}</span>
                       <span className="text-[10px] sm:text-[11px] text-[var(--color-secondary-text)] block font-sans">
-                        {format(parseISO(b.bookingDate), 'MMM d, yyyy')} at {b.startTime}
+                        {format(parseISO(b.bookingDate), 'MMM d, yyyy')} at {formatTime12(b.startTime)}
                       </span>
                     </div>
                     <span className="font-sans text-[9px] sm:text-[10px] uppercase tracking-wider text-[var(--color-muted-text)] shrink-0">
@@ -721,7 +722,7 @@ export default function Dashboard() {
                         <div>
                           <div className="text-xs font-medium text-[var(--color-primary-text)]">{services[b.serviceId] || 'Service'}</div>
                           <div className="font-sans text-[11px] text-[var(--color-secondary-text)]">
-                            {format(parseISO(b.bookingDate), 'MMM d, yyyy')} · {b.startTime}
+                            {format(parseISO(b.bookingDate), 'MMM d, yyyy')} · {formatTimeRange12(b.startTime, b.endTime)}
                           </div>
                         </div>
                       </div>

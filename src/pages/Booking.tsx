@@ -132,12 +132,17 @@ export default function Booking() {
       .then((r) => r.json())
       .then((data) => {
         if (Array.isArray(data)) {
-          setSlots(data);
-          // If current selectedTime is not in the new slots, clear it
+          const todayStr = format(new Date(), 'yyyy-MM-dd');
+          const nowStr = format(new Date(), 'HH:mm');
+          // For today, ensure past times are filtered out immediately
+          const filteredData = selectedDate === todayStr ? data.filter((s: string) => s >= nowStr) : data;
+          
+          setSlots(filteredData);
+          // If current selectedTime is not in the new slots, clear it or pick the first available
           setSelectedTime((prev) => {
-            if (prev && !data.includes(prev)) return null;
-            if (!prev && data.length > 0 && !isRefetch) {
-              return data.length > 1 ? data[1] : data[0];
+            if (prev && !filteredData.includes(prev)) return null;
+            if (!prev && filteredData.length > 0 && !isRefetch) {
+              return filteredData[0];
             }
             return prev;
           });
@@ -568,6 +573,12 @@ export default function Booking() {
                     <span className="flex items-center gap-1"><Clock size={11} /> {selectedService.durationMinutes} min</span>
                     <span>•</span>
                     <span className="flex items-center gap-1"><CalendarDays size={11} /> {format(parseISO(selectedDate), 'MMM d')}</span>
+                    {selectedTime && (
+                      <>
+                        <span>•</span>
+                        <span className="font-semibold text-[var(--color-primary)]">{formatTime12(selectedTime)}</span>
+                      </>
+                    )}
                   </div>
                 </div>
               )}

@@ -126,9 +126,29 @@ apiRouter.get("/availability", rateLimit("avail", 300, 60), async (req, res) => 
     const { date, service } = req.query as { date: string, service: string };
     if (!date || !service) return res.status(400).json({ error: "Date and service required" });
 
+    const now = new Date();
+    const todayStr = format(now, "yyyy-MM-dd");
+    
+    // Reject dates strictly in the past
+    if (date < todayStr) {
+        return res.json([]);
+    }
+
+    const isToday = date === todayStr;
+    const currentHourMin = format(now, "HH:mm");
+
     const cacheKey = `availability:${date}:${service}`;
     const cached = await redisClient.get(cacheKey);
-    if (cached) return res.json(JSON.parse(cached));
+    if (cached) {
+        try {
+            const rawSlots: string[] = JSON.parse(cached);
+            // If checking for today, dynamically filter out slots that have already passed right now
+            const filtered = isToday ? rawSlots.filter(s => s >= currentHourMin) : rawSlots;
+            return res.json(filtered);
+        } catch {
+            // Fall through to calculation if cache corrupted
+        }
+    }
 
     // Calculate availability
     const svc = await db.select().from(services).where(eq(services.name, service)).limit(1);
@@ -139,7 +159,7 @@ apiRouter.get("/availability", rateLimit("avail", 300, 60), async (req, res) => 
         openingTime: "09:00", 
         closingTime: "19:00", 
         slotDurationMinutes: 30, 
-        minimumAdvanceMinutes: 60, 
+        minimumAdvanceMinutes: 0, 
         maximumAdvanceDays: 30,
         breakStartTime: "13:00",
         breakEndTime: "14:00",
@@ -171,17 +191,14 @@ apiRouter.get("/availability", rateLimit("avail", 300, 60), async (req, res) => 
 
     let current = parse(`${date} ${shop.openingTime}`, "yyyy-MM-dd HH:mm", new Date());
     const closing = parse(`${date} ${shop.closingTime}`, "yyyy-MM-dd HH:mm", new Date());
-    const slots = [];
-
-    const now = new Date();
-    const minAdvance = addMinutes(now, shop.minimumAdvanceMinutes);
+    const slots: string[] = [];
 
     while (isBefore(addMinutes(current, svc[0].durationMinutes), closing) || current.getTime() === closing.getTime() - svc[0].durationMinutes * 60000) {
         const timeStr = format(current, "HH:mm");
         const slotEnd = addMinutes(current, svc[0].durationMinutes);
 
-        // Check past / minimum advance
-        if (isBefore(current, minAdvance)) {
+        // Filter out past time slots if booking for today
+        if (isToday && timeStr < currentHourMin) {
             current = addMinutes(current, shop.slotDurationMinutes);
             continue;
         }
@@ -228,7 +245,8 @@ apiRouter.get("/availability", rateLimit("avail", 300, 60), async (req, res) => 
         current = addMinutes(current, shop.slotDurationMinutes);
     }
 
-    await redisClient.set(cacheKey, JSON.stringify(slots), { EX: 15 });
+    // Cache computed slots in Redis for ultra-fast response (< 1ms)
+    await redisClient.set(cacheKey, JSON.stringify(slots), { EX: 30 });
     res.json(slots);
 });
 
@@ -279,11 +297,16 @@ apiRouter.post("/bookings", rateLimit("create_booking", 10, 60), requireAuth, as
                 throw new Error("Selected time is outside shop operating hours");
             }
 
-            // D. Check minimum advance notice
+            // D. Prevent booking past time slots
             const now = new Date();
-            const minAdvance = addMinutes(now, shop.minimumAdvanceMinutes);
-            if (isBefore(newStart, minAdvance)) {
-                throw new Error(`Bookings require at least ${shop.minimumAdvanceMinutes} minutes advance notice`);
+            if (isBefore(newStart, subMinutes(now, 2))) {
+                throw new Error("Selected time slot is in the past. Please choose an upcoming available slot.");
+            }
+            if (shop.minimumAdvanceMinutes && shop.minimumAdvanceMinutes > 0) {
+                const minAdvance = addMinutes(now, shop.minimumAdvanceMinutes);
+                if (isBefore(newStart, minAdvance)) {
+                    throw new Error(`Bookings require at least ${shop.minimumAdvanceMinutes} minutes advance notice`);
+                }
             }
 
             // E. Check holidays
