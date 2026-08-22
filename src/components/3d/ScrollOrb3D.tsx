@@ -1,12 +1,13 @@
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { useTheme } from '../../lib/theme';
+import { Polyhedron3D } from './Polyhedron3D';
 
 interface ScrollOrb3DProps {
   /** Size of canvas in pixels */
   size?: number;
   /** Geometry variant */
-  variant?: 'orb' | 'ring' | 'diamond' | 'helix' | 'star';
+  variant?: 'polyhedron' | 'orb' | 'ring' | 'diamond' | 'helix' | 'star';
   /** Position side for layout */
   side?: 'left' | 'right' | 'center';
   /** Rotation speed multiplier */
@@ -21,7 +22,7 @@ interface ScrollOrb3DProps {
  */
 export function ScrollOrb3D({
   size = 120,
-  variant = 'orb',
+  variant = 'polyhedron',
   speed = 1,
   className = '',
 }: ScrollOrb3DProps) {
@@ -30,6 +31,20 @@ export function ScrollOrb3D({
   const themeRef = useRef(theme);
 
   useEffect(() => { themeRef.current = theme; }, [theme]);
+
+  // If polyhedron variant, render using the requested Polyhedron3D component
+  if (variant === 'polyhedron') {
+    return (
+      <div style={{ width: size, height: size }} className={`shrink-0 pointer-events-none ${className}`}>
+        <Polyhedron3D
+          size={size * 0.85}
+          speed={speed}
+          nested={true}
+          interactive={false}
+        />
+      </div>
+    );
+  }
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -86,7 +101,6 @@ export function ScrollOrb3D({
       roughness: 0.15,
       transparent: true,
       opacity: isDark ? 0.85 : 0.65,
-      wireframe: variant === 'orb' ? false : false,
     });
     const mesh = new THREE.Mesh(geo, mat);
     scene.add(mesh);

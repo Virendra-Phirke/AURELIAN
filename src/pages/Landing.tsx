@@ -35,10 +35,10 @@ function ScrollProgress() {
 
 // Orb-accented gold divider placed between each section
 function GoldDivider({
-  variant = 'ring',
+  variant = 'polyhedron',
   side = 'left',
 }: {
-  variant?: 'orb' | 'ring' | 'diamond' | 'helix' | 'star';
+  variant?: 'polyhedron' | 'orb' | 'ring' | 'diamond' | 'helix' | 'star';
   side?: 'left' | 'right';
 }) {
   return (
@@ -113,14 +113,14 @@ export default function Landing() {
         {/* Hero with live shop tagline, live client count, and 3D kinetic centerpiece */}
         <HeroSection shop={shop} stats={stats} />
 
-        {/* ── Section break: diamond accent + right orb ── */}
-        <GoldDivider variant="diamond" side="right" />
+        {/* ── Section break: Polyhedron accent + right ── */}
+        <GoldDivider variant="polyhedron" side="right" />
 
         {/* Philosophy & Atmosphere with live DB metric tickers */}
         <AtmosphereSection stats={stats} />
 
-        {/* ── Section break: helix knot + left orb ── */}
-        <GoldDivider variant="helix" side="left" />
+        {/* ── Section break: Polyhedron accent + left ── */}
+        <GoldDivider variant="polyhedron" side="left" />
 
         {/* Services Showcase loaded directly from Database */}
         <ServicesSection services={services} shop={shop} loading={loading} />
@@ -131,14 +131,14 @@ export default function Landing() {
         {/* Craftsmanship Journey Protocol */}
         <CraftsmanshipSection />
 
-        {/* ── Section break: star + left orb ── */}
-        <GoldDivider variant="star" side="left" />
+        {/* ── Section break: Polyhedron accent + left ── */}
+        <GoldDivider variant="polyhedron" side="left" />
 
         {/* Client Reviews / Comments Marquee */}
         <TestimonialsSection />
 
-        {/* ── Section break: orb + right ── */}
-        <GoldDivider variant="orb" side="right" />
+        {/* ── Section break: Polyhedron accent + right ── */}
+        <GoldDivider variant="polyhedron" side="right" />
 
         {/* Grand CTA with real DB shop hours, cancellation cutoff, and instant booking lock */}
         <CtaSection shop={shop} />
