@@ -16,14 +16,14 @@ export default function Layout() {
 
   const isAuthPage = AUTH_PAGES.some(p => location.pathname.startsWith(p));
   const isAdminPage = location.pathname.startsWith('/admin');
-  const isLandingPage = location.pathname === '/';
+  const isLandingPage = location.pathname === '/' || location.pathname === '/privacy-policy' || location.pathname === '/privacy';
 
   const handleLogout = async () => {
     await authClient.signOut({});
     navigate('/login');
   };
 
-  // Landing page — full control, no chrome
+  // Landing & Policy pages — full control, dedicated layout
   if (isLandingPage) {
     return <Outlet />;
   }

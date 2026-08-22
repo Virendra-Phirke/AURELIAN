@@ -178,10 +178,14 @@ export function LandingFooter({ shop }: LandingFooterProps) {
             © {new Date().getFullYear()} {brandName}. All rights reserved.
           </p>
           <div className="flex gap-5">
-            {['Privacy Policy', 'Terms of Service', 'Cancellation Policy'].map(label => (
+            {[
+              { label: 'Privacy Policy', to: '/privacy-policy' },
+              { label: 'Terms of Service', to: '/privacy-policy' },
+              { label: 'Cancellation Policy', to: '/privacy-policy' },
+            ].map(({ label, to }) => (
               <Link
                 key={label}
-                to="/"
+                to={to}
                 className="font-sans text-[10px] transition-colors duration-200"
                 style={{ color: 'var(--color-muted-text)' }}
                 onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-primary)')}

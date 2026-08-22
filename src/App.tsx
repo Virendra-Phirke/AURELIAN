@@ -10,6 +10,7 @@ import Dashboard from './pages/Dashboard';
 import Settings from './pages/Settings';
 import Admin from './pages/Admin';
 import Landing from './pages/Landing';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 import { authClient } from './lib/auth';
 import { ThemeProvider } from './lib/theme';
 import { Skeleton, StatCardSkeleton } from './components/ui/skeleton';
@@ -30,7 +31,7 @@ function ProtectedRoute({ children, adminOnly = false, blockAdmin = false }: { c
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <StatCardSkeleton />
             <StatCardSkeleton />
-            <StatCardSkeleton />
+            <StatCardSkeleton />x``
             <StatCardSkeleton />
           </div>
           <Skeleton className="w-full h-36 rounded-2xl" />
@@ -82,6 +83,9 @@ export default function App() {
           <Route path="register" element={<Register />} />
           <Route path="forgot-password" element={<ForgotPassword />} />
           <Route path="reset-password" element={<ResetPassword />} />
+          
+          <Route path="privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="privacy" element={<Navigate to="/privacy-policy" replace />} />
           
           <Route path="booking" element={
             <ProtectedRoute blockAdmin={true}>
