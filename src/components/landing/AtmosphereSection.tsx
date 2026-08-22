@@ -64,7 +64,7 @@ export function AtmosphereSection({ stats }: AtmosphereSectionProps) {
   const totalBookings = stats?.totalBookings ?? 0;
   const totalClients = stats?.totalClients ?? 0;
   const totalServices = stats?.totalServices ?? 0;
-  const satisfactionRate = stats?.satisfactionRate ?? 98;
+  const satisfactionRate = stats?.satisfactionRate ?? 100;
 
   const metrics = [
     { end: totalBookings, label: 'Appointments Completed', suffix: totalBookings >= 100 ? '+' : '' },

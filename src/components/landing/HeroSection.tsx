@@ -26,21 +26,22 @@ export function HeroSection({ shop, stats }: HeroSectionProps) {
   };
 
   const clientCount = stats?.totalClients ?? 0;
-  const clientCountStr = clientCount >= 100 ? `${clientCount.toLocaleString()}+` : `${clientCount}`;
+  const clientCountStr = clientCount > 0 ? `${clientCount}` : '0';
 
   const servicesCount = stats?.totalServices ?? 0;
-  const servicesCountStr = servicesCount > 0 ? `${servicesCount} Signature Services` : 'Bespoke Services';
+  const servicesCountStr = servicesCount > 0 ? `${servicesCount} Signature Services` : 'Bespoke Atelier';
 
-  const satisfactionRate = stats?.satisfactionRate ?? 98;
+  const bookingsCount = stats?.totalBookings ?? 0;
+  const bookingsCountStr = bookingsCount > 0 ? `${bookingsCount} Completed` : 'Private Sanctuary';
 
   const floatBadges = [
-    { icon: Star, label: `${satisfactionRate}%`, sub: 'Satisfaction Rate', pos: 'top-8 left-6' },
-    { icon: Users, label: clientCountStr, sub: 'Loyal Clients', pos: 'bottom-16 left-2' },
+    { icon: Star, label: bookingsCount > 0 ? '100%' : 'Bespoke', sub: bookingsCount > 0 ? 'Satisfaction Rate' : 'Private Suites', pos: 'top-8 left-6' },
+    { icon: Users, label: clientCount > 0 ? `${clientCountStr} Loyal Clients` : 'Private Atelier', sub: 'Verified Patrons', pos: 'bottom-16 left-2' },
     { icon: Sparkles, label: servicesCountStr, sub: 'Crafted Packages', pos: 'top-12 right-4' },
   ];
 
   const tagline = shop?.shopTagline || 'Luxury Grooming & Styling';
-  const clientInitials = stats?.clientInitials && stats.clientInitials.length > 0 ? stats.clientInitials : ['A', 'V', 'R', 'S'];
+  const clientInitials = stats?.clientInitials || [];
 
   return (
     <section className="relative min-h-screen flex items-center pt-20 pb-12 px-6 sm:px-10 lg:px-16 overflow-hidden">
@@ -147,24 +148,45 @@ export function HeroSection({ shop, stats }: HeroSectionProps) {
             }}
           >
             <div className="flex -space-x-2">
-              {clientInitials.map((l, i) => (
+              {clientInitials.length > 0 ? (
+                clientInitials.map((l, i) => (
+                  <div
+                    key={i}
+                    className="w-8 h-8 rounded-full flex items-center justify-center font-brand text-xs font-bold border-2 backdrop-blur-md"
+                    style={{
+                      background: isDark ? 'rgba(229,195,120,0.18)' : 'linear-gradient(135deg, #f0ebd8 0%, #ffffff 100%)',
+                      borderColor: 'var(--color-primary)',
+                      color: 'var(--color-primary)',
+                      boxShadow: isDark ? '0 2px 8px rgba(0,0,0,0.3)' : '1px 1px 4px rgba(190,175,145,0.25)',
+                    }}
+                  >
+                    {l}
+                  </div>
+                ))
+              ) : (
                 <div
-                  key={i}
                   className="w-8 h-8 rounded-full flex items-center justify-center font-brand text-xs font-bold border-2 backdrop-blur-md"
                   style={{
                     background: isDark ? 'rgba(229,195,120,0.18)' : 'linear-gradient(135deg, #f0ebd8 0%, #ffffff 100%)',
                     borderColor: 'var(--color-primary)',
                     color: 'var(--color-primary)',
-                    boxShadow: isDark ? '0 2px 8px rgba(0,0,0,0.3)' : '1px 1px 4px rgba(190,175,145,0.25)',
                   }}
                 >
-                  {l}
+                  ⚜
                 </div>
-              ))}
+              )}
             </div>
             <p className="font-sans text-xs" style={{ color: 'var(--color-secondary-text)' }}>
-              <span style={{ color: 'var(--color-primary)', fontWeight: 700 }}>{clientCountStr}</span>{' '}
-              discerning clients trust {shop?.shopName || 'Aurelian'}
+              {clientCount > 0 ? (
+                <>
+                  <span style={{ color: 'var(--color-primary)', fontWeight: 700 }}>{clientCountStr}</span>{' '}
+                  discerning {clientCount === 1 ? 'client' : 'clients'} trust {shop?.shopName || 'Aurelian'}
+                </>
+              ) : (
+                <>
+                  Private sanctuary for discerning patrons of <span style={{ color: 'var(--color-primary)', fontWeight: 700 }}>{shop?.shopName || 'Aurelian'}</span>
+                </>
+              )}
             </p>
           </motion.div>
         </div>

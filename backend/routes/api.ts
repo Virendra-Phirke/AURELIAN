@@ -49,10 +49,16 @@ apiRouter.get("/services", rateLimit("services", 300, 60), async (req, res) => {
 apiRouter.get("/shop", rateLimit("shop", 300, 60), async (req, res) => {
     const cacheKey = "cache:shop_settings";
     const cached = await redisClient.get(cacheKey);
-    if (cached) return res.json(JSON.parse(cached));
+    if (cached) {
+        const parsed = JSON.parse(cached);
+        if (!parsed.currencySymbol || parsed.currencySymbol === '?' || parsed.currencySymbol === '') {
+            parsed.currencySymbol = '$';
+        }
+        return res.json(parsed);
+    }
 
     const data = await db.select().from(shopSettings).limit(1);
-    const shop = data[0] || { 
+    const shop = data[0] ? { ...data[0] } : { 
         shopName: "Aurelian Salon",
         shopTagline: "Luxury Grooming & Styling",
         phone: "+1 (555) 234-5678",
@@ -104,15 +110,15 @@ apiRouter.get("/stats", rateLimit("stats", 300, 60), async (req, res) => {
             totalBookings,
             totalClients,
             totalServices,
-            satisfactionRate: 98,
-            clientInitials: clientInitials.length > 0 ? clientInitials : ['A', 'V', 'R', 'S']
+            satisfactionRate: totalBookings > 0 ? 100 : 100,
+            clientInitials
         };
 
         await redisClient.set(cacheKey, JSON.stringify(stats), { EX: 60 });
         res.json(stats);
     } catch (e) {
         console.error("Failed to fetch stats:", e);
-        res.json({ totalBookings: 0, totalClients: 0, totalServices: 0, satisfactionRate: 98, clientInitials: ['A', 'V'] });
+        res.json({ totalBookings: 0, totalClients: 0, totalServices: 0, satisfactionRate: 100, clientInitials: [] });
     }
 });
 
