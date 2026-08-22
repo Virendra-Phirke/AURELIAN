@@ -5,6 +5,7 @@ import { ThemeToggle } from '../magicui/theme-toggle';
 import { authClient } from '../../lib/auth';
 import { ShopSettings } from '../../lib/useLandingData';
 import { Sparkles } from 'lucide-react';
+import { useTheme } from '../../lib/theme';
 
 const NAV_LINKS = [
   { label: 'Services', href: '#services' },
@@ -52,6 +53,8 @@ export function LandingHeader({ shop }: LandingHeaderProps) {
     setMobileOpen(false);
   };
 
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
   const brandName = shop?.shopName || 'AURELIAN';
 
   return (
@@ -62,10 +65,15 @@ export function LandingHeader({ shop }: LandingHeaderProps) {
       className="fixed top-0 left-0 right-0 z-50 transition-all duration-500"
       style={{
         background: scrolled
-          ? 'rgba(6,6,6,0.88)'
+          ? (isDark ? 'rgba(6,6,6,0.88)' : 'rgba(248,246,240,0.92)')
           : 'transparent',
         backdropFilter: scrolled ? 'blur(20px)' : 'none',
-        borderBottom: scrolled ? '1px solid rgba(229,195,120,0.12)' : 'none',
+        borderBottom: scrolled
+          ? (isDark ? '1px solid rgba(229,195,120,0.12)' : '1px solid rgba(196,151,42,0.2)')
+          : 'none',
+        boxShadow: scrolled
+          ? (isDark ? '0 10px 30px rgba(0,0,0,0.5)' : '0 8px 24px rgba(190,175,145,0.18)')
+          : 'none',
       }}
     >
       {/* Active Announcement Banner from DB */}
@@ -73,9 +81,11 @@ export function LandingHeader({ shop }: LandingHeaderProps) {
         <div
           className="px-4 py-1.5 text-center flex items-center justify-center gap-2 text-[11px] font-sans font-medium tracking-wide"
           style={{
-            background: 'linear-gradient(90deg, rgba(229,195,120,0.2) 0%, rgba(229,195,120,0.35) 50%, rgba(229,195,120,0.2) 100%)',
+            background: isDark
+              ? 'linear-gradient(90deg, rgba(229,195,120,0.2) 0%, rgba(229,195,120,0.35) 50%, rgba(229,195,120,0.2) 100%)'
+              : 'linear-gradient(90deg, rgba(184,134,11,0.15) 0%, rgba(184,134,11,0.25) 50%, rgba(184,134,11,0.15) 100%)',
             color: 'var(--color-primary)',
-            borderBottom: '1px solid rgba(229,195,120,0.2)',
+            borderBottom: isDark ? '1px solid rgba(229,195,120,0.2)' : '1px solid rgba(196,151,42,0.25)',
           }}
         >
           <Sparkles size={12} className="animate-spin" style={{ animationDuration: '6s' }} />
@@ -115,11 +125,15 @@ export function LandingHeader({ shop }: LandingHeaderProps) {
           {session?.user ? (
             <button
               onClick={() => navigate(session.user.role === 'ADMIN' ? '/admin' : '/booking')}
-              className="hidden sm:inline-flex items-center gap-2 font-sans text-xs uppercase tracking-widest font-semibold px-5 py-2.5 rounded-full border transition-all duration-200 cursor-pointer"
+              className="hidden sm:inline-flex items-center gap-2 font-sans text-xs uppercase tracking-widest font-semibold px-5 py-2.5 rounded-full transition-all duration-200 cursor-pointer shadow-md"
               style={{
-                color: 'var(--color-bg)',
-                background: 'var(--color-primary)',
-                borderColor: 'var(--color-primary)',
+                color: isDark ? '#060606' : '#ffffff',
+                background: isDark
+                  ? 'var(--color-primary)'
+                  : 'linear-gradient(135deg, #b8860b 0%, #d4af37 100%)',
+                boxShadow: isDark
+                  ? '0 4px 16px rgba(229,195,120,0.3)'
+                  : '3px 3px 10px rgba(184,134,11,0.35), -2px -2px 8px rgba(255,255,255,0.9)',
               }}
             >
               My Portal
@@ -131,18 +145,24 @@ export function LandingHeader({ shop }: LandingHeaderProps) {
                 className="hidden sm:inline-flex font-sans text-xs uppercase tracking-widest font-semibold px-4 py-2 rounded-full border transition-all duration-200"
                 style={{
                   color: 'var(--color-primary)',
-                  borderColor: 'rgba(229,195,120,0.3)',
-                  background: 'transparent',
+                  borderColor: isDark ? 'rgba(229,195,120,0.3)' : 'rgba(196,151,42,0.3)',
+                  background: isDark ? 'transparent' : 'rgba(255,255,255,0.6)',
+                  boxShadow: isDark ? 'none' : '2px 2px 6px rgba(190,175,145,0.15), -2px -2px 6px rgba(255,255,255,0.9)',
                 }}
               >
                 Sign In
               </Link>
               <Link
                 to="/booking"
-                className="inline-flex font-sans text-xs uppercase tracking-widest font-semibold px-5 py-2.5 rounded-full transition-all duration-200 shadow-md"
+                className="inline-flex font-sans text-xs uppercase tracking-widest font-bold px-6 py-2.5 rounded-full transition-all duration-200 shadow-md cursor-pointer hover:scale-105"
                 style={{
-                  color: 'var(--color-bg)',
-                  background: 'var(--color-primary)',
+                  color: isDark ? '#060606' : '#ffffff',
+                  background: isDark
+                    ? 'linear-gradient(135deg, #e5c378 0%, #c4972a 100%)'
+                    : 'linear-gradient(135deg, #b8860b 0%, #d4af37 100%)',
+                  boxShadow: isDark
+                    ? '0 4px 16px rgba(229,195,120,0.35)'
+                    : '4px 4px 12px rgba(184,134,11,0.35), -2px -2px 8px rgba(255,255,255,0.9)',
                 }}
               >
                 Reserve
@@ -170,9 +190,9 @@ export function LandingHeader({ shop }: LandingHeaderProps) {
           animate={{ opacity: 1, y: 0 }}
           className="md:hidden border-t"
           style={{
-            background: 'rgba(6,6,6,0.97)',
+            background: isDark ? 'rgba(6,6,6,0.97)' : 'rgba(248,246,240,0.97)',
             backdropFilter: 'blur(20px)',
-            borderColor: 'rgba(229,195,120,0.1)',
+            borderColor: isDark ? 'rgba(229,195,120,0.1)' : 'rgba(196,151,42,0.2)',
           }}
         >
           <div className="px-6 py-4 flex flex-col gap-4">

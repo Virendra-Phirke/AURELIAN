@@ -40,21 +40,48 @@
 }
 
 html.light, [data-theme="light"] {
-  --color-bg: #FAF8F5;
+  --color-bg: #F8F6F0;
   --color-surface: #FFFFFF;
-  --color-surface-raised: #F3F0EB;
-  --color-surface-hover: #EBE7E0;
-  --color-primary: #C4972A;
-  --color-primary-hover: #B08622;
+  --color-surface-raised: #F3EFE6;
+  --color-surface-hover: #EAE4D8;
+  --color-primary: #B8860B;
+  --color-primary-hover: #996515;
   --color-primary-text: #1A1612;
-  --color-body-text: #2C2824;
-  --color-secondary-text: #6B635A;
-  --color-muted-text: #9C958C;
-  --color-border: #E2DDD6;
-  --color-border-light: #EDEBE7;
+  --color-body-text: #2C261E;
+  --color-secondary-text: #665C4F;
+  --color-muted-text: #948A7C;
+  --color-border: #E5DFD3;
+  --color-border-light: #EFEBE3;
   --color-input-bg: #FFFFFF;
   --color-card-bg: #FFFFFF;
-  --color-sidebar-bg: #F5F2ED;
+  --color-sidebar-bg: #F3EFE6;
+}
+
+/* Neumorphic Extrusions & Recessed Wells */
+.neu-raised {
+  box-shadow: 8px 8px 24px rgba(190, 175, 145, 0.22), -8px -8px 24px rgba(255, 255, 255, 0.95), inset 0 1px 1px rgba(255, 255, 255, 1);
+}
+
+html.dark .neu-raised {
+  box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.75), -6px -6px 20px rgba(229, 195, 120, 0.04), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+}
+
+.neu-sunken {
+  box-shadow: inset 4px 4px 10px rgba(190, 175, 145, 0.2), inset -4px -4px 10px rgba(255, 255, 255, 0.9);
+}
+
+html.dark .neu-sunken {
+  box-shadow: inset 4px 4px 12px rgba(0, 0, 0, 0.6), inset -2px -2px 8px rgba(229, 195, 120, 0.04);
+}
+
+.neu-gold-btn {
+  background: linear-gradient(135deg, #c4972a 0%, #dfb755 50%, #b8860b 100%);
+  box-shadow: 4px 4px 16px rgba(184, 134, 11, 0.35), -3px -3px 10px rgba(255, 255, 255, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+}
+
+html.dark .neu-gold-btn {
+  background: linear-gradient(135deg, #e5c378 0%, #edd495 50%, #c4972a 100%);
+  box-shadow: 0 8px 25px rgba(229, 195, 120, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.3);
 }
 
 .font-brand {

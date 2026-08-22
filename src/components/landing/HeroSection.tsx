@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { HeroCenterpiece3D } from '../3d/HeroCenterpiece3D';
 import { Star, Users, Sparkles, ChevronDown } from 'lucide-react';
 import { ShopSettings, LandingStats } from '../../lib/useLandingData';
+import { useTheme } from '../../lib/theme';
 
 const BADGE_DELAY = 0.1;
 
@@ -13,6 +14,8 @@ interface HeroSectionProps {
 }
 
 export function HeroSection({ shop, stats }: HeroSectionProps) {
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
   const scrollInto = (id: string) => {
     const el = document.getElementById(id);
     if (el) {
@@ -56,15 +59,19 @@ export function HeroSection({ shop, stats }: HeroSectionProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2 font-sans text-[10px] uppercase tracking-[0.2em] font-semibold px-4 py-2 rounded-full border backdrop-blur-xl"
+            className="inline-flex items-center gap-2 font-sans text-[10px] uppercase tracking-[0.2em] font-semibold px-5 py-2.5 rounded-full border backdrop-blur-xl"
             style={{
               color: 'var(--color-primary)',
-              borderColor: 'rgba(229,195,120,0.3)',
-              background: 'linear-gradient(135deg, rgba(229,195,120,0.12) 0%, rgba(14,12,8,0.6) 100%)',
-              boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.1), 0 4px 16px rgba(0,0,0,0.3)',
+              borderColor: isDark ? 'rgba(229,195,120,0.3)' : 'rgba(196,151,42,0.35)',
+              background: isDark
+                ? 'linear-gradient(135deg, rgba(229,195,120,0.12) 0%, rgba(16,14,10,0.6) 100%)'
+                : 'linear-gradient(145deg, #ffffff 0%, #f4efe6 100%)',
+              boxShadow: isDark
+                ? 'inset 0 1px 1px rgba(255,255,255,0.1), 0 4px 16px rgba(0,0,0,0.3)'
+                : '4px 4px 12px rgba(190,175,145,0.22), -3px -3px 8px rgba(255,255,255,0.95), inset 0 1px 1px rgba(255,255,255,1)',
             }}
           >
-            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: 'var(--color-primary)' }} />
+            <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--color-primary)' }} />
             {tagline}
           </motion.div>
 
@@ -80,7 +87,9 @@ export function HeroSection({ shop, stats }: HeroSectionProps) {
             <span
               className="block"
               style={{
-                background: 'linear-gradient(135deg, var(--color-primary) 0%, #fff0c0 50%, var(--color-primary) 100%)',
+                background: isDark
+                  ? 'linear-gradient(135deg, #e5c378 0%, #fff0c0 50%, #e5c378 100%)'
+                  : 'linear-gradient(135deg, #b8860b 0%, #996515 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
@@ -108,15 +117,19 @@ export function HeroSection({ shop, stats }: HeroSectionProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.35 }}
-            className="flex flex-wrap gap-3 pt-2"
+            className="flex flex-wrap gap-4 pt-2"
           >
             <Link
               to="/booking"
-              className="group inline-flex items-center gap-2.5 font-sans text-xs uppercase tracking-widest font-semibold px-7 py-3.5 rounded-full transition-all duration-300 shadow-lg"
+              className="group inline-flex items-center gap-2.5 font-sans text-xs uppercase tracking-widest font-bold px-8 py-4 rounded-full transition-all duration-300 shadow-lg cursor-pointer hover:scale-105"
               style={{
-                color: 'var(--color-bg)',
-                background: 'linear-gradient(135deg, var(--color-primary), #edd495)',
-                boxShadow: '0 8px 30px rgba(229,195,120,0.3)',
+                color: isDark ? '#060606' : '#ffffff',
+                background: isDark
+                  ? 'linear-gradient(135deg, #e5c378, #edd495)'
+                  : 'linear-gradient(135deg, #b8860b 0%, #d4af37 50%, #996515 100%)',
+                boxShadow: isDark
+                  ? '0 8px 30px rgba(229,195,120,0.3)'
+                  : '6px 6px 18px rgba(184,134,11,0.35), -3px -3px 10px rgba(255,255,255,0.9), inset 0 1px 1px rgba(255,255,255,0.5)',
               }}
             >
               Reserve an Appointment
@@ -124,27 +137,36 @@ export function HeroSection({ shop, stats }: HeroSectionProps) {
             </Link>
             <button
               onClick={() => scrollInto('services')}
-              className="inline-flex items-center gap-2.5 font-sans text-xs uppercase tracking-widest font-semibold px-7 py-3.5 rounded-full border transition-all duration-300 cursor-pointer"
+              className="inline-flex items-center gap-2.5 font-sans text-xs uppercase tracking-widest font-semibold px-8 py-4 rounded-full border transition-all duration-300 cursor-pointer hover:scale-105"
               style={{
                 color: 'var(--color-primary)',
-                borderColor: 'rgba(229,195,120,0.3)',
-                background: 'rgba(229,195,120,0.04)',
+                borderColor: isDark ? 'rgba(229,195,120,0.3)' : 'rgba(196,151,42,0.35)',
+                background: isDark
+                  ? 'rgba(229,195,120,0.06)'
+                  : 'linear-gradient(145deg, #ffffff 0%, #f4efe6 100%)',
+                boxShadow: isDark
+                  ? 'none'
+                  : '4px 4px 12px rgba(190,175,145,0.2), -3px -3px 8px rgba(255,255,255,0.95)',
               }}
             >
               Explore Services
             </button>
           </motion.div>
 
-          {/* Divider + Credentials with Glassmorphism */}
+          {/* Divider + Credentials with Neumorphism */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.5 }}
-            className="inline-flex items-center gap-4 p-3.5 pr-6 rounded-2xl border backdrop-blur-xl"
+            className="inline-flex items-center gap-4 p-4 pr-7 rounded-2xl border backdrop-blur-xl"
             style={{
-              background: 'linear-gradient(160deg, rgba(229,195,120,0.08) 0%, rgba(14,12,8,0.72) 100%)',
-              borderColor: 'rgba(229,195,120,0.2)',
-              boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.08), 0 12px 30px -8px rgba(0,0,0,0.4)',
+              background: isDark
+                ? 'linear-gradient(160deg, rgba(229,195,120,0.08) 0%, rgba(16,14,10,0.85) 100%)'
+                : 'linear-gradient(145deg, #ffffff 0%, #f7f4ec 100%)',
+              borderColor: isDark ? 'rgba(229,195,120,0.2)' : 'rgba(196,151,42,0.22)',
+              boxShadow: isDark
+                ? 'inset 0 1px 1px rgba(255,255,255,0.08), 0 12px 30px -8px rgba(0,0,0,0.4)'
+                : '6px 6px 18px rgba(190, 175, 145, 0.2), -6px -6px 18px rgba(255, 255, 255, 0.95), inset 0 1px 1px rgba(255, 255, 255, 1)',
             }}
           >
             <div className="flex -space-x-2">
@@ -153,10 +175,10 @@ export function HeroSection({ shop, stats }: HeroSectionProps) {
                   key={i}
                   className="w-8 h-8 rounded-full flex items-center justify-center font-brand text-xs font-bold border-2 backdrop-blur-md"
                   style={{
-                    background: 'rgba(229,195,120,0.18)',
+                    background: isDark ? 'rgba(229,195,120,0.18)' : 'linear-gradient(135deg, #f0ebd8 0%, #ffffff 100%)',
                     borderColor: 'var(--color-primary)',
                     color: 'var(--color-primary)',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                    boxShadow: isDark ? '0 2px 8px rgba(0,0,0,0.3)' : '1px 1px 4px rgba(190,175,145,0.25)',
                   }}
                 >
                   {l}
@@ -180,10 +202,14 @@ export function HeroSection({ shop, stats }: HeroSectionProps) {
           {/* Subtle glow behind */}
           <div
             className="absolute inset-0 rounded-full blur-3xl pointer-events-none"
-            style={{ background: 'radial-gradient(circle, rgba(229,195,120,0.12) 0%, transparent 70%)' }}
+            style={{
+              background: isDark
+                ? 'radial-gradient(circle, rgba(229,195,120,0.12) 0%, transparent 70%)'
+                : 'radial-gradient(circle, rgba(196,151,42,0.15) 0%, transparent 70%)',
+            }}
           />
 
-          {/* Floating stat badges */}
+          {/* Floating stat badges — Neumorphic extruded pills */}
           {floatBadges.map(({ icon: Icon, label, sub, pos }, i) => (
             <motion.div
               key={label}
@@ -196,22 +222,28 @@ export function HeroSection({ shop, stats }: HeroSectionProps) {
               }}
             >
               <div
-                className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl border backdrop-blur-xl"
+                className="flex items-center gap-3 px-4 py-3 rounded-2xl border backdrop-blur-xl"
                 style={{
-                  background: 'rgba(6,6,6,0.75)',
-                  borderColor: 'rgba(229,195,120,0.2)',
-                  boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+                  background: isDark ? 'rgba(16,14,10,0.85)' : 'linear-gradient(145deg, #ffffff 0%, #f7f4ec 100%)',
+                  borderColor: isDark ? 'rgba(229,195,120,0.2)' : 'rgba(196,151,42,0.22)',
+                  boxShadow: isDark
+                    ? '0 10px 32px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.08)'
+                    : '6px 6px 18px rgba(190, 175, 145, 0.22), -4px -4px 14px rgba(255, 255, 255, 0.95), inset 0 1px 1px rgba(255, 255, 255, 1)',
                 }}
               >
                 <div
-                  className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                  style={{ background: 'rgba(229,195,120,0.15)' }}
+                  className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 backdrop-blur-md"
+                  style={{
+                    background: isDark ? 'rgba(229,195,120,0.15)' : 'linear-gradient(135deg, #f0ebd8 0%, #ffffff 100%)',
+                    border: isDark ? '1px solid rgba(229,195,120,0.2)' : '1px solid rgba(196,151,42,0.25)',
+                    boxShadow: isDark ? 'none' : 'inset 1px 1px 3px rgba(190,175,145,0.2)',
+                  }}
                 >
-                  <Icon size={14} style={{ color: 'var(--color-primary)' }} />
+                  <Icon size={15} style={{ color: 'var(--color-primary)' }} />
                 </div>
                 <div>
-                  <p className="font-brand text-sm font-semibold leading-none" style={{ color: 'var(--color-primary)' }}>{label}</p>
-                  <p className="font-sans text-[10px] mt-0.5" style={{ color: 'var(--color-secondary-text)' }}>{sub}</p>
+                  <p className="font-brand text-sm font-bold leading-none" style={{ color: 'var(--color-primary)' }}>{label}</p>
+                  <p className="font-sans text-[10px] font-medium mt-0.5" style={{ color: 'var(--color-secondary-text)' }}>{sub}</p>
                 </div>
               </div>
             </motion.div>

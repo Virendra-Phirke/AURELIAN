@@ -1,57 +1,58 @@
-import { useRef } from 'react';
+import React, { useRef } from 'react';
 import { motion, useInView } from 'motion/react';
 import { Marquee } from '../magicui/marquee';
 import { Star } from 'lucide-react';
 import { ScrollOrb3D } from '../3d/ScrollOrb3D';
+import { useTheme } from '../../lib/theme';
 
 const TESTIMONIALS = [
   {
-    name: 'Arjun Mehta',
-    handle: '@arjun.mehta',
-    role: 'Founding Member',
-    text: 'Aurelian is the only salon I will ever trust. The precision is unreal — I look sculpted, not just groomed. My go-to for every major event.',
+    name: 'Julian Vance',
+    handle: '@julianvance',
+    role: 'Managing Partner',
+    text: 'Aurelian has ruined every other barbershop for me. The private suite and the bespoke scalp ritual are transcendent.',
     stars: 5,
-    avatar: 'A',
+    avatar: 'JV',
   },
   {
-    name: 'Rohan Iyer',
-    handle: '@rohaniyer',
-    role: 'Grand Prestige Member',
-    text: 'The Royal Shave experience is a ritual I look forward to every month. Hot linen, cold press, a straight razor — pure theatre in the best way.',
+    name: 'Dr. Marcus Webb',
+    handle: '@mwebb_md',
+    role: 'Neurosurgeon',
+    text: 'Zero wait time. I arrive, my suite is ready, and my master stylist knows my exact specifications before I speak.',
     stars: 5,
-    avatar: 'R',
+    avatar: 'MW',
   },
   {
-    name: 'Vikram Sharma',
-    handle: '@vsharma_exec',
-    role: 'VIP Member',
-    text: 'The booking system is flawless — I have never had a conflict, ever. And the barbers just understand what you want without needing a lecture.',
+    name: 'Soren Lindqvist',
+    handle: '@soren_l',
+    role: 'Creative Director',
+    text: 'The precision of their hot-towel shave is unmatched. You leave feeling restored, not just groomed.',
     stars: 5,
-    avatar: 'V',
+    avatar: 'SL',
   },
   {
-    name: 'Nikhil Banerjee',
-    handle: '@nikb',
-    role: 'Founding Member',
-    text: 'Grand Luxe is worth every rupee. Three hours of complete indulgence. I left feeling like I owned the city.',
+    name: 'Ethan Cole',
+    handle: '@ecole_arch',
+    role: 'Principal Architect',
+    text: 'The architectural design of the salon alone is inspiring. The haircut? World-class geometry.',
     stars: 5,
-    avatar: 'N',
+    avatar: 'EC',
   },
   {
-    name: 'Siddharth Rao',
-    handle: '@siddrao',
-    role: 'Prestige Monthly',
-    text: 'The scalp therapy changed my life — not an exaggeration. My hair health has transformed in three months of consistent treatments here.',
+    name: 'Lord Henry Sterling',
+    handle: '@hsterling',
+    role: 'Private Equity',
+    text: 'Finally, an atelier that respects time and privacy. The single-malt selection and craft are peerless.',
     stars: 5,
-    avatar: 'S',
+    avatar: 'HS',
   },
   {
-    name: 'Kabir Desai',
-    handle: '@kabirdsr',
-    role: 'VIP Member',
-    text: 'Understated luxury, exceptionally executed. Aurelian is a class above every other establishment in the city.',
+    name: 'Kai Takahashi',
+    handle: '@kai_t',
+    role: 'Venture Capitalist',
+    text: 'Every visit is a masterclass in subtlety. You never look "freshly cut" — you just look impeccably refined.',
     stars: 5,
-    avatar: 'K',
+    avatar: 'KT',
   },
 ];
 
@@ -65,13 +66,20 @@ interface TestimonialCardProps {
 }
 
 function TestimonialCard({ name, handle, role, text, stars, avatar }: TestimonialCardProps) {
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
+
   return (
     <div
-      className="w-72 sm:w-80 rounded-2xl border p-6 space-y-4 mx-3 shrink-0 backdrop-blur-xl transition-all duration-300 hover:border-[rgba(229,195,120,0.35)]"
+      className="w-72 sm:w-80 rounded-3xl border p-6 space-y-4 mx-3 shrink-0 backdrop-blur-xl transition-all duration-300 hover:scale-[1.02]"
       style={{
-        background: 'linear-gradient(160deg, rgba(229,195,120,0.06) 0%, rgba(14,12,8,0.78) 100%)',
-        borderColor: 'rgba(229,195,120,0.18)',
-        boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.08), 0 16px 36px -8px rgba(0,0,0,0.5)',
+        background: isDark
+          ? 'linear-gradient(160deg, rgba(229,195,120,0.06) 0%, rgba(16,14,10,0.85) 100%)'
+          : 'linear-gradient(145deg, #ffffff 0%, #f7f4ec 100%)',
+        borderColor: isDark ? 'rgba(229,195,120,0.18)' : 'rgba(196,151,42,0.22)',
+        boxShadow: isDark
+          ? '10px 10px 30px rgba(0,0,0,0.7), inset 0 1px 1px rgba(255,255,255,0.08)'
+          : '8px 8px 24px rgba(190, 175, 145, 0.22), -8px -8px 24px rgba(255, 255, 255, 0.95), inset 0 1px 1px rgba(255, 255, 255, 1)',
       }}
     >
       {/* Stars */}
@@ -87,10 +95,15 @@ function TestimonialCard({ name, handle, role, text, stars, avatar }: Testimonia
       </p>
 
       {/* Author */}
-      <div className="flex items-center gap-3 pt-3 border-t" style={{ borderColor: 'rgba(229,195,120,0.12)' }}>
+      <div className="flex items-center gap-3 pt-3 border-t" style={{ borderColor: isDark ? 'rgba(229,195,120,0.12)' : 'rgba(196,151,42,0.15)' }}>
         <div
           className="w-9 h-9 rounded-full flex items-center justify-center font-brand text-sm font-bold shrink-0 backdrop-blur-md"
-          style={{ background: 'rgba(229,195,120,0.18)', color: 'var(--color-primary)', border: '1px solid rgba(229,195,120,0.3)' }}
+          style={{
+            background: isDark ? 'rgba(229,195,120,0.18)' : 'linear-gradient(135deg, #f0ebd8 0%, #ffffff 100%)',
+            color: 'var(--color-primary)',
+            border: isDark ? '1px solid rgba(229,195,120,0.3)' : '1px solid rgba(196,151,42,0.3)',
+            boxShadow: isDark ? 'none' : 'inset 1px 1px 3px rgba(190,175,145,0.2)',
+          }}
         >
           {avatar}
         </div>

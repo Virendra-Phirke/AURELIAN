@@ -1,5 +1,6 @@
 import React, { useRef, useState, useCallback } from 'react';
 import { motion, useSpring, useMotionValue, useTransform } from 'motion/react';
+import { useTheme } from '../../lib/theme';
 
 interface TiltCard3DProps {
   children: React.ReactNode;
@@ -15,14 +16,19 @@ export function TiltCard3D({
   children,
   className = '',
   style,
-  glareColor = 'rgba(229, 195, 120, 0.15)',
-  maxTilt = 12,
+  glareColor,
+  maxTilt = 10,
   perspective = 800,
-  scale = 1.03,
+  scale = 1.025,
 }: TiltCard3DProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [glarePos, setGlarePos] = useState({ x: 50, y: 50, opacity: 0 });
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
+
+  const defaultGlare = isDark ? 'rgba(229, 195, 120, 0.15)' : 'rgba(255, 255, 255, 0.5)';
+  const activeGlare = glareColor || defaultGlare;
 
   const rotateX = useMotionValue(0);
   const rotateY = useMotionValue(0);
@@ -49,9 +55,9 @@ export function TiltCard3D({
     setGlarePos({
       x: (x / rect.width) * 100,
       y: (y / rect.height) * 100,
-      opacity: 0.6,
+      opacity: isDark ? 0.6 : 0.8,
     });
-  }, [rotateX, rotateY, maxTilt]);
+  }, [rotateX, rotateY, maxTilt, isDark]);
 
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
@@ -68,8 +74,12 @@ export function TiltCard3D({
 
   const shadow = useTransform(
     [rotateXSpring, rotateYSpring],
-    ([rx, ry]: number[]) =>
-      `${ry * -0.8}px ${rx * 0.8}px 32px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.1), 0 0 ${isHovered ? '24px' : '0px'} rgba(229,195,120,0.15)`
+    ([rx, ry]: number[]) => {
+      if (isDark) {
+        return `${ry * -0.8 + 8}px ${rx * 0.8 + 8}px 32px rgba(0,0,0,0.7), ${ry * 0.8 - 4}px ${rx * -0.8 - 4}px 16px rgba(229,195,120,0.03), inset 0 1px 1px rgba(255,255,255,0.08), 0 0 ${isHovered ? '24px' : '0px'} rgba(229,195,120,0.15)`;
+      }
+      return `${ry * -0.8 + 8}px ${rx * 0.8 + 8}px 24px rgba(190, 175, 145, 0.25), ${ry * 0.8 - 8}px ${rx * -0.8 - 8}px 24px rgba(255, 255, 255, 0.95), inset 0 1px 1px rgba(255, 255, 255, 1), 0 0 ${isHovered ? '20px' : '0px'} rgba(196,151,42,0.15)`;
+    }
   );
 
   return (
