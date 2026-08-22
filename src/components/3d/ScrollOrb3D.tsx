@@ -118,8 +118,12 @@ export function ScrollOrb3D({
     scene.add(wireMesh);
 
     let t = Math.random() * Math.PI * 2;
+    let isVisible = true;
+    let animId = 0;
+
     const animate = () => {
-      const raf = requestAnimationFrame(animate);
+      if (!isVisible) return;
+      animId = requestAnimationFrame(animate);
       t += 0.012 * speed;
 
       mesh.rotation.x = t * 0.6;
@@ -133,12 +137,23 @@ export function ScrollOrb3D({
       wireMesh.scale.setScalar(wireScale * s);
 
       renderer.render(scene, camera);
-      return raf;
     };
-    const raf = animate();
+
+    const observer = new IntersectionObserver(([entry]) => {
+      const prev = isVisible;
+      isVisible = entry.isIntersecting;
+      if (isVisible && !prev) {
+        cancelAnimationFrame(animId);
+        animId = requestAnimationFrame(animate);
+      }
+    }, { threshold: 0.05 });
+    observer.observe(canvas);
+
+    animId = requestAnimationFrame(animate);
 
     return () => {
-      cancelAnimationFrame(raf);
+      cancelAnimationFrame(animId);
+      observer.disconnect();
       geo.dispose();
       mat.dispose();
       wireMat.dispose();

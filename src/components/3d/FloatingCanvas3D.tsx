@@ -344,7 +344,18 @@ export function FloatingCanvas3D() {
 
       renderer.render(scene, camera);
     };
-    animate();
+
+    let isTabVisible = !document.hidden;
+    const handleVisibility = () => {
+      isTabVisible = !document.hidden;
+      if (isTabVisible) {
+        cancelAnimationFrame(animFrameRef.current);
+        animFrameRef.current = requestAnimationFrame(animate);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    animFrameRef.current = requestAnimationFrame(animate);
 
     // ── Event listeners ─────────────────────────────────────────
     const handleResize = () => {
@@ -374,6 +385,7 @@ export function FloatingCanvas3D() {
 
     return () => {
       cancelAnimationFrame(animFrameRef.current);
+      document.removeEventListener('visibilitychange', handleVisibility);
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('mousemove', handleMouse);
       if (scrollContainer) scrollContainer.removeEventListener('scroll', handleScroll);

@@ -14,9 +14,10 @@ export default function Layout() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const LEGAL_PAGES = ['/privacy', '/privacy-policy', '/terms', '/terms-of-service', '/terms-and-conditions', '/cancellation-policy'];
   const isAuthPage = AUTH_PAGES.some(p => location.pathname.startsWith(p));
   const isAdminPage = location.pathname.startsWith('/admin');
-  const isLandingPage = location.pathname === '/' || location.pathname === '/privacy-policy' || location.pathname === '/privacy';
+  const isLandingPage = location.pathname === '/' || LEGAL_PAGES.some(p => location.pathname.startsWith(p));
 
   const handleLogout = async () => {
     await authClient.signOut({});

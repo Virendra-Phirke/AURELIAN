@@ -180,8 +180,8 @@ export function LandingFooter({ shop }: LandingFooterProps) {
           <div className="flex gap-5">
             {[
               { label: 'Privacy Policy', to: '/privacy-policy' },
-              { label: 'Terms of Service', to: '/privacy-policy' },
-              { label: 'Cancellation Policy', to: '/privacy-policy' },
+              { label: 'Terms of Service', to: '/terms' },
+              { label: 'Cancellation Policy', to: '/cancellation-policy' },
             ].map(({ label, to }) => (
               <Link
                 key={label}

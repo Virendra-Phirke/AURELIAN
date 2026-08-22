@@ -58,6 +58,8 @@ export function Polyhedron3D({
     let animationFrameId: number;
     const startTime = performance.now();
     let isIntersecting = true;
+    let cachedWidth = canvas.clientWidth || 100;
+    let cachedHeight = canvas.clientHeight || 100;
 
     // Golden ratio
     const t = (1 + Math.sqrt(5)) / 2;
@@ -99,15 +101,14 @@ export function Polyhedron3D({
     const innerVertices = rawVertices.map(([x, y, z]) => [x * 0.52, y * 0.52, z * 0.52]);
 
     const renderFrame = (now: number) => {
-      const rect = canvas.getBoundingClientRect();
-      const width = rect.width;
-      const height = rect.height;
+      const width = cachedWidth;
+      const height = cachedHeight;
       if (width === 0 || height === 0) return;
 
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      if (canvas.width !== width * dpr || canvas.height !== height * dpr) {
-        canvas.width = width * dpr;
-        canvas.height = height * dpr;
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      if (canvas.width !== Math.round(width * dpr) || canvas.height !== Math.round(height * dpr)) {
+        canvas.width = Math.round(width * dpr);
+        canvas.height = Math.round(height * dpr);
       }
 
       ctx.save();
@@ -226,7 +227,11 @@ export function Polyhedron3D({
       ctx.restore();
     };
 
-    const handleResize = () => renderFrame(performance.now());
+    const handleResize = () => {
+      cachedWidth = canvas.clientWidth || 100;
+      cachedHeight = canvas.clientHeight || 100;
+      renderFrame(performance.now());
+    };
     const resizeObserver = new ResizeObserver(handleResize);
     resizeObserver.observe(canvas);
 

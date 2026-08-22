@@ -10,4 +10,17 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  build: {
+    chunkSizeWarningLimit: 600,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-three': ['three'],
+          'vendor-motion': ['motion', 'motion/react'],
+          'vendor-icons': ['lucide-react'],
+          'vendor-auth': ['better-auth'],
+        },
+      },
+    },
+  },
 });

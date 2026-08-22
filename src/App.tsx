@@ -1,19 +1,34 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Layout from './components/Layout';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import ForgotPassword from './pages/ForgotPassword';
-import ResetPassword from './pages/ResetPassword';
-import Booking from './pages/Booking';
-import Dashboard from './pages/Dashboard';
-import Settings from './pages/Settings';
-import Admin from './pages/Admin';
 import Landing from './pages/Landing';
-import PrivacyPolicy from './pages/PrivacyPolicy';
 import { authClient } from './lib/auth';
 import { ThemeProvider } from './lib/theme';
 import { Skeleton, StatCardSkeleton } from './components/ui/skeleton';
+
+// Lazy-loaded routes for instant initial landing page FCP/LCP
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+const Booking = lazy(() => import('./pages/Booking'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Settings = lazy(() => import('./pages/Settings'));
+const Admin = lazy(() => import('./pages/Admin'));
+const LegalPortal = lazy(() => import('./pages/LegalPortal'));
+
+function RouteLoadingFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center p-8 bg-[var(--color-bg)]">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-8 h-8 rounded-full border-2 border-[var(--color-primary)] border-t-transparent animate-spin" />
+        <span className="text-xs font-sans tracking-widest text-[var(--color-muted-text)] uppercase">
+          Aurelian Sanctuary
+        </span>
+      </div>
+    </div>
+  );
+}
 
 function ProtectedRoute({ children, adminOnly = false, blockAdmin = false }: { children: React.ReactNode, adminOnly?: boolean, blockAdmin?: boolean }) {
   const { data, isPending } = authClient.useSession();
@@ -76,42 +91,49 @@ function ProtectedRoute({ children, adminOnly = false, blockAdmin = false }: { c
 export default function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="aurelian-ui-theme">
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Landing />} />
-          <Route path="login" element={<Login />} />
-          <Route path="register" element={<Register />} />
-          <Route path="forgot-password" element={<ForgotPassword />} />
-          <Route path="reset-password" element={<ResetPassword />} />
-          
-          <Route path="privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="privacy" element={<Navigate to="/privacy-policy" replace />} />
-          
-          <Route path="booking" element={
-            <ProtectedRoute blockAdmin={true}>
-              <Booking />
-            </ProtectedRoute>
-          } />
-          
-          <Route path="dashboard" element={
-            <ProtectedRoute blockAdmin={true}>
-              <Dashboard />
-            </ProtectedRoute>
-          } />
-          
-          <Route path="settings" element={
-            <ProtectedRoute>
-              <Settings />
-            </ProtectedRoute>
-          } />
-          
-          <Route path="admin" element={
-            <ProtectedRoute adminOnly={true}>
-              <Admin />
-            </ProtectedRoute>
-          } />
-        </Route>
-      </Routes>
+      <Suspense fallback={<RouteLoadingFallback />}>
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Landing />} />
+            <Route path="login" element={<Login />} />
+            <Route path="register" element={<Register />} />
+            <Route path="forgot-password" element={<ForgotPassword />} />
+            <Route path="reset-password" element={<ResetPassword />} />
+            
+            {/* Legal Governance Routes */}
+            <Route path="privacy-policy" element={<LegalPortal />} />
+            <Route path="privacy" element={<LegalPortal />} />
+            <Route path="terms" element={<LegalPortal />} />
+            <Route path="terms-of-service" element={<LegalPortal />} />
+            <Route path="terms-and-conditions" element={<LegalPortal />} />
+            <Route path="cancellation-policy" element={<LegalPortal />} />
+            
+            <Route path="booking" element={
+              <ProtectedRoute blockAdmin={true}>
+                <Booking />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="dashboard" element={
+              <ProtectedRoute blockAdmin={true}>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="settings" element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="admin" element={
+              <ProtectedRoute adminOnly={true}>
+                <Admin />
+              </ProtectedRoute>
+            } />
+          </Route>
+        </Routes>
+      </Suspense>
     </ThemeProvider>
   );
 }

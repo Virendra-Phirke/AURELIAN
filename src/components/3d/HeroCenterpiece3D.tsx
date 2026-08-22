@@ -22,11 +22,11 @@ export function HeroCenterpiece3D() {
     const H = mount.clientHeight;
 
     // Renderer
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     renderer.setSize(W, H);
     renderer.setClearColor(0x000000, 0);
-    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.enabled = false;
     rendererRef.current = renderer;
     mount.appendChild(renderer.domElement);
 
@@ -132,7 +132,9 @@ export function HeroCenterpiece3D() {
 
     // Animation
     let time = 0;
+    let isVisible = true;
     const animate = () => {
+      if (!isVisible) return;
       animFrameRef.current = requestAnimationFrame(animate);
       time += 0.008;
 
@@ -171,7 +173,18 @@ export function HeroCenterpiece3D() {
 
       renderer.render(scene, camera);
     };
-    animate();
+
+    const intersectionObserver = new IntersectionObserver(([entry]) => {
+      const prev = isVisible;
+      isVisible = entry.isIntersecting;
+      if (isVisible && !prev) {
+        cancelAnimationFrame(animFrameRef.current);
+        animFrameRef.current = requestAnimationFrame(animate);
+      }
+    }, { threshold: 0.05 });
+    intersectionObserver.observe(mount);
+
+    animFrameRef.current = requestAnimationFrame(animate);
 
     // Resize
     const handleResize = () => {
@@ -225,6 +238,7 @@ export function HeroCenterpiece3D() {
 
     return () => {
       cancelAnimationFrame(animFrameRef.current);
+      intersectionObserver.disconnect();
       resizeObserver.disconnect();
       renderer.domElement.removeEventListener('mousedown', handleMouseDown);
       window.removeEventListener('mousemove', handleMouseMove);
