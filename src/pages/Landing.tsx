@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { motion, useScroll, useTransform } from 'motion/react';
 import { FloatingCanvas3D } from '../components/3d/FloatingCanvas3D';
+import { ScrollOrb3D } from '../components/3d/ScrollOrb3D';
 import { LandingHeader } from '../components/landing/LandingHeader';
 import { HeroSection } from '../components/landing/HeroSection';
 import { AtmosphereSection } from '../components/landing/AtmosphereSection';
@@ -32,14 +33,59 @@ function ScrollProgress() {
   );
 }
 
-// Section divider
-function GoldDivider() {
+// Orb-accented gold divider placed between each section
+function GoldDivider({
+  variant = 'ring',
+  side = 'left',
+}: {
+  variant?: 'orb' | 'ring' | 'diamond' | 'helix' | 'star';
+  side?: 'left' | 'right';
+}) {
   return (
-    <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16">
+    <div className="relative max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 flex items-center gap-6">
+      {/* Left orb */}
+      {side === 'left' && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.5 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          className="shrink-0"
+        >
+          <ScrollOrb3D variant={variant} size={64} speed={0.8} />
+        </motion.div>
+      )}
+
+      {/* Divider line */}
       <div
-        className="h-px w-full"
-        style={{ background: 'linear-gradient(to right, transparent, rgba(229,195,120,0.2), rgba(229,195,120,0.15), transparent)' }}
+        className="flex-1 h-px"
+        style={{ background: 'linear-gradient(to right, rgba(229,195,120,0.25), rgba(229,195,120,0.12), transparent)' }}
       />
+
+      {/* Center diamond accent */}
+      <div
+        className="shrink-0 w-1.5 h-1.5 rotate-45 border"
+        style={{ borderColor: 'rgba(229,195,120,0.4)', background: 'rgba(229,195,120,0.15)' }}
+      />
+
+      {/* Right divider line */}
+      <div
+        className="flex-1 h-px"
+        style={{ background: 'linear-gradient(to left, rgba(229,195,120,0.25), rgba(229,195,120,0.12), transparent)' }}
+      />
+
+      {/* Right orb */}
+      {side === 'right' && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.5 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          className="shrink-0"
+        >
+          <ScrollOrb3D variant={variant} size={64} speed={0.8} />
+        </motion.div>
+      )}
     </div>
   );
 }
@@ -49,7 +95,7 @@ export default function Landing() {
 
   return (
     <div className="relative h-full" style={{ background: 'var(--color-bg)' }}>
-      {/* 3D Background Canvas */}
+      {/* Full-page WebGL 3D background — camera scrolls with page */}
       <FloatingCanvas3D />
 
       {/* Scroll progress bar */}
@@ -67,27 +113,32 @@ export default function Landing() {
         {/* Hero with live shop tagline, live client count, and 3D kinetic centerpiece */}
         <HeroSection shop={shop} stats={stats} />
 
-        <GoldDivider />
+        {/* ── Section break: diamond accent + right orb ── */}
+        <GoldDivider variant="diamond" side="right" />
 
         {/* Philosophy & Atmosphere with live DB metric tickers */}
         <AtmosphereSection stats={stats} />
 
-        <GoldDivider />
+        {/* ── Section break: helix knot + left orb ── */}
+        <GoldDivider variant="helix" side="left" />
 
         {/* Services Showcase loaded directly from Database */}
         <ServicesSection services={services} shop={shop} loading={loading} />
 
-        <GoldDivider />
+        {/* ── Section break: ring + right orb ── */}
+        <GoldDivider variant="ring" side="right" />
 
         {/* Craftsmanship Journey Protocol */}
         <CraftsmanshipSection />
 
-        <GoldDivider />
+        {/* ── Section break: star + left orb ── */}
+        <GoldDivider variant="star" side="left" />
 
         {/* Client Reviews / Comments Marquee */}
         <TestimonialsSection />
 
-        <GoldDivider />
+        {/* ── Section break: orb + right ── */}
+        <GoldDivider variant="orb" side="right" />
 
         {/* Grand CTA with real DB shop hours, cancellation cutoff, and instant booking lock */}
         <CtaSection shop={shop} />

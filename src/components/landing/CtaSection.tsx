@@ -5,6 +5,7 @@ import { CalendarDays, Zap, Clock, ShieldCheck } from 'lucide-react';
 import { ShimmerButton } from '../magicui/shimmer-button';
 import { ShineBorder } from '../magicui/shine-border';
 import { ShopSettings } from '../../lib/useLandingData';
+import { ScrollOrb3D } from '../3d/ScrollOrb3D';
 
 interface CtaSectionProps {
   shop?: ShopSettings;
@@ -33,6 +34,24 @@ export function CtaSection({ shop }: CtaSectionProps) {
           background: 'radial-gradient(ellipse 80% 60% at 50% 50%, rgba(229,195,120,0.06) 0%, transparent 70%)',
         }}
       />
+
+      {/* Flanking 3D orbs */}
+      <motion.div
+        initial={{ opacity: 0, x: -60 }}
+        animate={inView ? { opacity: 1, x: 0 } : {}}
+        transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+        className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none hidden xl:block"
+      >
+        <ScrollOrb3D variant="helix" size={200} speed={0.5} />
+      </motion.div>
+      <motion.div
+        initial={{ opacity: 0, x: 60 }}
+        animate={inView ? { opacity: 1, x: 0 } : {}}
+        transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+        className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none hidden xl:block"
+      >
+        <ScrollOrb3D variant="ring" size={200} speed={0.65} />
+      </motion.div>
 
       <div className="max-w-4xl mx-auto relative z-10">
         <motion.div
