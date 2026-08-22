@@ -17,6 +17,7 @@
     "@google/genai": "^2.4.0",
     "@hookform/resolvers": "^5.9.1",
     "@tailwindcss/vite": "^4.1.14",
+    "@types/three": "^0.185.4",
     "@upstash/redis": "^1.38.2",
     "@vitejs/plugin-react": "^5.0.4",
     "better-auth": "^1.7.1",
@@ -37,6 +38,7 @@
     "redis": "^6.2.1",
     "resend": "^6.21.0",
     "tailwind-merge": "^3.6.0",
+    "three": "^0.185.1",
     "uuid": "^14.0.2",
     "vite": "^6.2.3",
     "zod": "^4.4.3"

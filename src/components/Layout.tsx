@@ -16,11 +16,17 @@ export default function Layout() {
 
   const isAuthPage = AUTH_PAGES.some(p => location.pathname.startsWith(p));
   const isAdminPage = location.pathname.startsWith('/admin');
+  const isLandingPage = location.pathname === '/';
 
   const handleLogout = async () => {
     await authClient.signOut({});
     navigate('/login');
   };
+
+  // Landing page — full control, no chrome
+  if (isLandingPage) {
+    return <Outlet />;
+  }
 
   // Auth pages get a clean minimal layout (no header/nav chrome)
   if (isAuthPage) {

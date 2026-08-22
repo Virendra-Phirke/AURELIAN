@@ -340,3 +340,45 @@ td {
 ::view-transition-new(root) {
   z-index: 999999 !important;
 }
+
+/* ==============================
+   Landing Page — 3D & Animation
+   ============================== */
+
+/* Hero badge harmonic float */
+@keyframes float-badge {
+  0%   { transform: translateY(0px) rotate(-1deg); }
+  100% { transform: translateY(-10px) rotate(1deg); }
+}
+
+/* Landing scroll container — momentum scroll on iOS */
+#landing-scroll {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* WebGL canvas — GPU layer */
+canvas {
+  will-change: transform;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* Landing section headings — font-feature */
+.font-brand {
+  font-feature-settings: "liga" 1, "kern" 1;
+  text-rendering: optimizeLegibility;
+}
+
+/* Gold gradient text utility */
+.text-gold-gradient {
+  background: linear-gradient(135deg, var(--color-primary) 0%, #fff0c0 50%, var(--color-primary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Shimmer keyframe for landing elements */
+@keyframes shimmer-slide {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}

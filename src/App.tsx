@@ -9,6 +9,7 @@ import Booking from './pages/Booking';
 import Dashboard from './pages/Dashboard';
 import Settings from './pages/Settings';
 import Admin from './pages/Admin';
+import Landing from './pages/Landing';
 import { authClient } from './lib/auth';
 import { ThemeProvider } from './lib/theme';
 import { Skeleton, StatCardSkeleton } from './components/ui/skeleton';
@@ -76,7 +77,7 @@ export default function App() {
     <ThemeProvider defaultTheme="dark" storageKey="aurelian-ui-theme">
       <Routes>
         <Route path="/" element={<Layout />}>
-          <Route index element={<Navigate to="/booking" replace />} />
+          <Route index element={<Landing />} />
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
           <Route path="forgot-password" element={<ForgotPassword />} />
