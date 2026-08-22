@@ -130,20 +130,22 @@ export function AtmosphereSection({ stats }: AtmosphereSectionProps) {
           {PILLARS.map(({ icon: Icon, title, description, stat, statLabel, gradient }) => (
             <motion.div key={title} variants={itemVariants}>
               <TiltCard3D
-                className="h-full rounded-2xl border p-6 space-y-4"
+                className="h-full rounded-2xl border p-6 space-y-4 backdrop-blur-xl"
                 style={{
                   background: gradient.includes('e5c378')
-                    ? 'linear-gradient(160deg, rgba(229,195,120,0.06) 0%, var(--color-surface) 100%)'
-                    : 'linear-gradient(160deg, rgba(196,151,42,0.06) 0%, var(--color-surface) 100%)',
-                  borderColor: 'rgba(229,195,120,0.12)',
+                    ? 'linear-gradient(160deg, rgba(229,195,120,0.09) 0%, rgba(14,12,8,0.72) 100%)'
+                    : 'linear-gradient(160deg, rgba(196,151,42,0.09) 0%, rgba(14,12,8,0.72) 100%)',
+                  borderColor: 'rgba(229,195,120,0.18)',
+                  boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.08), 0 16px 36px -8px rgba(0,0,0,0.5)',
                 }}
               >
                 {/* Icon */}
                 <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center"
+                  className="w-12 h-12 rounded-xl flex items-center justify-center backdrop-blur-md"
                   style={{
-                    background: 'rgba(229,195,120,0.1)',
-                    border: '1px solid rgba(229,195,120,0.2)',
+                    background: 'rgba(229,195,120,0.12)',
+                    border: '1px solid rgba(229,195,120,0.25)',
+                    boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.1)',
                   }}
                 >
                   <Icon size={22} style={{ color: 'var(--color-primary)' }} />
@@ -159,7 +161,7 @@ export function AtmosphereSection({ stats }: AtmosphereSectionProps) {
                   </p>
                 </div>
 
-                <div className="border-t" style={{ borderColor: 'rgba(229,195,120,0.1)' }} />
+                <div className="border-t" style={{ borderColor: 'rgba(229,195,120,0.12)' }} />
 
                 {/* Title & Description */}
                 <div className="space-y-2">
@@ -175,19 +177,23 @@ export function AtmosphereSection({ stats }: AtmosphereSectionProps) {
           ))}
         </motion.div>
 
-        {/* Live Metrics Bar from Database */}
+        {/* Live Metrics Bar from Database with Glassmorphism */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.4 }}
-          className="grid grid-cols-2 lg:grid-cols-4 gap-px overflow-hidden rounded-2xl border"
-          style={{ borderColor: 'rgba(229,195,120,0.1)', background: 'rgba(229,195,120,0.08)' }}
+          className="grid grid-cols-2 lg:grid-cols-4 gap-px overflow-hidden rounded-2xl border backdrop-blur-2xl"
+          style={{
+            borderColor: 'rgba(229,195,120,0.2)',
+            background: 'rgba(229,195,120,0.1)',
+            boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.08), 0 20px 48px -10px rgba(0,0,0,0.5)',
+          }}
         >
           {metrics.map(({ end, label, suffix }) => (
             <div
               key={label}
-              className="flex flex-col items-center justify-center py-8 px-4 gap-2"
-              style={{ background: 'var(--color-surface)' }}
+              className="flex flex-col items-center justify-center py-8 px-4 gap-2 backdrop-blur-xl transition-colors duration-300"
+              style={{ background: 'rgba(14,12,8,0.72)' }}
             >
               <div className="flex items-baseline gap-0.5">
                 {inView && (
@@ -200,7 +206,7 @@ export function AtmosphereSection({ stats }: AtmosphereSectionProps) {
                   {suffix}
                 </span>
               </div>
-              <p className="font-sans text-[10px] uppercase tracking-widest text-center" style={{ color: 'var(--color-muted-text)' }}>
+              <p className="font-sans text-[10px] uppercase tracking-widest text-center font-medium" style={{ color: 'var(--color-muted-text)' }}>
                 {label}
               </p>
             </div>

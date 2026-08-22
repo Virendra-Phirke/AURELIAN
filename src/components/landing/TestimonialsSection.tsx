@@ -67,10 +67,11 @@ interface TestimonialCardProps {
 function TestimonialCard({ name, handle, role, text, stars, avatar }: TestimonialCardProps) {
   return (
     <div
-      className="w-72 sm:w-80 rounded-2xl border p-6 space-y-4 mx-3 shrink-0"
+      className="w-72 sm:w-80 rounded-2xl border p-6 space-y-4 mx-3 shrink-0 backdrop-blur-xl transition-all duration-300 hover:border-[rgba(229,195,120,0.35)]"
       style={{
-        background: 'var(--color-surface)',
-        borderColor: 'rgba(229,195,120,0.12)',
+        background: 'linear-gradient(160deg, rgba(229,195,120,0.06) 0%, rgba(14,12,8,0.78) 100%)',
+        borderColor: 'rgba(229,195,120,0.18)',
+        boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.08), 0 16px 36px -8px rgba(0,0,0,0.5)',
       }}
     >
       {/* Stars */}
@@ -86,10 +87,10 @@ function TestimonialCard({ name, handle, role, text, stars, avatar }: Testimonia
       </p>
 
       {/* Author */}
-      <div className="flex items-center gap-3 pt-2 border-t" style={{ borderColor: 'rgba(229,195,120,0.08)' }}>
+      <div className="flex items-center gap-3 pt-3 border-t" style={{ borderColor: 'rgba(229,195,120,0.12)' }}>
         <div
-          className="w-9 h-9 rounded-full flex items-center justify-center font-brand text-sm font-bold shrink-0"
-          style={{ background: 'rgba(229,195,120,0.15)', color: 'var(--color-primary)' }}
+          className="w-9 h-9 rounded-full flex items-center justify-center font-brand text-sm font-bold shrink-0 backdrop-blur-md"
+          style={{ background: 'rgba(229,195,120,0.18)', color: 'var(--color-primary)', border: '1px solid rgba(229,195,120,0.3)' }}
         >
           {avatar}
         </div>

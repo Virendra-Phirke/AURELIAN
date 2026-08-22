@@ -69,7 +69,7 @@ export function TiltCard3D({
   const shadow = useTransform(
     [rotateXSpring, rotateYSpring],
     ([rx, ry]: number[]) =>
-      `${ry * -0.8}px ${rx * 0.8}px 30px rgba(0,0,0,0.3), 0 0 ${isHovered ? '20px' : '0px'} rgba(229,195,120,0.1)`
+      `${ry * -0.8}px ${rx * 0.8}px 32px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.1), 0 0 ${isHovered ? '24px' : '0px'} rgba(229,195,120,0.15)`
   );
 
   return (
@@ -85,6 +85,8 @@ export function TiltCard3D({
         scale: scaleSpring,
         boxShadow: shadow,
         transformStyle: 'preserve-3d',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
         ...style,
       }}
       className={`relative overflow-hidden ${className}`}
@@ -97,11 +99,18 @@ export function TiltCard3D({
           opacity: glarePos.opacity,
         }}
       />
+      {/* Frosted glass top edge reflection */}
+      <div
+        className="pointer-events-none absolute top-0 left-0 right-0 h-[1px] z-10"
+        style={{
+          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.15), rgba(229,195,120,0.3), rgba(255,255,255,0.15), transparent)',
+        }}
+      />
       {/* Gold rim on hover */}
       <div
         className="pointer-events-none absolute inset-0 z-10 rounded-[inherit] transition-opacity duration-300"
         style={{
-          boxShadow: `inset 0 0 0 1px rgba(229,195,120,${isHovered ? 0.3 : 0})`,
+          boxShadow: `inset 0 0 0 1px rgba(229,195,120,${isHovered ? 0.35 : 0})`,
           opacity: isHovered ? 1 : 0,
         }}
       />

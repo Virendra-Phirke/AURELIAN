@@ -102,11 +102,11 @@ export function CraftsmanshipSection() {
           </p>
         </motion.div>
 
-        {/* Steps — horizontal timeline */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-0 relative">
+        {/* Steps — horizontal timeline with Glassmorphic Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 relative">
           {/* Connecting line */}
           <div
-            className="absolute top-8 left-[12.5%] right-[12.5%] h-px hidden lg:block"
+            className="absolute top-12 left-[12.5%] right-[12.5%] h-px hidden lg:block"
             style={{ background: 'linear-gradient(to right, transparent, rgba(229,195,120,0.3), rgba(229,195,120,0.5), rgba(229,195,120,0.3), transparent)' }}
           />
 
@@ -116,23 +116,28 @@ export function CraftsmanshipSection() {
               initial={{ opacity: 0, y: 40 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.7, delay: i * 0.12, ease: [0.22, 1, 0.36, 1] }}
-              className="relative p-6 lg:p-8 flex flex-col items-center text-center lg:items-start lg:text-left gap-5"
+              className="relative p-6 lg:p-7 rounded-2xl border backdrop-blur-xl flex flex-col items-center text-center lg:items-start lg:text-left gap-5 transition-all duration-300 hover:border-[rgba(229,195,120,0.35)]"
+              style={{
+                background: 'linear-gradient(160deg, rgba(229,195,120,0.06) 0%, rgba(14,12,8,0.72) 100%)',
+                borderColor: 'rgba(229,195,120,0.16)',
+                boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.08), 0 16px 36px -8px rgba(0,0,0,0.45)',
+              }}
             >
               {/* Step circle */}
               <div className="relative z-10">
                 <div
-                  className="w-16 h-16 rounded-full flex items-center justify-center border-2 relative"
+                  className="w-14 h-14 rounded-2xl flex items-center justify-center border backdrop-blur-md relative"
                   style={{
-                    background: 'var(--color-surface)',
+                    background: 'rgba(229,195,120,0.12)',
                     borderColor: 'rgba(229,195,120,0.35)',
-                    boxShadow: '0 0 20px rgba(229,195,120,0.1)',
+                    boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.15), 0 0 20px rgba(229,195,120,0.15)',
                   }}
                 >
-                  <Icon size={22} style={{ color: 'var(--color-primary)' }} />
+                  <Icon size={20} style={{ color: 'var(--color-primary)' }} />
 
                   {/* Step number badge */}
                   <span
-                    className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center font-brand text-[10px] font-bold"
+                    className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center font-brand text-[10px] font-bold shadow-md"
                     style={{ background: 'var(--color-primary)', color: 'var(--color-bg)' }}
                   >
                     {i + 1}
@@ -155,7 +160,7 @@ export function CraftsmanshipSection() {
               {/* Vertical connector on mobile */}
               {i < STEPS.length - 1 && (
                 <div
-                  className="lg:hidden absolute bottom-0 left-1/2 w-px h-6"
+                  className="lg:hidden absolute -bottom-4 left-1/2 w-px h-4"
                   style={{ background: 'rgba(229,195,120,0.2)' }}
                 />
               )}

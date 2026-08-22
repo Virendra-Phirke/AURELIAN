@@ -56,11 +56,12 @@ export function HeroSection({ shop, stats }: HeroSectionProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2 font-sans text-[10px] uppercase tracking-[0.2em] font-semibold px-4 py-2 rounded-full border"
+            className="inline-flex items-center gap-2 font-sans text-[10px] uppercase tracking-[0.2em] font-semibold px-4 py-2 rounded-full border backdrop-blur-xl"
             style={{
               color: 'var(--color-primary)',
               borderColor: 'rgba(229,195,120,0.3)',
-              background: 'rgba(229,195,120,0.06)',
+              background: 'linear-gradient(135deg, rgba(229,195,120,0.12) 0%, rgba(14,12,8,0.6) 100%)',
+              boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.1), 0 4px 16px rgba(0,0,0,0.3)',
             }}
           >
             <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: 'var(--color-primary)' }} />
@@ -134,22 +135,28 @@ export function HeroSection({ shop, stats }: HeroSectionProps) {
             </button>
           </motion.div>
 
-          {/* Divider + Credentials */}
+          {/* Divider + Credentials with Glassmorphism */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.5 }}
-            className="flex items-center gap-6 pt-4"
+            className="inline-flex items-center gap-4 p-3.5 pr-6 rounded-2xl border backdrop-blur-xl"
+            style={{
+              background: 'linear-gradient(160deg, rgba(229,195,120,0.08) 0%, rgba(14,12,8,0.72) 100%)',
+              borderColor: 'rgba(229,195,120,0.2)',
+              boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.08), 0 12px 30px -8px rgba(0,0,0,0.4)',
+            }}
           >
             <div className="flex -space-x-2">
               {clientInitials.map((l, i) => (
                 <div
                   key={i}
-                  className="w-8 h-8 rounded-full flex items-center justify-center font-brand text-xs font-bold border-2"
+                  className="w-8 h-8 rounded-full flex items-center justify-center font-brand text-xs font-bold border-2 backdrop-blur-md"
                   style={{
-                    background: 'var(--color-surface)',
+                    background: 'rgba(229,195,120,0.18)',
                     borderColor: 'var(--color-primary)',
                     color: 'var(--color-primary)',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
                   }}
                 >
                   {l}
@@ -158,7 +165,7 @@ export function HeroSection({ shop, stats }: HeroSectionProps) {
             </div>
             <p className="font-sans text-xs" style={{ color: 'var(--color-secondary-text)' }}>
               <span style={{ color: 'var(--color-primary)', fontWeight: 700 }}>{clientCountStr}</span>{' '}
-              discerning clients trust {shop?.shopName || 'Aurelian'} for their signature look
+              discerning clients trust {shop?.shopName || 'Aurelian'}
             </p>
           </motion.div>
         </div>

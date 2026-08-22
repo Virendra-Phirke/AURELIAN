@@ -100,36 +100,36 @@ export function LandingFooter({ shop }: LandingFooterProps) {
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {/* Primary Address & Hours */}
-              <div className="space-y-3 p-4 rounded-xl border" style={{ borderColor: 'rgba(229,195,120,0.1)', background: 'rgba(229,195,120,0.02)' }}>
+              <div className="space-y-3 p-5 rounded-2xl border backdrop-blur-xl transition-all duration-300 hover:border-[rgba(229,195,120,0.35)]" style={{ borderColor: 'rgba(229,195,120,0.18)', background: 'linear-gradient(160deg, rgba(229,195,120,0.06) 0%, rgba(14,12,8,0.72) 100%)', boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.08), 0 12px 30px rgba(0,0,0,0.35)' }}>
                 <div>
                   <p className="font-brand text-sm font-semibold" style={{ color: 'var(--color-primary-text)' }}>{brandName} Flagship</p>
-                  <p className="font-sans text-[10px] uppercase tracking-widest" style={{ color: 'var(--color-primary)' }}>Private Atelier</p>
+                  <p className="font-sans text-[10px] uppercase tracking-widest font-semibold" style={{ color: 'var(--color-primary)' }}>Private Atelier</p>
                 </div>
-                <div className="space-y-2">
-                  <div className="flex items-start gap-2">
-                    <MapPin size={12} className="mt-0.5 shrink-0" style={{ color: 'var(--color-primary)' }} />
+                <div className="space-y-2.5">
+                  <div className="flex items-start gap-2.5">
+                    <MapPin size={13} className="mt-0.5 shrink-0" style={{ color: 'var(--color-primary)' }} />
                     <p className="font-sans text-xs leading-relaxed" style={{ color: 'var(--color-secondary-text)' }}>{address}</p>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Clock size={12} className="shrink-0" style={{ color: 'var(--color-primary)' }} />
+                  <div className="flex items-center gap-2.5">
+                    <Clock size={13} className="shrink-0" style={{ color: 'var(--color-primary)' }} />
                     <p className="font-sans text-xs" style={{ color: 'var(--color-secondary-text)' }}>Mon–Sat · {hours}</p>
                   </div>
                 </div>
               </div>
 
               {/* Direct Concierge Contact */}
-              <div className="space-y-3 p-4 rounded-xl border" style={{ borderColor: 'rgba(229,195,120,0.1)', background: 'rgba(229,195,120,0.02)' }}>
+              <div className="space-y-3 p-5 rounded-2xl border backdrop-blur-xl transition-all duration-300 hover:border-[rgba(229,195,120,0.35)]" style={{ borderColor: 'rgba(229,195,120,0.18)', background: 'linear-gradient(160deg, rgba(229,195,120,0.06) 0%, rgba(14,12,8,0.72) 100%)', boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.08), 0 12px 30px rgba(0,0,0,0.35)' }}>
                 <div>
                   <p className="font-brand text-sm font-semibold" style={{ color: 'var(--color-primary-text)' }}>Concierge Desk</p>
-                  <p className="font-sans text-[10px] uppercase tracking-widest" style={{ color: 'var(--color-primary)' }}>Direct Line</p>
+                  <p className="font-sans text-[10px] uppercase tracking-widest font-semibold" style={{ color: 'var(--color-primary)' }}>Direct Line</p>
                 </div>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Phone size={12} className="shrink-0" style={{ color: 'var(--color-primary)' }} />
+                <div className="space-y-2.5">
+                  <div className="flex items-center gap-2.5">
+                    <Phone size={13} className="shrink-0" style={{ color: 'var(--color-primary)' }} />
                     <p className="font-sans text-xs" style={{ color: 'var(--color-secondary-text)' }}>{phone}</p>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Mail size={12} className="shrink-0" style={{ color: 'var(--color-primary)' }} />
+                  <div className="flex items-center gap-2.5">
+                    <Mail size={13} className="shrink-0" style={{ color: 'var(--color-primary)' }} />
                     <p className="font-sans text-xs" style={{ color: 'var(--color-secondary-text)' }}>{email}</p>
                   </div>
                 </div>

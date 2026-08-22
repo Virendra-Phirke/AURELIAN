@@ -66,17 +66,19 @@ export function CtaSection({ shop }: CtaSectionProps) {
             color={['#e5c378', '#edd495', '#c4972a']}
           >
             <div
-              className="rounded-3xl p-10 sm:p-16 text-center space-y-8"
+              className="rounded-3xl p-10 sm:p-16 text-center space-y-8 backdrop-blur-2xl"
               style={{
-                background: 'var(--color-surface)',
+                background: 'linear-gradient(160deg, rgba(229,195,120,0.08) 0%, rgba(14,12,8,0.85) 100%)',
+                boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.1), 0 24px 64px -12px rgba(0,0,0,0.6)',
               }}
             >
               {/* Live slot badge */}
               <div
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full border"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full border backdrop-blur-md"
                 style={{
-                  background: 'rgba(229,195,120,0.06)',
-                  borderColor: 'rgba(229,195,120,0.2)',
+                  background: 'rgba(229,195,120,0.1)',
+                  borderColor: 'rgba(229,195,120,0.25)',
+                  boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.1)',
                 }}
               >
                 <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#4ade80' }} />

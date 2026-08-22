@@ -138,11 +138,12 @@ export function ServicesSection({ services: propServices, shop, loading }: Servi
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className="font-sans text-[10px] uppercase tracking-widest font-semibold px-4 py-2 rounded-full border transition-all duration-200 cursor-pointer"
+                className="font-sans text-[10px] uppercase tracking-widest font-semibold px-4 py-2 rounded-full border backdrop-blur-lg transition-all duration-200 cursor-pointer"
                 style={{
-                  background: activeCategory === cat ? 'var(--color-primary)' : 'transparent',
+                  background: activeCategory === cat ? 'var(--color-primary)' : 'rgba(14,12,8,0.65)',
                   color: activeCategory === cat ? 'var(--color-bg)' : 'var(--color-secondary-text)',
                   borderColor: activeCategory === cat ? 'var(--color-primary)' : 'rgba(229,195,120,0.2)',
+                  boxShadow: activeCategory === cat ? '0 4px 20px rgba(229,195,120,0.3)' : 'inset 0 1px 1px rgba(255,255,255,0.06)',
                 }}
               >
                 {cat}
@@ -153,7 +154,7 @@ export function ServicesSection({ services: propServices, shop, loading }: Servi
 
         {/* Services Grid with Real Database Records */}
         {filtered.length === 0 ? (
-          <div className="text-center py-16 space-y-3 rounded-2xl border" style={{ borderColor: 'rgba(229,195,120,0.1)', background: 'var(--color-surface)' }}>
+          <div className="text-center py-16 space-y-3 rounded-2xl border backdrop-blur-xl" style={{ borderColor: 'rgba(229,195,120,0.18)', background: 'rgba(14,12,8,0.72)', boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.08), 0 16px 40px rgba(0,0,0,0.4)' }}>
             <Scissors size={28} className="mx-auto" style={{ color: 'var(--color-primary)' }} />
             <p className="font-brand text-lg" style={{ color: 'var(--color-primary-text)' }}>
               {loading ? 'Curating Signature Services...' : 'Services Currently Being Prepared'}
@@ -179,12 +180,13 @@ export function ServicesSection({ services: propServices, shop, loading }: Servi
                 animate={inView ? 'visible' : 'hidden'}
               >
                 <TiltCard3D
-                  className="h-full rounded-2xl border flex flex-col"
+                  className="h-full rounded-2xl border flex flex-col backdrop-blur-xl"
                   style={{
                     background: isHighlight
-                      ? 'linear-gradient(160deg, rgba(229,195,120,0.1) 0%, var(--color-surface) 60%)'
-                      : 'var(--color-surface)',
-                    borderColor: isHighlight ? 'rgba(229,195,120,0.25)' : 'rgba(229,195,120,0.08)',
+                      ? 'linear-gradient(160deg, rgba(229,195,120,0.12) 0%, rgba(14,12,8,0.75) 60%)'
+                      : 'linear-gradient(160deg, rgba(229,195,120,0.04) 0%, rgba(14,12,8,0.72) 100%)',
+                    borderColor: isHighlight ? 'rgba(229,195,120,0.28)' : 'rgba(229,195,120,0.14)',
+                    boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.08), 0 16px 36px -8px rgba(0,0,0,0.5)',
                   }}
                 >
                   <div className="flex flex-col h-full p-5 space-y-4">
