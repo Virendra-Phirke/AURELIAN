@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { motion, useScroll, useTransform } from 'motion/react';
 import { FloatingCanvas3D } from '../components/3d/FloatingCanvas3D';
+import { FloatingPolyhedronPath } from '../components/3d/FloatingPolyhedronPath';
 import { ScrollOrb3D } from '../components/3d/ScrollOrb3D';
 import { LandingHeader } from '../components/landing/LandingHeader';
 import { HeroSection } from '../components/landing/HeroSection';
@@ -33,7 +34,7 @@ function ScrollProgress() {
   );
 }
 
-// Orb-accented gold divider placed between each section
+// Orb-accented gold divider placed between each section with subtle diagonal drift
 function GoldDivider({
   variant = 'polyhedron',
   side = 'left',
@@ -42,17 +43,17 @@ function GoldDivider({
   side?: 'left' | 'right';
 }) {
   return (
-    <div className="relative max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 flex items-center gap-6">
-      {/* Left orb */}
+    <div className="relative max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 flex items-center gap-6 overflow-visible">
+      {/* Left orb — diagonal entrance and continuous rotation */}
       {side === 'left' && (
         <motion.div
-          initial={{ opacity: 0, scale: 0.5 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          initial={{ opacity: 0, scale: 0.6, x: -35, y: -20 }}
+          whileInView={{ opacity: 1, scale: 1, x: 0, y: 0 }}
+          viewport={{ once: false, margin: '-50px' }}
+          transition={{ duration: 1.0, ease: [0.22, 1, 0.36, 1] }}
           className="shrink-0"
         >
-          <ScrollOrb3D variant={variant} size={64} speed={0.8} />
+          <ScrollOrb3D variant={variant} size={72} speed={0.9} />
         </motion.div>
       )}
 
@@ -74,16 +75,16 @@ function GoldDivider({
         style={{ background: 'linear-gradient(to left, rgba(229,195,120,0.25), rgba(229,195,120,0.12), transparent)' }}
       />
 
-      {/* Right orb */}
+      {/* Right orb — diagonal entrance and continuous rotation */}
       {side === 'right' && (
         <motion.div
-          initial={{ opacity: 0, scale: 0.5 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          initial={{ opacity: 0, scale: 0.6, x: 35, y: -20 }}
+          whileInView={{ opacity: 1, scale: 1, x: 0, y: 0 }}
+          viewport={{ once: false, margin: '-50px' }}
+          transition={{ duration: 1.0, ease: [0.22, 1, 0.36, 1] }}
           className="shrink-0"
         >
-          <ScrollOrb3D variant={variant} size={64} speed={0.8} />
+          <ScrollOrb3D variant={variant} size={72} speed={0.9} />
         </motion.div>
       )}
     </div>
@@ -95,8 +96,11 @@ export default function Landing() {
 
   return (
     <div className="relative h-full" style={{ background: 'var(--color-bg)' }}>
-      {/* Full-page WebGL 3D background — camera scrolls with page */}
+      {/* Full-page WebGL 3D background */}
       <FloatingCanvas3D />
+
+      {/* Continuous diagonal travel path for Polyhedrons on scroll */}
+      <FloatingPolyhedronPath />
 
       {/* Scroll progress bar */}
       <ScrollProgress />

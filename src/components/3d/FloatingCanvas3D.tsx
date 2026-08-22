@@ -317,9 +317,10 @@ export function FloatingCanvas3D() {
           obj.originalY +
           Math.sin(time * obj.floatSpeed + obj.floatOffset) * obj.floatAmplitude;
 
-        // Mouse parallax on X
-        const targetX = obj.originalX + mouseRef.current.x * obj.parallaxFactor * 3.5;
-        obj.mesh.position.x += (targetX - obj.mesh.position.x) * 0.012;
+        // Diagonal travel path on scroll: objects weave across diagonal trajectories as you scroll
+        const diagonalWave = Math.sin(scrollPct * Math.PI * 3 + obj.floatOffset) * 6 * obj.parallaxFactor;
+        const targetX = obj.originalX + diagonalWave + mouseRef.current.x * obj.parallaxFactor * 3.5;
+        obj.mesh.position.x += (targetX - obj.mesh.position.x) * 0.015;
 
         // Scroll camera pan — camera moves down as user scrolls
         // Objects stay at their world Y; camera Y descends matching scroll
