@@ -1,17 +1,23 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion, useScroll, useTransform } from 'motion/react';
+import { motion } from 'motion/react';
 import { ThemeToggle } from '../magicui/theme-toggle';
 import { authClient } from '../../lib/auth';
+import { ShopSettings } from '../../lib/useLandingData';
+import { Sparkles } from 'lucide-react';
 
 const NAV_LINKS = [
   { label: 'Services', href: '#services' },
   { label: 'Experience', href: '#experience' },
-  { label: 'Membership', href: '#membership' },
+  { label: 'Reviews', href: '#membership' },
   { label: 'Locations', href: '#locations' },
 ];
 
-export function LandingHeader() {
+interface LandingHeaderProps {
+  shop?: ShopSettings;
+}
+
+export function LandingHeader({ shop }: LandingHeaderProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { data: sessionData } = authClient.useSession();
@@ -46,6 +52,8 @@ export function LandingHeader() {
     setMobileOpen(false);
   };
 
+  const brandName = shop?.shopName || 'AURELIAN';
+
   return (
     <motion.header
       initial={{ y: -80, opacity: 0 }}
@@ -54,20 +62,35 @@ export function LandingHeader() {
       className="fixed top-0 left-0 right-0 z-50 transition-all duration-500"
       style={{
         background: scrolled
-          ? 'rgba(6,6,6,0.85)'
+          ? 'rgba(6,6,6,0.88)'
           : 'transparent',
         backdropFilter: scrolled ? 'blur(20px)' : 'none',
-        borderBottom: scrolled ? '1px solid rgba(229,195,120,0.1)' : 'none',
+        borderBottom: scrolled ? '1px solid rgba(229,195,120,0.12)' : 'none',
       }}
     >
+      {/* Active Announcement Banner from DB */}
+      {shop?.announcementActive && shop?.announcementText && (
+        <div
+          className="px-4 py-1.5 text-center flex items-center justify-center gap-2 text-[11px] font-sans font-medium tracking-wide"
+          style={{
+            background: 'linear-gradient(90deg, rgba(229,195,120,0.2) 0%, rgba(229,195,120,0.35) 50%, rgba(229,195,120,0.2) 100%)',
+            color: 'var(--color-primary)',
+            borderBottom: '1px solid rgba(229,195,120,0.2)',
+          }}
+        >
+          <Sparkles size={12} className="animate-spin" style={{ animationDuration: '6s' }} />
+          <span>{shop.announcementText}</span>
+        </div>
+      )}
+
       <div className="max-w-7xl mx-auto px-6 sm:px-10 h-18 sm:h-20 flex items-center justify-between">
         {/* Brand */}
         <Link
           to="/"
-          className="text-xl sm:text-2xl font-brand tracking-[0.4em] font-semibold uppercase"
+          className="text-xl sm:text-2xl font-brand tracking-[0.35em] font-semibold uppercase"
           style={{ color: 'var(--color-primary)' }}
         >
-          ⚜ AURELIAN
+          ⚜ {brandName}
         </Link>
 
         {/* Desktop Nav */}
@@ -115,8 +138,8 @@ export function LandingHeader() {
                 Sign In
               </Link>
               <Link
-                to="/register"
-                className="inline-flex font-sans text-xs uppercase tracking-widest font-semibold px-5 py-2.5 rounded-full transition-all duration-200"
+                to="/booking"
+                className="inline-flex font-sans text-xs uppercase tracking-widest font-semibold px-5 py-2.5 rounded-full transition-all duration-200 shadow-md"
                 style={{
                   color: 'var(--color-bg)',
                   background: 'var(--color-primary)',
@@ -163,7 +186,7 @@ export function LandingHeader() {
                 {label}
               </button>
             ))}
-            {!session?.user && (
+            {!session?.user ? (
               <Link
                 to="/login"
                 onClick={() => setMobileOpen(false)}
@@ -171,6 +194,15 @@ export function LandingHeader() {
                 style={{ color: 'var(--color-primary)' }}
               >
                 Sign In
+              </Link>
+            ) : (
+              <Link
+                to={session.user.role === 'ADMIN' ? '/admin' : '/dashboard'}
+                onClick={() => setMobileOpen(false)}
+                className="font-sans text-xs uppercase tracking-widest font-semibold"
+                style={{ color: 'var(--color-primary)' }}
+              >
+                Dashboard
               </Link>
             )}
           </div>

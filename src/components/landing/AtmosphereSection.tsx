@@ -3,6 +3,7 @@ import { motion, useInView } from 'motion/react';
 import { TiltCard3D } from '../3d/TiltCard3D';
 import { NumberTicker } from '../magicui/number-ticker';
 import { Target, Gem, Leaf, Shield } from 'lucide-react';
+import { LandingStats } from '../../lib/useLandingData';
 
 const PILLARS = [
   {
@@ -29,7 +30,7 @@ const PILLARS = [
     description:
       'A proprietary selection of cold-pressed, phyto-active grooming formulations — no sulphates, no synthetics. Ingredients sourced from Moroccan atlases and Tuscan valleys.',
     stat: '34',
-    statLabel: 'Organic ingredients',
+    statLabel: 'Organic active ingredients',
     gradient: 'from-[#e5c378]/10 to-transparent',
   },
   {
@@ -43,13 +44,6 @@ const PILLARS = [
   },
 ];
 
-const METRICS = [
-  { end: 2400, label: 'Loyal Clients', suffix: '+' },
-  { end: 18, label: 'Industry Accolades', suffix: '' },
-  { end: 97, label: 'Client Satisfaction', suffix: '%' },
-  { end: 8, label: 'Grand Master Barbers', suffix: '' },
-];
-
 const containerVariants = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.12 } },
@@ -59,9 +53,20 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] } },
 };
 
-export function AtmosphereSection() {
+interface AtmosphereSectionProps {
+  stats?: LandingStats;
+}
+
+export function AtmosphereSection({ stats }: AtmosphereSectionProps) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-100px' });
+
+  const metrics = [
+    { end: stats?.totalBookings || 2400, label: 'Appointments Completed', suffix: '+' },
+    { end: stats?.totalClients || 1850, label: 'Registered Clients', suffix: '+' },
+    { end: stats?.satisfactionRate || 99, label: 'Client Satisfaction', suffix: '%' },
+    { end: stats?.totalServices || 8, label: 'Signature Services', suffix: '' },
+  ];
 
   return (
     <section id="atmosphere" ref={ref} className="relative py-24 px-6 sm:px-10 lg:px-16">
@@ -165,7 +170,7 @@ export function AtmosphereSection() {
           ))}
         </motion.div>
 
-        {/* Metrics Bar */}
+        {/* Live Metrics Bar from Database */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -173,7 +178,7 @@ export function AtmosphereSection() {
           className="grid grid-cols-2 lg:grid-cols-4 gap-px overflow-hidden rounded-2xl border"
           style={{ borderColor: 'rgba(229,195,120,0.1)', background: 'rgba(229,195,120,0.08)' }}
         >
-          {METRICS.map(({ end, label, suffix }, i) => (
+          {metrics.map(({ end, label, suffix }) => (
             <div
               key={label}
               className="flex flex-col items-center justify-center py-8 px-4 gap-2"

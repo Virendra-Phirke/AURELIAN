@@ -1,103 +1,102 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 import { motion, useInView } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { TiltCard3D } from '../3d/TiltCard3D';
-import { Clock, ArrowRight } from 'lucide-react';
+import { Clock, ArrowRight, Scissors } from 'lucide-react';
+import { ServiceItem, ShopSettings } from '../../lib/useLandingData';
 
-const CATEGORIES = ['All', 'Hair Architecture', 'Royal Shaving', 'Facial & Scalp', 'VIP Packages'] as const;
-type Category = typeof CATEGORIES[number];
+interface ServicesSectionProps {
+  services?: ServiceItem[];
+  shop?: ShopSettings;
+  loading?: boolean;
+}
 
-const SERVICES = [
-  {
-    name: 'Signature Cut & Style',
-    category: 'Hair Architecture',
-    duration: 60,
-    price: '₹2,400',
-    description: 'A bespoke hair architecture session. Consultation, precision cut, and signature finish.',
-    badge: 'Most Popular',
-    highlight: true,
-  },
-  {
-    name: 'Royal Hot Towel Shave',
-    category: 'Royal Shaving',
-    duration: 45,
-    price: '₹1,800',
-    description: 'Traditional straight-razor shave ritual with hot linen, oil pre-treatment, and artisanal balm.',
-    badge: 'Heritage',
-    highlight: false,
-  },
-  {
-    name: 'Hair + Beard Mastery',
-    category: 'Hair Architecture',
-    duration: 90,
-    price: '₹3,600',
-    description: 'The complete grooming statement. Full precision cut paired with sculpted beard architecture.',
-    badge: 'Premium',
-    highlight: false,
-  },
-  {
-    name: 'Scalp Revival Therapy',
-    category: 'Facial & Scalp',
-    duration: 50,
-    price: '₹2,200',
-    description: 'Deep-cleanse scalp detox with organic actives, hot compress, and revitalising scalp massage.',
-    badge: 'Wellness',
-    highlight: false,
-  },
-  {
-    name: 'The Grand Luxe',
-    category: 'VIP Packages',
-    duration: 180,
-    price: '₹8,500',
-    description: 'The ultimate Aurelian experience: cut, shave, facial, scalp, VIP lounge, and curated refreshment.',
-    badge: 'VIP',
-    highlight: true,
-  },
-  {
-    name: 'Beard Shaping & Oil Ritual',
-    category: 'Royal Shaving',
-    duration: 40,
-    price: '₹1,400',
-    description: 'Surgical beard sculpting with contour mapping and a Moroccan argan nourishing ritual finish.',
-    badge: 'Classic',
-    highlight: false,
-  },
-  {
-    name: 'Brightening Facial',
-    category: 'Facial & Scalp',
-    duration: 55,
-    price: '₹2,600',
-    description: 'Multi-step rejuvenating facial with vitamin C infusion, lymphatic drainage, and LED finishing.',
-    badge: 'Glow',
-    highlight: false,
-  },
-  {
-    name: 'Prestige Monthly',
-    category: 'VIP Packages',
-    duration: 120,
-    price: '₹5,800',
-    description: 'Monthly retainer: unlimited styling touch-ups, priority slots, and complimentary beard maintenance.',
-    badge: 'Members',
-    highlight: false,
-  },
+const FALLBACK_SERVICES: ServiceItem[] = [
+  { id: '1', name: 'Signature Cut & Style', durationMinutes: 60, price: 2400, active: true },
+  { id: '2', name: 'Royal Hot Towel Shave', durationMinutes: 45, price: 1800, active: true },
+  { id: '3', name: 'Hair + Beard Mastery', durationMinutes: 90, price: 3600, active: true },
+  { id: '4', name: 'Scalp Revival Therapy', durationMinutes: 50, price: 2200, active: true },
+  { id: '5', name: 'The Grand Luxe', durationMinutes: 180, price: 8500, active: true },
+  { id: '6', name: 'Beard Shaping & Oil Ritual', durationMinutes: 40, price: 1400, active: true },
 ];
+
+function getCategoryForService(name: string): string {
+  const lower = name.toLowerCase();
+  if (lower.includes('shav') || lower.includes('beard')) return 'Royal Shaving';
+  if (lower.includes('cut') || lower.includes('hair') || lower.includes('style')) return 'Hair Architecture';
+  if (lower.includes('scalp') || lower.includes('facial') || lower.includes('therapy')) return 'Facial & Scalp';
+  if (lower.includes('luxe') || lower.includes('package') || lower.includes('vip')) return 'VIP Packages';
+  return 'Bespoke';
+}
+
+function getBadgeForService(index: number, name: string): string {
+  const lower = name.toLowerCase();
+  if (lower.includes('luxe') || lower.includes('grand')) return 'VIP Luxe';
+  if (lower.includes('signature') || index === 0) return 'Signature';
+  if (lower.includes('royal') || lower.includes('heritage')) return 'Heritage';
+  if (lower.includes('beard')) return 'Precision';
+  if (lower.includes('scalp')) return 'Wellness';
+  return 'Artisanal';
+}
+
+function getDescriptionForService(name: string): string {
+  const lower = name.toLowerCase();
+  if (lower.includes('cut') && lower.includes('beard')) {
+    return 'The complete grooming statement. Full precision haircut paired with tailored beard contouring.';
+  }
+  if (lower.includes('cut') || lower.includes('style')) {
+    return 'A bespoke hair architecture session. Morphological consultation, precision scissor work, and signature finish.';
+  }
+  if (lower.includes('shav')) {
+    return 'Traditional straight-razor shave ritual with hot linen, essential oil pre-treatment, and soothing organic balm.';
+  }
+  if (lower.includes('beard')) {
+    return 'Surgical beard sculpting with contour mapping and a nourishing Moroccan argan conditioning finish.';
+  }
+  if (lower.includes('scalp') || lower.includes('facial')) {
+    return 'Deep revitalising scalp and facial therapy with pure phyto-active serums and restorative massage.';
+  }
+  if (lower.includes('luxe') || lower.includes('grand')) {
+    return 'The ultimate private suite experience: signature styling, royal shave, revitalising treatment, and lounge access.';
+  }
+  return 'Handcrafted luxury grooming experience tailored precisely to your facial geometry and personal style.';
+}
 
 const itemVariants = {
   hidden: { opacity: 0, y: 30 },
   visible: (i: number) => ({
-    opacity: 1, y: 0,
+    opacity: 1,
+    y: 0,
     transition: { duration: 0.6, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] },
   }),
 };
 
-export function ServicesSection() {
-  const [activeCategory, setActiveCategory] = useState<Category>('All');
+export function ServicesSection({ services: propServices, shop, loading }: ServicesSectionProps) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
 
-  const filtered = activeCategory === 'All'
-    ? SERVICES
-    : SERVICES.filter(s => s.category === activeCategory);
+  const activeServices = useMemo(() => {
+    if (propServices && propServices.length > 0) {
+      return propServices.filter(s => s.active !== false);
+    }
+    return FALLBACK_SERVICES;
+  }, [propServices]);
+
+  const categories = useMemo(() => {
+    const set = new Set<string>();
+    set.add('All');
+    activeServices.forEach(s => set.add(getCategoryForService(s.name)));
+    return Array.from(set);
+  }, [activeServices]);
+
+  const [activeCategory, setActiveCategory] = useState<string>('All');
+
+  const filtered = useMemo(() => {
+    if (activeCategory === 'All') return activeServices;
+    return activeServices.filter(s => getCategoryForService(s.name) === activeCategory);
+  }, [activeServices, activeCategory]);
+
+  const currency = shop?.currencySymbol || '₹';
 
   return (
     <section id="services" ref={ref} className="relative py-24 px-6 sm:px-10 lg:px-16">
@@ -123,7 +122,7 @@ export function ServicesSection() {
                   backgroundClip: 'text',
                 }}
               >
-                Services
+                Signature Services
               </span>
             </h2>
             <Link
@@ -131,110 +130,120 @@ export function ServicesSection() {
               className="hidden sm:inline-flex items-center gap-2 font-sans text-xs uppercase tracking-widest font-semibold transition-colors"
               style={{ color: 'var(--color-primary)' }}
             >
-              Book Now <ArrowRight size={14} />
+              Book an Experience <ArrowRight size={14} />
             </Link>
           </div>
         </motion.div>
 
         {/* Category Filter */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.5, delay: 0.15 }}
-          className="flex flex-wrap gap-2"
-        >
-          {CATEGORIES.map(cat => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className="font-sans text-[10px] uppercase tracking-widest font-semibold px-4 py-2 rounded-full border transition-all duration-200 cursor-pointer"
-              style={{
-                background: activeCategory === cat ? 'var(--color-primary)' : 'transparent',
-                color: activeCategory === cat ? 'var(--color-bg)' : 'var(--color-secondary-text)',
-                borderColor: activeCategory === cat ? 'var(--color-primary)' : 'rgba(229,195,120,0.2)',
-              }}
-            >
-              {cat}
-            </button>
-          ))}
-        </motion.div>
-
-        {/* Services Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-          {filtered.map((service, i) => (
-            <motion.div
-              key={service.name}
-              custom={i}
-              variants={itemVariants}
-              initial="hidden"
-              animate={inView ? 'visible' : 'hidden'}
-            >
-              <TiltCard3D
-                className="h-full rounded-2xl border flex flex-col"
+        {categories.length > 1 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.5, delay: 0.15 }}
+            className="flex flex-wrap gap-2"
+          >
+            {categories.map(cat => (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                className="font-sans text-[10px] uppercase tracking-widest font-semibold px-4 py-2 rounded-full border transition-all duration-200 cursor-pointer"
                 style={{
-                  background: service.highlight
-                    ? 'linear-gradient(160deg, rgba(229,195,120,0.1) 0%, var(--color-surface) 60%)'
-                    : 'var(--color-surface)',
-                  borderColor: service.highlight ? 'rgba(229,195,120,0.25)' : 'rgba(229,195,120,0.08)',
+                  background: activeCategory === cat ? 'var(--color-primary)' : 'transparent',
+                  color: activeCategory === cat ? 'var(--color-bg)' : 'var(--color-secondary-text)',
+                  borderColor: activeCategory === cat ? 'var(--color-primary)' : 'rgba(229,195,120,0.2)',
                 }}
               >
-                <div className="flex flex-col h-full p-5 space-y-4">
-                  {/* Badge */}
-                  <div className="flex items-center justify-between">
-                    <span
-                      className="font-sans text-[9px] uppercase tracking-widest font-semibold px-2.5 py-1 rounded-full border"
-                      style={{
-                        color: service.highlight ? 'var(--color-bg)' : 'var(--color-primary)',
-                        background: service.highlight ? 'var(--color-primary)' : 'rgba(229,195,120,0.08)',
-                        borderColor: 'rgba(229,195,120,0.2)',
-                      }}
-                    >
-                      {service.badge}
-                    </span>
-                    <span className="font-sans text-[9px] uppercase tracking-widest" style={{ color: 'var(--color-muted-text)' }}>
-                      {service.category}
-                    </span>
-                  </div>
+                {cat}
+              </button>
+            ))}
+          </motion.div>
+        )}
 
-                  {/* Service name */}
-                  <h3 className="font-brand text-lg leading-tight" style={{ color: 'var(--color-primary-text)' }}>
-                    {service.name}
-                  </h3>
+        {/* Services Grid with Real Database Records */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          {filtered.map((service, i) => {
+            const categoryName = getCategoryForService(service.name);
+            const badgeName = getBadgeForService(i, service.name);
+            const description = getDescriptionForService(service.name);
+            const isHighlight = i === 0 || service.name.toLowerCase().includes('luxe');
 
-                  {/* Description */}
-                  <p className="font-sans text-xs leading-relaxed flex-1" style={{ color: 'var(--color-secondary-text)' }}>
-                    {service.description}
-                  </p>
-
-                  {/* Footer */}
-                  <div className="border-t pt-4 flex items-center justify-between" style={{ borderColor: 'rgba(229,195,120,0.1)' }}>
-                    <div>
-                      <p className="font-brand text-xl font-bold" style={{ color: 'var(--color-primary)' }}>
-                        {service.price}
-                      </p>
-                      <div className="flex items-center gap-1 mt-0.5">
-                        <Clock size={10} style={{ color: 'var(--color-muted-text)' }} />
-                        <span className="font-sans text-[10px]" style={{ color: 'var(--color-muted-text)' }}>
-                          {service.duration} min
-                        </span>
-                      </div>
+            return (
+              <motion.div
+                key={service.id || service.name}
+                custom={i}
+                variants={itemVariants}
+                initial="hidden"
+                animate={inView ? 'visible' : 'hidden'}
+              >
+                <TiltCard3D
+                  className="h-full rounded-2xl border flex flex-col"
+                  style={{
+                    background: isHighlight
+                      ? 'linear-gradient(160deg, rgba(229,195,120,0.1) 0%, var(--color-surface) 60%)'
+                      : 'var(--color-surface)',
+                    borderColor: isHighlight ? 'rgba(229,195,120,0.25)' : 'rgba(229,195,120,0.08)',
+                  }}
+                >
+                  <div className="flex flex-col h-full p-5 space-y-4">
+                    {/* Badge & Category */}
+                    <div className="flex items-center justify-between">
+                      <span
+                        className="font-sans text-[9px] uppercase tracking-widest font-semibold px-2.5 py-1 rounded-full border"
+                        style={{
+                          color: isHighlight ? 'var(--color-bg)' : 'var(--color-primary)',
+                          background: isHighlight ? 'var(--color-primary)' : 'rgba(229,195,120,0.08)',
+                          borderColor: 'rgba(229,195,120,0.2)',
+                        }}
+                      >
+                        {badgeName}
+                      </span>
+                      <span className="font-sans text-[9px] uppercase tracking-widest" style={{ color: 'var(--color-muted-text)' }}>
+                        {categoryName}
+                      </span>
                     </div>
-                    <Link
-                      to="/booking"
-                      className="inline-flex items-center gap-1.5 font-sans text-[10px] uppercase tracking-widest font-semibold px-4 py-2 rounded-full transition-all duration-200"
-                      style={{
-                        background: service.highlight ? 'var(--color-primary)' : 'rgba(229,195,120,0.1)',
-                        color: service.highlight ? 'var(--color-bg)' : 'var(--color-primary)',
-                        border: '1px solid rgba(229,195,120,0.2)',
-                      }}
-                    >
-                      Book <ArrowRight size={10} />
-                    </Link>
+
+                    {/* Service Name */}
+                    <h3 className="font-brand text-lg leading-tight" style={{ color: 'var(--color-primary-text)' }}>
+                      {service.name}
+                    </h3>
+
+                    {/* Description */}
+                    <p className="font-sans text-xs leading-relaxed flex-1" style={{ color: 'var(--color-secondary-text)' }}>
+                      {description}
+                    </p>
+
+                    {/* Footer: Price + Duration + 1-Click Booking */}
+                    <div className="border-t pt-4 flex items-center justify-between" style={{ borderColor: 'rgba(229,195,120,0.1)' }}>
+                      <div>
+                        <p className="font-brand text-xl font-bold" style={{ color: 'var(--color-primary)' }}>
+                          {currency}
+                          {Number(service.price).toLocaleString()}
+                        </p>
+                        <div className="flex items-center gap-1 mt-0.5">
+                          <Clock size={10} style={{ color: 'var(--color-muted-text)' }} />
+                          <span className="font-sans text-[10px]" style={{ color: 'var(--color-muted-text)' }}>
+                            {service.durationMinutes} min
+                          </span>
+                        </div>
+                      </div>
+                      <Link
+                        to={`/booking`}
+                        className="inline-flex items-center gap-1.5 font-sans text-[10px] uppercase tracking-widest font-semibold px-4 py-2 rounded-full transition-all duration-200 cursor-pointer shadow-sm hover:scale-105"
+                        style={{
+                          background: isHighlight ? 'var(--color-primary)' : 'rgba(229,195,120,0.1)',
+                          color: isHighlight ? 'var(--color-bg)' : 'var(--color-primary)',
+                          border: '1px solid rgba(229,195,120,0.25)',
+                        }}
+                      >
+                        Book <ArrowRight size={10} />
+                      </Link>
+                    </div>
                   </div>
-                </div>
-              </TiltCard3D>
-            </motion.div>
-          ))}
+                </TiltCard3D>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>

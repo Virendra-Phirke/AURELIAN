@@ -79,6 +79,35 @@ apiRouter.get("/shop", rateLimit("shop", 300, 60), async (req, res) => {
     res.json(shop);
 });
 
+apiRouter.get("/stats", rateLimit("stats", 300, 60), async (req, res) => {
+    const cacheKey = "cache:landing_stats";
+    const cached = await redisClient.get(cacheKey);
+    if (cached) return res.json(JSON.parse(cached));
+
+    try {
+        const [bookingsCountRes] = await db.select({ count: count() }).from(bookings);
+        const [usersCountRes] = await db.select({ count: count() }).from(user);
+        const [servicesCountRes] = await db.select({ count: count() }).from(services).where(eq(services.active, true));
+
+        const totalBookings = Number(bookingsCountRes?.count || 0);
+        const totalClients = Number(usersCountRes?.count || 0);
+        const totalServices = Number(servicesCountRes?.count || 0);
+
+        const stats = {
+            totalBookings,
+            totalClients,
+            totalServices,
+            satisfactionRate: 98,
+        };
+
+        await redisClient.set(cacheKey, JSON.stringify(stats), { EX: 60 });
+        res.json(stats);
+    } catch (e) {
+        console.error("Failed to fetch stats:", e);
+        res.json({ totalBookings: 0, totalClients: 0, totalServices: 0, satisfactionRate: 98 });
+    }
+});
+
 apiRouter.get("/availability", rateLimit("avail", 300, 60), async (req, res) => {
     const { date, service } = req.query as { date: string, service: string };
     if (!date || !service) return res.status(400).json({ error: "Date and service required" });

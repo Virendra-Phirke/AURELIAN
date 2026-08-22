@@ -1,18 +1,18 @@
+import React from 'react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { HeroCenterpiece3D } from '../3d/HeroCenterpiece3D';
-import { SparklesText } from '../magicui/sparkles-text';
-import { Star, Users, Award, ChevronDown } from 'lucide-react';
+import { Star, Users, Sparkles, ChevronDown } from 'lucide-react';
+import { ShopSettings, LandingStats } from '../../lib/useLandingData';
 
 const BADGE_DELAY = 0.1;
 
-const floatBadges = [
-  { icon: Star, label: '4.9 / 5', sub: 'Client Rating', pos: 'top-8 left-6' },
-  { icon: Users, label: '2,400+', sub: 'Loyal Clients', pos: 'bottom-16 left-2' },
-  { icon: Award, label: '18 Accolades', sub: 'Industry Awards', pos: 'top-12 right-4' },
-];
+interface HeroSectionProps {
+  shop?: ShopSettings;
+  stats?: LandingStats;
+}
 
-export function HeroSection() {
+export function HeroSection({ shop, stats }: HeroSectionProps) {
   const scrollInto = (id: string) => {
     const el = document.getElementById(id);
     if (el) {
@@ -20,6 +20,20 @@ export function HeroSection() {
       c ? c.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' }) : el.scrollIntoView({ behavior: 'smooth' });
     }
   };
+
+  const clientCountStr = stats?.totalClients
+    ? `${stats.totalClients > 100 ? stats.totalClients.toLocaleString() + '+' : stats.totalClients}`
+    : '2,400+';
+
+  const servicesCountStr = stats?.totalServices ? `${stats.totalServices} Signature Services` : 'Bespoke Services';
+
+  const floatBadges = [
+    { icon: Star, label: `${stats?.satisfactionRate || 99}%`, sub: 'Satisfaction Rate', pos: 'top-8 left-6' },
+    { icon: Users, label: clientCountStr, sub: 'Loyal Clients', pos: 'bottom-16 left-2' },
+    { icon: Sparkles, label: servicesCountStr, sub: 'Crafted Packages', pos: 'top-12 right-4' },
+  ];
+
+  const tagline = shop?.shopTagline || 'Bespoke Grooming & Haute Coiffure';
 
   return (
     <section className="relative min-h-screen flex items-center pt-20 pb-12 px-6 sm:px-10 lg:px-16 overflow-hidden">
@@ -47,7 +61,7 @@ export function HeroSection() {
             }}
           >
             <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: 'var(--color-primary)' }} />
-            Bespoke Grooming &amp; Haute Coiffure
+            {tagline}
           </motion.div>
 
           {/* Headline */}
@@ -81,9 +95,8 @@ export function HeroSection() {
             className="font-sans text-sm sm:text-base leading-relaxed max-w-[440px]"
             style={{ color: 'var(--color-secondary-text)' }}
           >
-            Aurelian is more than a salon — it is a sanctuary. Each appointment is an exercise in
-            mastery: precision cutting, artisanal shaving ritual, and tailored aesthetic consultation
-            conducted by our Grand Masters of grooming.
+            {shop?.shopName || 'Aurelian'} is more than a salon — it is a private sanctuary. Every appointment is an exercise in
+            haute precision, artisanal treatment rituals, and tailored aesthetic mastery conducted in private suites.
           </motion.p>
 
           {/* CTAs */}
@@ -141,8 +154,8 @@ export function HeroSection() {
               ))}
             </div>
             <p className="font-sans text-xs" style={{ color: 'var(--color-secondary-text)' }}>
-              <span style={{ color: 'var(--color-primary)', fontWeight: 700 }}>2,400+</span>{' '}
-              clients trust Aurelian for their signature look
+              <span style={{ color: 'var(--color-primary)', fontWeight: 700 }}>{clientCountStr}</span>{' '}
+              discerning clients trust {shop?.shopName || 'Aurelian'} for their signature look
             </p>
           </motion.div>
         </div>

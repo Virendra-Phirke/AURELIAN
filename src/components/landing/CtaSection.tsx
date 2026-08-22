@@ -1,18 +1,28 @@
-import { useRef } from 'react';
+import React, { useRef } from 'react';
 import { motion, useInView } from 'motion/react';
 import { Link } from 'react-router-dom';
-import { CalendarDays, Zap, Clock } from 'lucide-react';
+import { CalendarDays, Zap, Clock, ShieldCheck } from 'lucide-react';
 import { ShimmerButton } from '../magicui/shimmer-button';
 import { ShineBorder } from '../magicui/shine-border';
+import { ShopSettings } from '../../lib/useLandingData';
 
-export function CtaSection() {
+interface CtaSectionProps {
+  shop?: ShopSettings;
+}
+
+export function CtaSection({ shop }: CtaSectionProps) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
 
-  // Simulated next available slot
+  const openingTime = shop?.openingTime || '09:00';
+  const closingTime = shop?.closingTime || '20:00';
+  const cancelHours = shop?.cancellationCutoffHours || 2;
+  const autoConfirmText = shop?.autoConfirmBookings ? 'Instant Slot Confirmation' : 'Priority Host Booking';
+
+  // Compute realistic next available day preview
   const now = new Date();
-  const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-  const slotTime = `Tomorrow, ${tomorrow.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' })} · 10:00 AM`;
+  const nextDate = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+  const slotTime = `Tomorrow, ${nextDate.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' })} · ${openingTime}`;
 
   return (
     <section className="relative py-24 px-6 sm:px-10 lg:px-16 overflow-hidden" ref={ref}>
@@ -42,10 +52,13 @@ export function CtaSection() {
               }}
             >
               {/* Live slot badge */}
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border" style={{
-                background: 'rgba(229,195,120,0.06)',
-                borderColor: 'rgba(229,195,120,0.2)',
-              }}>
+              <div
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full border"
+                style={{
+                  background: 'rgba(229,195,120,0.06)',
+                  borderColor: 'rgba(229,195,120,0.2)',
+                }}
+              >
                 <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#4ade80' }} />
                 <span className="font-sans text-[10px] uppercase tracking-widest font-semibold" style={{ color: 'var(--color-body-text)' }}>
                   Next Available Slot
@@ -73,16 +86,17 @@ export function CtaSection() {
                 </h2>
                 <p className="font-sans text-sm max-w-lg mx-auto leading-relaxed" style={{ color: 'var(--color-secondary-text)' }}>
                   Reserve your private session with an Aurelian Grand Master. Bespoke, precise, and exclusively yours.
-                  Zero conflicts. One click.
+                  Operating hours: {openingTime} to {closingTime}.
                 </p>
               </div>
 
-              {/* Feature Pills */}
+              {/* Real Feature Pills from Database Settings */}
               <div className="flex flex-wrap justify-center gap-3">
                 {[
-                  { icon: CalendarDays, label: 'Instant Confirmation' },
-                  { icon: Zap, label: 'Atomic Slot Locking' },
-                  { icon: Clock, label: 'Free 24hr Cancellation' },
+                  { icon: CalendarDays, label: autoConfirmText },
+                  { icon: Zap, label: 'Zero Double-Booking Lock' },
+                  { icon: Clock, label: `Free ${cancelHours}h Cancellation` },
+                  { icon: ShieldCheck, label: 'Bespoke Private Suite' },
                 ].map(({ icon: Icon, label }) => (
                   <div
                     key={label}

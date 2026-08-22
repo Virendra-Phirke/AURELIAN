@@ -9,6 +9,7 @@ import { CraftsmanshipSection } from '../components/landing/CraftsmanshipSection
 import { TestimonialsSection } from '../components/landing/TestimonialsSection';
 import { CtaSection } from '../components/landing/CtaSection';
 import { LandingFooter } from '../components/landing/LandingFooter';
+import { useLandingData } from '../lib/useLandingData';
 
 // Scroll progress indicator
 function ScrollProgress() {
@@ -22,7 +23,7 @@ function ScrollProgress() {
 
   return (
     <motion.div
-      className="fixed top-0 left-0 right-0 h-[2px] z-[100] origin-left"
+      className="fixed top-0 left-0 right-0 h-[2px] z-[100] origin-left pointer-events-none"
       style={{
         scaleX,
         background: 'linear-gradient(to right, var(--color-primary), #fff0c0)',
@@ -44,6 +45,8 @@ function GoldDivider() {
 }
 
 export default function Landing() {
+  const { services, shop, stats, loading } = useLandingData();
+
   return (
     <div className="relative h-full" style={{ background: 'var(--color-bg)' }}>
       {/* 3D Background Canvas */}
@@ -52,8 +55,8 @@ export default function Landing() {
       {/* Scroll progress bar */}
       <ScrollProgress />
 
-      {/* Fixed Header */}
-      <LandingHeader />
+      {/* Fixed Header with live shop announcement and brand */}
+      <LandingHeader shop={shop} />
 
       {/* Scrollable Content */}
       <div
@@ -61,36 +64,36 @@ export default function Landing() {
         className="relative z-10 h-full overflow-y-auto overflow-x-hidden"
         style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(229,195,120,0.2) transparent' }}
       >
-        {/* Hero */}
-        <HeroSection />
+        {/* Hero with live shop tagline, live client count, and 3D kinetic centerpiece */}
+        <HeroSection shop={shop} stats={stats} />
 
         <GoldDivider />
 
-        {/* Philosophy & Atmosphere */}
-        <AtmosphereSection />
+        {/* Philosophy & Atmosphere with live DB metric tickers */}
+        <AtmosphereSection stats={stats} />
 
         <GoldDivider />
 
-        {/* Services Showcase */}
-        <ServicesSection />
+        {/* Services Showcase loaded directly from Database */}
+        <ServicesSection services={services} shop={shop} loading={loading} />
 
         <GoldDivider />
 
-        {/* Craftsmanship Journey */}
+        {/* Craftsmanship Journey Protocol */}
         <CraftsmanshipSection />
 
         <GoldDivider />
 
-        {/* Client Testimonials */}
+        {/* Client Reviews / Comments Marquee */}
         <TestimonialsSection />
 
         <GoldDivider />
 
-        {/* Grand CTA */}
-        <CtaSection />
+        {/* Grand CTA with real DB shop hours, cancellation cutoff, and instant booking lock */}
+        <CtaSection shop={shop} />
 
-        {/* Footer */}
-        <LandingFooter />
+        {/* Footer with real salon contact details, opening hours, and address */}
+        <LandingFooter shop={shop} />
       </div>
     </div>
   );

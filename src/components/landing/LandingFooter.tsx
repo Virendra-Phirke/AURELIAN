@@ -1,40 +1,28 @@
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Clock, Phone, ExternalLink, Share2 } from 'lucide-react';
+import { MapPin, Clock, Phone, Mail, ExternalLink, Share2 } from 'lucide-react';
+import { ShopSettings } from '../../lib/useLandingData';
 
-const LOCATIONS = [
-  {
-    city: 'Mumbai',
-    district: 'Bandra West',
-    address: '14 Chapel Road, Bandra West, Mumbai 400050',
-    phone: '+91 98765 43210',
-    hours: 'Mon–Sat · 10:00 – 20:00',
-  },
-  {
-    city: 'Delhi',
-    district: 'Connaught Place',
-    address: 'Unit 4B, Outer Circle, Connaught Place, New Delhi 110001',
-    phone: '+91 91234 56789',
-    hours: 'Mon–Sat · 10:00 – 20:00',
-  },
-  {
-    city: 'Bengaluru',
-    district: 'Indiranagar',
-    address: '72, 12th Main Road, Indiranagar, Bengaluru 560038',
-    phone: '+91 98888 12345',
-    hours: 'Mon–Sat · 10:00 – 20:00',
-  },
-];
+interface LandingFooterProps {
+  shop?: ShopSettings;
+}
 
 const NAV_LINKS = [
-  { label: 'Services', href: '#services' },
-  { label: 'Experience', href: '#experience' },
-  { label: 'Book an Appointment', href: '/booking' },
-  { label: 'Client Portal', href: '/dashboard' },
-  { label: 'Sign In', href: '/login' },
-  { label: 'Register', href: '/register' },
+  { label: 'Signature Services', href: '#services' },
+  { label: 'The Experience', href: '#experience' },
+  { label: 'Client Reviews', href: '#membership' },
+  { label: 'Reserve Online', href: '/booking' },
+  { label: 'Client Dashboard', href: '/dashboard' },
+  { label: 'Sign In / Register', href: '/login' },
 ];
 
-export function LandingFooter() {
+export function LandingFooter({ shop }: LandingFooterProps) {
+  const brandName = shop?.shopName || 'AURELIAN';
+  const hours = `${shop?.openingTime || '09:00'} – ${shop?.closingTime || '20:00'}`;
+  const address = shop?.address || '14 Mayfair Atelier, London / DIFC Dubai / Beverly Hills';
+  const phone = shop?.phone || '+1 (555) 234-5678';
+  const email = shop?.email || 'concierge@aureliansalon.com';
+
   return (
     <footer id="locations" className="relative border-t" style={{ borderColor: 'rgba(229,195,120,0.1)', background: 'var(--color-sidebar-bg)' }}>
       <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 py-16 space-y-12">
@@ -44,20 +32,19 @@ export function LandingFooter() {
           <div className="space-y-5 lg:col-span-1">
             <Link
               to="/"
-              className="text-2xl font-brand tracking-[0.4em] font-semibold uppercase"
+              className="text-2xl font-brand tracking-[0.35em] font-semibold uppercase"
               style={{ color: 'var(--color-primary)' }}
             >
-              ⚜ AURELIAN
+              ⚜ {brandName}
             </Link>
             <p className="font-sans text-xs leading-relaxed" style={{ color: 'var(--color-secondary-text)' }}>
-              Luxury salon and bespoke grooming platform. Precision, craft, and exclusivity — in three cities.
+              {shop?.shopTagline || 'Luxury salon and bespoke grooming platform. Precision, craft, and exclusivity.'}
             </p>
             <div className="flex gap-3">
               {[Share2, ExternalLink].map((Icon, i) => (
-                <a
+                <button
                   key={i}
-                  href="#"
-                  className="w-9 h-9 rounded-lg flex items-center justify-center border transition-colors duration-200"
+                  className="w-9 h-9 rounded-lg flex items-center justify-center border transition-colors duration-200 cursor-pointer"
                   style={{
                     borderColor: 'rgba(229,195,120,0.2)',
                     color: 'var(--color-secondary-text)',
@@ -72,7 +59,7 @@ export function LandingFooter() {
                   }}
                 >
                   <Icon size={14} />
-                </a>
+                </button>
               ))}
             </div>
           </div>
@@ -80,13 +67,20 @@ export function LandingFooter() {
           {/* Navigation */}
           <div className="space-y-4">
             <p className="font-sans text-[9px] uppercase tracking-[0.25em] font-semibold" style={{ color: 'var(--color-primary)' }}>
-              Navigate
+              Navigation
             </p>
             <ul className="space-y-2.5">
               {NAV_LINKS.map(({ label, href }) => (
                 <li key={href}>
                   <Link
-                    to={href}
+                    to={href.startsWith('#') ? '/' : href}
+                    onClick={() => {
+                      if (href.startsWith('#')) {
+                        const el = document.getElementById(href.replace('#', ''));
+                        const c = document.getElementById('landing-scroll');
+                        if (el && c) c.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' });
+                      }
+                    }}
                     className="font-sans text-xs transition-colors duration-200"
                     style={{ color: 'var(--color-secondary-text)' }}
                     onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-primary)')}
@@ -99,32 +93,47 @@ export function LandingFooter() {
             </ul>
           </div>
 
-          {/* Locations */}
+          {/* Real Salon Flagship Details from Database */}
           <div className="space-y-5 lg:col-span-2">
             <p className="font-sans text-[9px] uppercase tracking-[0.25em] font-semibold" style={{ color: 'var(--color-primary)' }}>
-              Flagship Locations
+              Concierge &amp; Flagship Atelier
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-              {LOCATIONS.map(({ city, district, address, phone, hours }) => (
-                <div key={city} className="space-y-2.5">
-                  <div>
-                    <p className="font-brand text-sm font-semibold" style={{ color: 'var(--color-primary-text)' }}>{city}</p>
-                    <p className="font-sans text-[10px] uppercase tracking-widest" style={{ color: 'var(--color-primary)', opacity: 0.7 }}>{district}</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {/* Primary Address & Hours */}
+              <div className="space-y-3 p-4 rounded-xl border" style={{ borderColor: 'rgba(229,195,120,0.1)', background: 'rgba(229,195,120,0.02)' }}>
+                <div>
+                  <p className="font-brand text-sm font-semibold" style={{ color: 'var(--color-primary-text)' }}>{brandName} Flagship</p>
+                  <p className="font-sans text-[10px] uppercase tracking-widest" style={{ color: 'var(--color-primary)' }}>Private Atelier</p>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-start gap-2">
+                    <MapPin size={12} className="mt-0.5 shrink-0" style={{ color: 'var(--color-primary)' }} />
+                    <p className="font-sans text-xs leading-relaxed" style={{ color: 'var(--color-secondary-text)' }}>{address}</p>
                   </div>
-                  <div className="space-y-1.5">
-                    {[
-                      { icon: MapPin, text: address },
-                      { icon: Phone, text: phone },
-                      { icon: Clock, text: hours },
-                    ].map(({ icon: Icon, text }) => (
-                      <div key={text} className="flex items-start gap-1.5">
-                        <Icon size={10} className="mt-0.5 shrink-0" style={{ color: 'var(--color-primary)' }} />
-                        <p className="font-sans text-[10px] leading-relaxed" style={{ color: 'var(--color-secondary-text)' }}>{text}</p>
-                      </div>
-                    ))}
+                  <div className="flex items-center gap-2">
+                    <Clock size={12} className="shrink-0" style={{ color: 'var(--color-primary)' }} />
+                    <p className="font-sans text-xs" style={{ color: 'var(--color-secondary-text)' }}>Mon–Sat · {hours}</p>
                   </div>
                 </div>
-              ))}
+              </div>
+
+              {/* Direct Concierge Contact */}
+              <div className="space-y-3 p-4 rounded-xl border" style={{ borderColor: 'rgba(229,195,120,0.1)', background: 'rgba(229,195,120,0.02)' }}>
+                <div>
+                  <p className="font-brand text-sm font-semibold" style={{ color: 'var(--color-primary-text)' }}>Concierge Desk</p>
+                  <p className="font-sans text-[10px] uppercase tracking-widest" style={{ color: 'var(--color-primary)' }}>Direct Line</p>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Phone size={12} className="shrink-0" style={{ color: 'var(--color-primary)' }} />
+                    <p className="font-sans text-xs" style={{ color: 'var(--color-secondary-text)' }}>{phone}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Mail size={12} className="shrink-0" style={{ color: 'var(--color-primary)' }} />
+                    <p className="font-sans text-xs" style={{ color: 'var(--color-secondary-text)' }}>{email}</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -135,7 +144,7 @@ export function LandingFooter() {
           style={{ borderColor: 'rgba(229,195,120,0.08)' }}
         >
           <p className="font-sans text-[10px]" style={{ color: 'var(--color-muted-text)' }}>
-            © {new Date().getFullYear()} Aurelian Salon. All rights reserved.
+            © {new Date().getFullYear()} {brandName}. All rights reserved.
           </p>
           <div className="flex gap-5">
             {['Privacy Policy', 'Terms of Service', 'Cancellation Policy'].map(label => (
