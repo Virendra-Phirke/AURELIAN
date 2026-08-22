@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+
 import { format, parseISO, formatDistanceToNow, differenceInMinutes, isToday, isFuture } from 'date-fns';
 import { motion, AnimatePresence } from 'motion/react';
+
 import {
   CalendarDays, Clock, User, History, Settings, Camera,
   ArrowRight, Phone, Sparkles, TrendingUp, ChevronDown,
