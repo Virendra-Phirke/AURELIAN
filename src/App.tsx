@@ -5,6 +5,7 @@ import Landing from './pages/Landing';
 import { authClient } from './lib/auth';
 import { ThemeProvider } from './lib/theme';
 import { Skeleton, StatCardSkeleton } from './components/ui/skeleton';
+import { Analytics } from '@vercel/analytics/react';
 
 // Lazy-loaded routes for instant initial landing page FCP/LCP
 const Login = lazy(() => import('./pages/Login'));
@@ -153,6 +154,7 @@ export default function App() {
           </Route>
         </Routes>
       </Suspense>
+      <Analytics />
     </ThemeProvider>
   );
 }
