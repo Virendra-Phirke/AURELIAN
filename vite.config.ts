@@ -10,6 +10,9 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  optimizeDeps: {
+    include: ['@vercel/analytics/react'],
+  },
   build: {
     chunkSizeWarningLimit: 600,
     rollupOptions: {
