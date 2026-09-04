@@ -54,8 +54,8 @@ export function ScrollOrb3D({
     const primary = isDark ? 0xe5c378 : 0xc4972a;
     const emissive = isDark ? 0x3d3010 : 0x8a6a00;
 
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'low-power' });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     renderer.setSize(size, size);
     renderer.setClearColor(0x000000, 0);
 
@@ -122,7 +122,7 @@ export function ScrollOrb3D({
     let animId = 0;
 
     const animate = () => {
-      if (!isVisible) return;
+      if (!isVisible || document.hidden) return;
       animId = requestAnimationFrame(animate);
       t += 0.012 * speed;
 
@@ -139,10 +139,20 @@ export function ScrollOrb3D({
       renderer.render(scene, camera);
     };
 
+    const handleVisibility = () => {
+      if (document.hidden) {
+        cancelAnimationFrame(animId);
+      } else if (isVisible) {
+        cancelAnimationFrame(animId);
+        animId = requestAnimationFrame(animate);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
     const observer = new IntersectionObserver(([entry]) => {
       const prev = isVisible;
       isVisible = entry.isIntersecting;
-      if (isVisible && !prev) {
+      if (isVisible && !prev && !document.hidden) {
         cancelAnimationFrame(animId);
         animId = requestAnimationFrame(animate);
       }
@@ -153,6 +163,7 @@ export function ScrollOrb3D({
 
     return () => {
       cancelAnimationFrame(animId);
+      document.removeEventListener('visibilitychange', handleVisibility);
       observer.disconnect();
       geo.dispose();
       mat.dispose();

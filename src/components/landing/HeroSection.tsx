@@ -1,9 +1,9 @@
-import React, { Suspense, lazy, useState, useEffect } from 'react';
-import { motion } from 'motion/react';
+import React, { Suspense, lazy, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Star, Users, Sparkles, ChevronDown } from 'lucide-react';
 import { ShopSettings, LandingStats } from '../../lib/useLandingData';
 import { useTheme } from '../../lib/theme';
+import { useDeferred3D } from '../../lib/useDeferred3D';
 
 const HeroCenterpiece3D = lazy(() => import('../3d/HeroCenterpiece3D'));
 
@@ -39,10 +39,6 @@ function HeroCenterpiecePlaceholder({ isDark }: { isDark: boolean }) {
             <stop offset="50%" stopColor={primaryGold} />
             <stop offset="100%" stopColor="#8a6a00" />
           </linearGradient>
-          <filter id="goldGlowFilter" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="3" result="blur" />
-            <feComposite in="SourceGraphic" in2="blur" operator="over" />
-          </filter>
         </defs>
 
         {/* Outer Gyro Ring 1 */}
@@ -87,8 +83,15 @@ function HeroCenterpiecePlaceholder({ isDark }: { isDark: boolean }) {
           style={{ animationDuration: '18s', transformOrigin: '200px 200px' }}
         />
 
-        {/* Central Faceted Crystal Gem */}
-        <g filter="url(#goldGlowFilter)" className="animate-pulse" style={{ animationDuration: '3.5s', transformOrigin: '200px 200px' }}>
+        {/* Central Faceted Crystal Gem - GPU composited drop-shadow without CPU filter re-rasterization */}
+        <g
+          className="animate-pulse"
+          style={{
+            animationDuration: '3.5s',
+            transformOrigin: '200px 200px',
+            filter: isDark ? 'drop-shadow(0 0 6px rgba(229,195,120,0.45))' : 'drop-shadow(0 0 6px rgba(196,151,42,0.4))',
+          }}
+        >
           <polygon points="200,130 255,165 255,235 200,270 145,235 145,165" stroke="url(#goldGradHero)" strokeWidth="1.8" fill={isDark ? "rgba(229,195,120,0.08)" : "rgba(196,151,42,0.1)"} />
           <polygon points="200,155 235,178 235,222 200,245 165,222 165,178" stroke={primaryGold} strokeWidth="1.2" fill={isDark ? "rgba(229,195,120,0.18)" : "rgba(196,151,42,0.2)"} />
           <line x1="200" y1="130" x2="200" y2="155" stroke={primaryGold} strokeWidth="1.2" opacity="0.8" />
@@ -115,17 +118,11 @@ function HeroCenterpiecePlaceholder({ isDark }: { isDark: boolean }) {
 export function HeroSection({ shop, stats }: HeroSectionProps) {
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
-  const [show3D, setShow3D] = useState(false);
+  
+  // Progressively load 3D kinetic centerpiece on user gesture or post-load idle
+  const show3D = useDeferred3D(4000);
   const [is3DReady, setIs3DReady] = useState(false);
 
-  useEffect(() => {
-    const start = () => setShow3D(true);
-    if ('requestIdleCallback' in window) {
-      (window as any).requestIdleCallback(start, { timeout: 1200 });
-    } else {
-      setTimeout(start, 500);
-    }
-  }, []);
   const scrollInto = (id: string) => {
     const el = document.getElementById(id);
     if (el) {
@@ -202,7 +199,7 @@ export function HeroSection({ shop, stats }: HeroSectionProps) {
             </div>
           </div>
 
-          {/* Headline - Rendered with immediate paint for lightning-fast LCP */}
+          {/* Headline - Immediate paint for lightning-fast LCP */}
           <h1
             className="font-brand text-5xl sm:text-6xl lg:text-7xl xl:text-8xl leading-[1.0] tracking-tight"
             style={{ color: 'var(--color-primary-text)' }}
@@ -259,13 +256,11 @@ export function HeroSection({ shop, stats }: HeroSectionProps) {
             </button>
           </div>
 
-          {/* Divider + Credentials with Neumorphism */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
+          {/* Divider + Credentials with Neumorphism — GPU accelerated entrance */}
+          <div
             className="inline-flex items-center gap-4 p-4 pr-7 rounded-2xl border backdrop-blur-xl"
             style={{
+              animation: 'hero-fade-in 0.6s ease-out 0.5s both',
               background: isDark
                 ? 'linear-gradient(160deg, rgba(229,195,120,0.08) 0%, rgba(16,14,10,0.85) 100%)'
                 : 'linear-gradient(145deg, #ffffff 0%, #f7f4ec 100%)',
@@ -316,15 +311,15 @@ export function HeroSection({ shop, stats }: HeroSectionProps) {
                 </>
               )}
             </p>
-          </motion.div>
+          </div>
         </div>
 
-        {/* Right — 3D Centerpiece */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+        {/* Right — 3D Centerpiece — GPU accelerated entrance */}
+        <div
           className="relative h-[380px] sm:h-[480px] lg:h-[600px]"
+          style={{
+            animation: 'hero-scale-in 1s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both',
+          }}
         >
           {/* Subtle glow behind */}
           <div
@@ -338,42 +333,45 @@ export function HeroSection({ shop, stats }: HeroSectionProps) {
 
           {/* Floating stat badges — Neumorphic extruded pills */}
           {floatBadges.map(({ icon: Icon, label, sub, pos }, i) => (
-            <motion.div
+            <div
               key={label}
-              initial={{ opacity: 0, x: i % 2 === 0 ? -20 : 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.7, delay: 0.5 + i * BADGE_DELAY }}
               className={`absolute ${pos} z-20 pointer-events-none`}
               style={{
-                animation: `float-badge ${3 + i * 0.7}s ease-in-out infinite alternate`,
+                animation: `${i % 2 === 0 ? 'hero-badge-in-left' : 'hero-badge-in-right'} 0.7s ease-out ${0.5 + i * BADGE_DELAY}s both`,
               }}
             >
               <div
-                className="flex items-center gap-3 px-4 py-3 rounded-2xl border backdrop-blur-xl"
                 style={{
-                  background: isDark ? 'rgba(16,14,10,0.85)' : 'linear-gradient(145deg, #ffffff 0%, #f7f4ec 100%)',
-                  borderColor: isDark ? 'rgba(229,195,120,0.2)' : 'rgba(196,151,42,0.22)',
-                  boxShadow: isDark
-                    ? '0 10px 32px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.08)'
-                    : '6px 6px 18px rgba(190, 175, 145, 0.22), -4px -4px 14px rgba(255, 255, 255, 0.95), inset 0 1px 1px rgba(255, 255, 255, 1)',
+                  animation: `float-badge ${3 + i * 0.7}s ease-in-out ${0.5 + i * BADGE_DELAY + 0.7}s infinite alternate`,
                 }}
               >
                 <div
-                  className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 backdrop-blur-md"
+                  className="flex items-center gap-3 px-4 py-3 rounded-2xl border backdrop-blur-xl"
                   style={{
-                    background: isDark ? 'rgba(229,195,120,0.15)' : 'linear-gradient(135deg, #f0ebd8 0%, #ffffff 100%)',
-                    border: isDark ? '1px solid rgba(229,195,120,0.2)' : '1px solid rgba(196,151,42,0.25)',
-                    boxShadow: isDark ? 'none' : 'inset 1px 1px 3px rgba(190,175,145,0.2)',
+                    background: isDark ? 'rgba(16,14,10,0.85)' : 'linear-gradient(145deg, #ffffff 0%, #f7f4ec 100%)',
+                    borderColor: isDark ? 'rgba(229,195,120,0.2)' : 'rgba(196,151,42,0.22)',
+                    boxShadow: isDark
+                      ? '0 10px 32px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.08)'
+                      : '6px 6px 18px rgba(190, 175, 145, 0.22), -4px -4px 14px rgba(255, 255, 255, 0.95), inset 0 1px 1px rgba(255, 255, 255, 1)',
                   }}
                 >
-                  <Icon size={15} style={{ color: 'var(--color-primary)' }} />
-                </div>
-                <div>
-                  <p className="font-brand text-sm font-bold leading-none" style={{ color: 'var(--color-primary)' }}>{label}</p>
-                  <p className="font-sans text-[10px] font-medium mt-0.5" style={{ color: 'var(--color-secondary-text)' }}>{sub}</p>
+                  <div
+                    className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 backdrop-blur-md"
+                    style={{
+                      background: isDark ? 'rgba(229,195,120,0.15)' : 'linear-gradient(135deg, #f0ebd8 0%, #ffffff 100%)',
+                      border: isDark ? '1px solid rgba(229,195,120,0.2)' : '1px solid rgba(196,151,42,0.25)',
+                      boxShadow: isDark ? 'none' : 'inset 1px 1px 3px rgba(190,175,145,0.2)',
+                    }}
+                  >
+                    <Icon size={15} style={{ color: 'var(--color-primary)' }} />
+                  </div>
+                  <div>
+                    <p className="font-brand text-sm font-bold leading-none" style={{ color: 'var(--color-primary)' }}>{label}</p>
+                    <p className="font-sans text-[10px] font-medium mt-0.5" style={{ color: 'var(--color-secondary-text)' }}>{sub}</p>
+                  </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
 
           {/* Lightweight SVG/CSS Hero Centerpiece — Immediate Paint at 0ms */}
@@ -395,16 +393,16 @@ export function HeroSection({ shop, stats }: HeroSectionProps) {
               </Suspense>
             </div>
           )}
-        </motion.div>
+        </div>
       </div>
 
       {/* Scroll cue */}
-      <motion.button
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.2 }}
+      <button
         onClick={() => scrollInto('atmosphere')}
         className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 cursor-pointer group"
+        style={{
+          animation: 'hero-fade-in 0.6s ease-out 1.2s both',
+        }}
       >
         <span className="font-sans text-[9px] uppercase tracking-[0.25em]" style={{ color: 'var(--color-muted-text)' }}>
           Discover
@@ -414,7 +412,7 @@ export function HeroSection({ shop, stats }: HeroSectionProps) {
           className="animate-bounce"
           style={{ color: 'var(--color-primary)' }}
         />
-      </motion.button>
+      </button>
     </section>
   );
 }

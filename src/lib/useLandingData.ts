@@ -110,10 +110,23 @@ export function useLandingData() {
   }, []);
 
   useEffect(() => {
-    loadData();
+    let id: any = null;
+    if ('requestIdleCallback' in window) {
+      id = (window as any).requestIdleCallback(loadData, { timeout: 4000 });
+    } else {
+      id = setTimeout(loadData, 2500);
+    }
+
     const onFocus = () => loadData();
     window.addEventListener('focus', onFocus);
-    return () => window.removeEventListener('focus', onFocus);
+    return () => {
+      if ('cancelIdleCallback' in window && typeof id === 'number') {
+        (window as any).cancelIdleCallback(id);
+      } else if (id) {
+        clearTimeout(id);
+      }
+      window.removeEventListener('focus', onFocus);
+    };
   }, [loadData]);
 
   // Real-Time Server-Sent Event Triggers (Zero DB polling overhead)

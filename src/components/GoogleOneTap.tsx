@@ -17,6 +17,15 @@ export default function GoogleOneTap({ callbackURL = '/booking' }: GoogleOneTapP
   useEffect(() => {
     let isMounted = true;
 
+    // Dynamically inject Google GSI script on-demand when authentication component mounts
+    if (!window.google?.accounts?.id && !document.querySelector('script[src*="accounts.google.com/gsi/client"]')) {
+      const script = document.createElement('script');
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+    }
+
     // Clear Google One Tap cooldown cookie (g_state) to prevent suppression in dev
     try {
       document.cookie = 'g_state=;path=/;expires=Thu, 01 Jan 1970 00:00:01 GMT';

@@ -1,3 +1,4 @@
+@import "./fonts.css";
 @import "tailwindcss";
 
 @theme {
@@ -428,4 +429,45 @@ canvas {
 @keyframes shimmer-slide {
   0%   { background-position: -200% center; }
   100% { background-position: 200% center; }
+}
+
+/* GPU-accelerated Hero entrance animations (0ms JS execution overhead) */
+@keyframes hero-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes hero-scale-in {
+  from { opacity: 0; transform: scale(0.8); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes hero-badge-in-left {
+  from { opacity: 0; transform: translate3d(-20px, 0, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes hero-badge-in-right {
+  from { opacity: 0; transform: translate3d(20px, 0, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes divider-slide-left {
+  from { opacity: 0; transform: translate3d(-35px, -20px, 0) scale(0.6); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes divider-slide-right {
+  from { opacity: 0; transform: translate3d(35px, -20px, 0) scale(0.6); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes header-slide-down {
+  from { opacity: 0; transform: translate3d(0, -80px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes dropdown-fade-in {
+  from { opacity: 0; transform: translate3d(0, -10px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
 }

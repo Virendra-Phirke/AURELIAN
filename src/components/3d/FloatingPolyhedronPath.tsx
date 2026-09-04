@@ -58,8 +58,10 @@ export function FloatingPolyhedronPath() {
       <motion.div
         className="absolute will-change-transform"
         style={{
-          left: x1,
-          top: y1,
+          left: 0,
+          top: 0,
+          x: x1,
+          y: y1,
           scale: scale1,
           opacity: opacity1,
           rotate: rotate1,
@@ -74,8 +76,10 @@ export function FloatingPolyhedronPath() {
       <motion.div
         className="absolute will-change-transform"
         style={{
-          left: x2,
-          top: y2,
+          left: 0,
+          top: 0,
+          x: x2,
+          y: y2,
           scale: scale2,
           opacity: opacity2,
           rotate: rotate2,
@@ -90,8 +94,10 @@ export function FloatingPolyhedronPath() {
       <motion.div
         className="absolute will-change-transform"
         style={{
-          left: x3,
-          top: y3,
+          left: 0,
+          top: 0,
+          x: x3,
+          y: y3,
           scale: scale3,
           opacity: opacity3,
           width: 85,

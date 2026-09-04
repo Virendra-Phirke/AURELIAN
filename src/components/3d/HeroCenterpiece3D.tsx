@@ -180,10 +180,20 @@ export function HeroCenterpiece3D({ onLoaded }: { onLoaded?: () => void } = {}) 
       }
     };
 
+    const handleVisibility = () => {
+      if (document.hidden) {
+        cancelAnimationFrame(animFrameRef.current);
+      } else if (isVisible) {
+        cancelAnimationFrame(animFrameRef.current);
+        animFrameRef.current = requestAnimationFrame(animate);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
     const intersectionObserver = new IntersectionObserver(([entry]) => {
       const prev = isVisible;
       isVisible = entry.isIntersecting;
-      if (isVisible && !prev) {
+      if (isVisible && !prev && !document.hidden) {
         cancelAnimationFrame(animFrameRef.current);
         animFrameRef.current = requestAnimationFrame(animate);
       }
@@ -244,6 +254,7 @@ export function HeroCenterpiece3D({ onLoaded }: { onLoaded?: () => void } = {}) 
 
     return () => {
       cancelAnimationFrame(animFrameRef.current);
+      document.removeEventListener('visibilitychange', handleVisibility);
       intersectionObserver.disconnect();
       resizeObserver.disconnect();
       renderer.domElement.removeEventListener('mousedown', handleMouseDown);

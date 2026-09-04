@@ -16,10 +16,16 @@ export function useLiveEvents(listeners: Record<string, EventCallback>) {
     let reconnectTimeout: any = null;
     let isDisposed = false;
 
+    let consecutiveErrors = 0;
+
     function connect() {
       if (isDisposed) return;
       try {
         eventSource = new EventSource('/api/events');
+
+        eventSource.onopen = () => {
+          consecutiveErrors = 0;
+        };
 
         eventSource.onmessage = (e) => {
           try {
@@ -36,16 +42,21 @@ export function useLiveEvents(listeners: Record<string, EventCallback>) {
             eventSource = null;
           }
           if (!isDisposed) {
-            reconnectTimeout = setTimeout(connect, 3000);
+            consecutiveErrors++;
+            // If the endpoint is unavailable (e.g. preview server or offline), don't spam reconnects
+            if (consecutiveErrors > 3) return;
+            const delay = Math.min(3000 * Math.pow(2, consecutiveErrors - 1), 30000);
+            reconnectTimeout = setTimeout(connect, delay);
           }
         };
       } catch {}
     }
 
-    connect();
+    const initialTimer = setTimeout(connect, 3500);
 
     return () => {
       isDisposed = true;
+      clearTimeout(initialTimer);
       if (reconnectTimeout) clearTimeout(reconnectTimeout);
       if (eventSource) eventSource.close();
     };

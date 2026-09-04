@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState, Suspense, lazy } from 'react';
-import { motion } from 'motion/react';
-import { ScrollOrb3D } from '../components/3d/ScrollOrb3D';
 import { LandingHeader } from '../components/landing/LandingHeader';
 import { HeroSection } from '../components/landing/HeroSection';
 import { useLandingData } from '../lib/useLandingData';
+import { useDeferred3D } from '../lib/useDeferred3D';
 
-// Background 3D canvases loaded asynchronously after first paint
+// Dynamic 3D components completely decoupled from initial critical path
+const ScrollOrb3D = lazy(() => import('../components/3d/ScrollOrb3D').then(m => ({ default: m.ScrollOrb3D })));
 const FloatingCanvas3D = lazy(() => import('../components/3d/FloatingCanvas3D').then(m => ({ default: m.FloatingCanvas3D })));
 const FloatingPolyhedronPath = lazy(() => import('../components/3d/FloatingPolyhedronPath').then(m => ({ default: m.FloatingPolyhedronPath })));
 
@@ -108,19 +108,43 @@ function GoldDivider({
   variant?: 'polyhedron' | 'orb' | 'ring' | 'diamond' | 'helix' | 'star';
   side?: 'left' | 'right';
 }) {
+  const [shouldRender3D, setShouldRender3D] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShouldRender3D(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '300px 0px 300px 0px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="relative max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 flex items-center gap-6 overflow-visible">
-      {/* Left orb — diagonal entrance and continuous rotation */}
+    <div ref={containerRef} className="relative max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 flex items-center gap-6 overflow-visible">
+      {/* Left orb — diagonal entrance on GPU */}
       {side === 'left' && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.6, x: -35, y: -20 }}
-          whileInView={{ opacity: 1, scale: 1, x: 0, y: 0 }}
-          viewport={{ once: false, margin: '-50px' }}
-          transition={{ duration: 1.0, ease: [0.22, 1, 0.36, 1] }}
+        <div
           className="shrink-0"
+          style={{
+            animation: shouldRender3D ? 'divider-slide-left 1.0s cubic-bezier(0.22, 1, 0.36, 1) both' : 'none',
+          }}
         >
-          <ScrollOrb3D variant={variant} size={72} speed={0.9} />
-        </motion.div>
+          {shouldRender3D ? (
+            <Suspense fallback={<div style={{ width: 72, height: 72 }} className="shrink-0" />}>
+              <ScrollOrb3D variant={variant} size={72} speed={0.9} />
+            </Suspense>
+          ) : (
+            <div style={{ width: 72, height: 72 }} className="shrink-0" />
+          )}
+        </div>
       )}
 
       {/* Divider line */}
@@ -141,17 +165,22 @@ function GoldDivider({
         style={{ background: 'linear-gradient(to left, rgba(229,195,120,0.25), rgba(229,195,120,0.12), transparent)' }}
       />
 
-      {/* Right orb — diagonal entrance and continuous rotation */}
+      {/* Right orb — diagonal entrance on GPU */}
       {side === 'right' && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.6, x: 35, y: -20 }}
-          whileInView={{ opacity: 1, scale: 1, x: 0, y: 0 }}
-          viewport={{ once: false, margin: '-50px' }}
-          transition={{ duration: 1.0, ease: [0.22, 1, 0.36, 1] }}
+        <div
           className="shrink-0"
+          style={{
+            animation: shouldRender3D ? 'divider-slide-right 1.0s cubic-bezier(0.22, 1, 0.36, 1) both' : 'none',
+          }}
         >
-          <ScrollOrb3D variant={variant} size={72} speed={0.9} />
-        </motion.div>
+          {shouldRender3D ? (
+            <Suspense fallback={<div style={{ width: 72, height: 72 }} className="shrink-0" />}>
+              <ScrollOrb3D variant={variant} size={72} speed={0.9} />
+            </Suspense>
+          ) : (
+            <div style={{ width: 72, height: 72 }} className="shrink-0" />
+          )}
+        </div>
       )}
     </div>
   );
@@ -159,30 +188,23 @@ function GoldDivider({
 
 export default function Landing() {
   const { services, shop, stats, loading } = useLandingData();
-  const [show3D, setShow3D] = useState(false);
-
-  // Progressive Activation: Initialize background 3D scenes after first paint
-  useEffect(() => {
-    const start3D = () => setShow3D(true);
-    if ('requestIdleCallback' in window) {
-      (window as any).requestIdleCallback(start3D, { timeout: 1500 });
-    } else {
-      setTimeout(start3D, 800);
-    }
-  }, []);
+  
+  // Staggered activation of background 3D canvas and diagonal polyhedrons on gesture or post-load idle
+  const showBackground3D = useDeferred3D(4500);
+  const showPolyhedrons = useDeferred3D(5500);
 
   return (
     <div className="relative h-full" style={{ background: 'var(--color-bg)' }}>
       {/* Background 3D canvases — deferred to Phase 2 for instant FCP & LCP */}
-      {show3D && (
-        <>
-          <Suspense fallback={null}>
-            <FloatingCanvas3D />
-          </Suspense>
-          <Suspense fallback={null}>
-            <FloatingPolyhedronPath />
-          </Suspense>
-        </>
+      {showBackground3D && (
+        <Suspense fallback={null}>
+          <FloatingCanvas3D />
+        </Suspense>
+      )}
+      {showPolyhedrons && (
+        <Suspense fallback={null}>
+          <FloatingPolyhedronPath />
+        </Suspense>
       )}
 
       {/* Scroll progress bar */}
@@ -256,4 +278,3 @@ export default function Landing() {
     </div>
   );
 }
-

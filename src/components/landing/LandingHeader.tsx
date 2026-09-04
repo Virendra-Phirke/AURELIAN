@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'motion/react';
 import { ThemeToggle } from '../magicui/theme-toggle';
-import { authClient } from '../../lib/auth';
 import { ShopSettings } from '../../lib/useLandingData';
 import { Sparkles } from 'lucide-react';
 import { useTheme } from '../../lib/theme';
@@ -23,9 +21,26 @@ interface LandingHeaderProps {
 export function LandingHeader({ shop }: LandingHeaderProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { data: sessionData } = authClient.useSession();
-  const session = sessionData as any;
+  const [session, setSession] = useState<any>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Dynamically check session on idle to completely remove better-auth from critical landing path
+    const checkSession = async () => {
+      try {
+        const { authClient } = await import('../../lib/auth');
+        const res = await (authClient as any).getSession();
+        if (res?.data) {
+          setSession(res.data);
+        }
+      } catch {}
+    };
+    if ('requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(checkSession, { timeout: 5000 });
+    } else {
+      setTimeout(checkSession, 3500);
+    }
+  }, []);
 
   useEffect(() => {
     const container = document.getElementById('landing-scroll');
@@ -60,12 +75,10 @@ export function LandingHeader({ shop }: LandingHeaderProps) {
   const brandName = shop?.shopName || 'AURELIAN';
 
   return (
-    <motion.header
-      initial={{ y: -80, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+    <header
       className="fixed top-0 left-0 right-0 z-50 transition-all duration-500"
       style={{
+        animation: 'header-slide-down 0.8s cubic-bezier(0.22, 1, 0.36, 1) both',
         background: scrolled
           ? (isDark ? 'rgba(6,6,6,0.88)' : 'rgba(248,246,240,0.92)')
           : 'transparent',
@@ -187,11 +200,10 @@ export function LandingHeader({ shop }: LandingHeaderProps) {
 
       {/* Mobile dropdown */}
       {mobileOpen && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
+        <div
           className="md:hidden border-t"
           style={{
+            animation: 'dropdown-fade-in 0.2s ease-out both',
             background: isDark ? 'rgba(6,6,6,0.97)' : 'rgba(248,246,240,0.97)',
             backdropFilter: 'blur(20px)',
             borderColor: isDark ? 'rgba(229,195,120,0.1)' : 'rgba(196,151,42,0.2)',
@@ -228,8 +240,8 @@ export function LandingHeader({ shop }: LandingHeaderProps) {
               </Link>
             )}
           </div>
-        </motion.div>
+        </div>
       )}
-    </motion.header>
+    </header>
   );
 }
