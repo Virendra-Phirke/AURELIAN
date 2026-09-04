@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { Star, Users, Sparkles, ChevronDown } from 'lucide-react';
@@ -14,9 +14,118 @@ interface HeroSectionProps {
   stats?: LandingStats;
 }
 
+function HeroCenterpiecePlaceholder({ isDark }: { isDark: boolean }) {
+  const primaryGold = isDark ? '#e5c378' : '#c4972a';
+  const glow = isDark ? 'rgba(229,195,120,0.18)' : 'rgba(196,151,42,0.22)';
+
+  return (
+    <div className="w-full h-full flex items-center justify-center relative pointer-events-none select-none">
+      {/* Outer ambient glow */}
+      <div
+        className="absolute w-64 h-64 sm:w-80 sm:h-80 rounded-full blur-3xl"
+        style={{ background: glow }}
+      />
+
+      {/* SVG Gyroscope & Crystal Skeleton */}
+      <svg
+        viewBox="0 0 400 400"
+        className="w-full h-full max-w-[420px] max-h-[420px] relative z-10"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <linearGradient id="goldGradHero" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#fff0c0" />
+            <stop offset="50%" stopColor={primaryGold} />
+            <stop offset="100%" stopColor="#8a6a00" />
+          </linearGradient>
+          <filter id="goldGlowFilter" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+          </filter>
+        </defs>
+
+        {/* Outer Gyro Ring 1 */}
+        <ellipse
+          cx="200"
+          cy="200"
+          rx="155"
+          ry="75"
+          stroke="url(#goldGradHero)"
+          strokeWidth="1.5"
+          strokeDasharray="8 4"
+          opacity="0.55"
+          transform="rotate(-25 200 200)"
+          className="animate-spin"
+          style={{ animationDuration: '28s', transformOrigin: '200px 200px' }}
+        />
+
+        {/* Outer Gyro Ring 2 */}
+        <ellipse
+          cx="200"
+          cy="200"
+          rx="135"
+          ry="65"
+          stroke="url(#goldGradHero)"
+          strokeWidth="1.8"
+          opacity="0.65"
+          transform="rotate(40 200 200)"
+          className="animate-spin"
+          style={{ animationDuration: '22s', animationDirection: 'reverse', transformOrigin: '200px 200px' }}
+        />
+
+        {/* Inner Ring 3 */}
+        <circle
+          cx="200"
+          cy="200"
+          r="105"
+          stroke={primaryGold}
+          strokeWidth="1.2"
+          strokeDasharray="4 6"
+          opacity="0.4"
+          className="animate-spin"
+          style={{ animationDuration: '18s', transformOrigin: '200px 200px' }}
+        />
+
+        {/* Central Faceted Crystal Gem */}
+        <g filter="url(#goldGlowFilter)" className="animate-pulse" style={{ animationDuration: '3.5s', transformOrigin: '200px 200px' }}>
+          <polygon points="200,130 255,165 255,235 200,270 145,235 145,165" stroke="url(#goldGradHero)" strokeWidth="1.8" fill={isDark ? "rgba(229,195,120,0.08)" : "rgba(196,151,42,0.1)"} />
+          <polygon points="200,155 235,178 235,222 200,245 165,222 165,178" stroke={primaryGold} strokeWidth="1.2" fill={isDark ? "rgba(229,195,120,0.18)" : "rgba(196,151,42,0.2)"} />
+          <line x1="200" y1="130" x2="200" y2="155" stroke={primaryGold} strokeWidth="1.2" opacity="0.8" />
+          <line x1="255" y1="165" x2="235" y2="178" stroke={primaryGold} strokeWidth="1.2" opacity="0.8" />
+          <line x1="255" y1="235" x2="235" y2="222" stroke={primaryGold} strokeWidth="1.2" opacity="0.8" />
+          <line x1="200" y1="270" x2="200" y2="245" stroke={primaryGold} strokeWidth="1.2" opacity="0.8" />
+          <line x1="145" y1="235" x2="165" y2="222" stroke={primaryGold} strokeWidth="1.2" opacity="0.8" />
+          <line x1="145" y1="165" x2="165" y2="178" stroke={primaryGold} strokeWidth="1.2" opacity="0.8" />
+
+          <circle cx="200" cy="200" r="14" fill="url(#goldGradHero)" opacity="0.9" />
+          <circle cx="200" cy="200" r="26" fill={primaryGold} opacity="0.2" />
+        </g>
+
+        {/* Orbiting Satellite Diamonds */}
+        <polygon points="200,45 205,52 200,59 195,52" fill="url(#goldGradHero)" />
+        <polygon points="355,200 362,205 355,210 348,205" fill="url(#goldGradHero)" />
+        <polygon points="200,355 205,362 200,369 195,362" fill="url(#goldGradHero)" />
+        <polygon points="45,200 52,205 45,210 38,205" fill="url(#goldGradHero)" />
+      </svg>
+    </div>
+  );
+}
+
 export function HeroSection({ shop, stats }: HeroSectionProps) {
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
+  const [show3D, setShow3D] = useState(false);
+  const [is3DReady, setIs3DReady] = useState(false);
+
+  useEffect(() => {
+    const start = () => setShow3D(true);
+    if ('requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(start, { timeout: 1200 });
+    } else {
+      setTimeout(start, 500);
+    }
+  }, []);
   const scrollInto = (id: string) => {
     const el = document.getElementById(id);
     if (el) {
@@ -43,8 +152,13 @@ export function HeroSection({ shop, stats }: HeroSectionProps) {
   const tagline = shop?.shopTagline || 'Luxury Grooming & Styling';
   const clientInitials = stats?.clientInitials || [];
 
+  // Formatted next slot preview
+  const now = new Date();
+  const slotHour = Math.max(10, Math.min(18, now.getHours() + 2));
+  const slotTime = `Today at ${slotHour > 12 ? slotHour - 12 : slotHour}:00 ${slotHour >= 12 ? 'PM' : 'AM'}`;
+
   return (
-    <section className="relative min-h-screen flex items-center pt-20 pb-12 px-6 sm:px-10 lg:px-16 overflow-hidden">
+    <section className="relative min-h-screen flex items-center pt-24 pb-16 px-6 sm:px-10 lg:px-16 overflow-hidden">
       {/* Background radial glow */}
       <div
         className="absolute inset-0 pointer-events-none"
@@ -53,25 +167,39 @@ export function HeroSection({ shop, stats }: HeroSectionProps) {
         }}
       />
 
-      <div className="max-w-7xl mx-auto w-full grid lg:grid-cols-2 gap-8 lg:gap-4 items-center">
+      <div className="max-w-7xl mx-auto w-full grid lg:grid-cols-2 gap-10 lg:gap-8 items-center">
         {/* Left — Text Block */}
         <div className="relative z-10 space-y-7">
-          {/* Pill Tag */}
-          <div
-            className="inline-flex items-center gap-2 font-sans text-[10px] uppercase tracking-[0.2em] font-semibold px-5 py-2.5 rounded-full border backdrop-blur-xl"
-            style={{
-              color: 'var(--color-primary)',
-              borderColor: isDark ? 'rgba(229,195,120,0.3)' : 'rgba(196,151,42,0.35)',
-              background: isDark
-                ? 'linear-gradient(135deg, rgba(229,195,120,0.12) 0%, rgba(16,14,10,0.6) 100%)'
-                : 'linear-gradient(145deg, #ffffff 0%, #f4efe6 100%)',
-              boxShadow: isDark
-                ? 'inset 0 1px 1px rgba(255,255,255,0.1), 0 4px 16px rgba(0,0,0,0.3)'
-                : '4px 4px 12px rgba(190,175,145,0.22), -3px -3px 8px rgba(255,255,255,0.95), inset 0 1px 1px rgba(255,255,255,1)',
-            }}
-          >
-            <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--color-primary)' }} />
-            {tagline}
+          {/* Live Tagline & Availability Pill */}
+          <div className="flex flex-wrap items-center gap-3">
+            <div
+              className="inline-flex items-center gap-2 font-sans text-[10px] uppercase tracking-[0.2em] font-semibold px-4 py-2 rounded-full border backdrop-blur-xl"
+              style={{
+                color: 'var(--color-primary)',
+                borderColor: isDark ? 'rgba(229,195,120,0.3)' : 'rgba(196,151,42,0.35)',
+                background: isDark
+                  ? 'linear-gradient(135deg, rgba(229,195,120,0.12) 0%, rgba(16,14,10,0.6) 100%)'
+                  : 'linear-gradient(145deg, #ffffff 0%, #f4efe6 100%)',
+                boxShadow: isDark
+                  ? 'inset 0 1px 1px rgba(255,255,255,0.1), 0 4px 16px rgba(0,0,0,0.3)'
+                  : '4px 4px 12px rgba(190,175,145,0.22), -3px -3px 8px rgba(255,255,255,0.95), inset 0 1px 1px rgba(255,255,255,1)',
+              }}
+            >
+              <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--color-primary)' }} />
+              {tagline}
+            </div>
+
+            <div
+              className="hidden sm:inline-flex items-center gap-2 font-sans text-[10px] uppercase tracking-widest font-semibold px-3.5 py-2 rounded-full border backdrop-blur-md"
+              style={{
+                color: 'var(--color-secondary-text)',
+                borderColor: isDark ? 'rgba(229,195,120,0.2)' : 'rgba(196,151,42,0.25)',
+                background: isDark ? 'rgba(16,14,10,0.6)' : 'rgba(255,255,255,0.7)',
+              }}
+            >
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+              <span>Next Suite: <strong style={{ color: 'var(--color-primary)' }}>{slotTime}</strong></span>
+            </div>
           </div>
 
           {/* Headline - Rendered with immediate paint for lightning-fast LCP */}
@@ -248,9 +376,25 @@ export function HeroSection({ shop, stats }: HeroSectionProps) {
             </motion.div>
           ))}
 
-          <Suspense fallback={<div className="w-full h-full" />}>
-            <HeroCenterpiece3D />
-          </Suspense>
+          {/* Lightweight SVG/CSS Hero Centerpiece — Immediate Paint at 0ms */}
+          <div
+            className="absolute inset-0 transition-opacity duration-700 pointer-events-none"
+            style={{ opacity: is3DReady ? 0 : 1 }}
+          >
+            <HeroCenterpiecePlaceholder isDark={isDark} />
+          </div>
+
+          {/* Real 3D Kinetic Centerpiece — Lazily activated with smooth cross-fade */}
+          {show3D && (
+            <div
+              className="absolute inset-0 transition-opacity duration-700"
+              style={{ opacity: is3DReady ? 1 : 0 }}
+            >
+              <Suspense fallback={null}>
+                <HeroCenterpiece3D onLoaded={() => setIs3DReady(true)} />
+              </Suspense>
+            </div>
+          )}
         </motion.div>
       </div>
 

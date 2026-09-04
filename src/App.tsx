@@ -113,20 +113,23 @@ export default function App() {
     <ThemeProvider defaultTheme="dark" storageKey="aurelian-ui-theme">
       <Suspense fallback={<RouteLoadingFallback />}>
         <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Landing />} />
+          {/* Landing page is completely standalone — zero Layout / Sidebar / Auth bundle overhead */}
+          <Route path="/" element={<Landing />} />
+          
+          {/* Legal Governance Routes */}
+          <Route path="privacy-policy" element={<LegalPortal />} />
+          <Route path="privacy" element={<LegalPortal />} />
+          <Route path="terms" element={<LegalPortal />} />
+          <Route path="terms-of-service" element={<LegalPortal />} />
+          <Route path="terms-and-conditions" element={<LegalPortal />} />
+          <Route path="cancellation-policy" element={<LegalPortal />} />
+          
+          {/* Auth & Protected App Routes wrapped in Layout */}
+          <Route element={<Layout />}>
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />
             <Route path="forgot-password" element={<ForgotPassword />} />
             <Route path="reset-password" element={<ResetPassword />} />
-            
-            {/* Legal Governance Routes */}
-            <Route path="privacy-policy" element={<LegalPortal />} />
-            <Route path="privacy" element={<LegalPortal />} />
-            <Route path="terms" element={<LegalPortal />} />
-            <Route path="terms-of-service" element={<LegalPortal />} />
-            <Route path="terms-and-conditions" element={<LegalPortal />} />
-            <Route path="cancellation-policy" element={<LegalPortal />} />
             
             <Route path="booking" element={
               <ProtectedRoute blockAdmin={true}>

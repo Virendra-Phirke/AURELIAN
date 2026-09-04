@@ -57,7 +57,7 @@ export function Polyhedron3D({
 
     let animationFrameId: number;
     const startTime = performance.now();
-    let isIntersecting = true;
+    let isIntersecting = false;
     let cachedWidth = canvas.clientWidth || 100;
     let cachedHeight = canvas.clientHeight || 100;
 
@@ -249,13 +249,13 @@ export function Polyhedron3D({
         if (isIntersecting && !wasIntersecting) {
           cancelAnimationFrame(animationFrameId);
           animationFrameId = requestAnimationFrame(draw);
+        } else if (!isIntersecting && wasIntersecting) {
+          cancelAnimationFrame(animationFrameId);
         }
       },
       { threshold: 0.05 }
     );
     intersectionObserver.observe(canvas);
-
-    animationFrameId = requestAnimationFrame(draw);
 
     // Mouse / Touch interaction handlers (if interactive)
     const onMouseDown = (e: MouseEvent) => {

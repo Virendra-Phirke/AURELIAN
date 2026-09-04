@@ -17,7 +17,6 @@ export default defineConfig({
         manualChunks: {
           'vendor-three': ['three'],
           'vendor-motion': ['motion', 'motion/react'],
-          'vendor-icons': ['lucide-react'],
           'vendor-auth': ['better-auth'],
         },
       },

@@ -58,18 +58,18 @@ export function CraftsmanshipSection() {
         initial={{ opacity: 0, x: 40 }}
         animate={inView ? { opacity: 1, x: 0 } : {}}
         transition={{ duration: 1, delay: 0.2 }}
-        className="absolute top-8 right-8 pointer-events-none hidden lg:block"
+        className="absolute top-8 right-8 pointer-events-none hidden xl:block"
       >
-        <ScrollOrb3D variant="polyhedron" size={180} speed={0.6} />
+        <ScrollOrb3D variant="polyhedron" size={100} speed={0.6} />
       </motion.div>
 
       <motion.div
         initial={{ opacity: 0, x: -40 }}
         animate={inView ? { opacity: 1, x: 0 } : {}}
         transition={{ duration: 1, delay: 0.4 }}
-        className="absolute bottom-8 left-8 pointer-events-none hidden lg:block"
+        className="absolute bottom-8 left-8 pointer-events-none hidden xl:block"
       >
-        <ScrollOrb3D variant="polyhedron" size={140} speed={0.8} />
+        <ScrollOrb3D variant="polyhedron" size={90} speed={0.8} />
       </motion.div>
 
       <div className="max-w-7xl mx-auto space-y-16 relative z-10">

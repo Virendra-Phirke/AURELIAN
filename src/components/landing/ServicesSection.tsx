@@ -254,7 +254,7 @@ export function ServicesSection({ services: propServices, shop, loading }: Servi
                         </div>
                       </div>
                       <Link
-                        to={`/booking`}
+                        to={`/booking?service=${encodeURIComponent(service.id)}`}
                         className="inline-flex items-center gap-1.5 font-sans text-[10px] uppercase tracking-widest font-semibold px-4 py-2 rounded-full transition-all duration-200 cursor-pointer hover:scale-105"
                         style={{
                           background: isDark

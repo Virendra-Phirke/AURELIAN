@@ -1,35 +1,99 @@
-import React, { useEffect, useRef, Suspense, lazy } from 'react';
-import { motion, useScroll, useTransform } from 'motion/react';
+import React, { useEffect, useRef, useState, Suspense, lazy } from 'react';
+import { motion } from 'motion/react';
 import { ScrollOrb3D } from '../components/3d/ScrollOrb3D';
 import { LandingHeader } from '../components/landing/LandingHeader';
 import { HeroSection } from '../components/landing/HeroSection';
-import { AtmosphereSection } from '../components/landing/AtmosphereSection';
-import { ServicesSection } from '../components/landing/ServicesSection';
-import { CraftsmanshipSection } from '../components/landing/CraftsmanshipSection';
-import { TestimonialsSection } from '../components/landing/TestimonialsSection';
-import { CtaSection } from '../components/landing/CtaSection';
-import { LandingFooter } from '../components/landing/LandingFooter';
 import { useLandingData } from '../lib/useLandingData';
 
-// Background 3D canvases loaded lazily to ensure sub-second FCP & LCP
+// Background 3D canvases loaded asynchronously after first paint
 const FloatingCanvas3D = lazy(() => import('../components/3d/FloatingCanvas3D').then(m => ({ default: m.FloatingCanvas3D })));
 const FloatingPolyhedronPath = lazy(() => import('../components/3d/FloatingPolyhedronPath').then(m => ({ default: m.FloatingPolyhedronPath })));
 
-// Scroll progress indicator
-function ScrollProgress() {
-  const containerRef = useRef<HTMLElement | null>(null);
-  const { scrollYProgress } = useScroll({ container: containerRef as React.RefObject<HTMLElement> });
-  const scaleX = useTransform(scrollYProgress, [0, 1], [0, 1]);
+// Below-the-fold sections loaded on-demand via dynamic chunk splitting
+const AtmosphereSection = lazy(() => import('../components/landing/AtmosphereSection').then(m => ({ default: m.AtmosphereSection })));
+const ServicesSection = lazy(() => import('../components/landing/ServicesSection').then(m => ({ default: m.ServicesSection })));
+const CraftsmanshipSection = lazy(() => import('../components/landing/CraftsmanshipSection').then(m => ({ default: m.CraftsmanshipSection })));
+const TestimonialsSection = lazy(() => import('../components/landing/TestimonialsSection').then(m => ({ default: m.TestimonialsSection })));
+const FaqSection = lazy(() => import('../components/landing/FaqSection').then(m => ({ default: m.FaqSection })));
+const CtaSection = lazy(() => import('../components/landing/CtaSection').then(m => ({ default: m.CtaSection })));
+const LandingFooter = lazy(() => import('../components/landing/LandingFooter').then(m => ({ default: m.LandingFooter })));
+
+// Viewport-aware section loader guaranteeing 0 Cumulative Layout Shift (CLS = 0)
+function LazyViewportSection({
+  children,
+  minHeight = '650px',
+  id,
+}: {
+  children: React.ReactNode;
+  minHeight?: string;
+  id?: string;
+}) {
+  const [shouldRender, setShouldRender] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    containerRef.current = document.getElementById('landing-scroll');
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShouldRender(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '800px 0px 800px 0px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
   }, []);
 
   return (
-    <motion.div
-      className="fixed top-0 left-0 right-0 h-[2px] z-[100] origin-left pointer-events-none"
+    <div id={id} ref={containerRef} style={{ minHeight: shouldRender ? undefined : minHeight }} className="w-full">
+      {shouldRender ? (
+        <Suspense fallback={<div style={{ minHeight }} className="w-full" aria-hidden="true" />}>
+          {children}
+        </Suspense>
+      ) : (
+        <div style={{ minHeight }} className="w-full" aria-hidden="true" />
+      )}
+    </div>
+  );
+}
+
+// Pure GPU scroll progress indicator — 0 React re-renders, 0 hook overhead
+function ScrollProgress() {
+  const barRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = document.getElementById('landing-scroll');
+    const bar = barRef.current;
+    if (!container || !bar) return;
+
+    let ticking = false;
+    const updateProgress = () => {
+      const max = container.scrollHeight - container.clientHeight;
+      const progress = max > 0 ? container.scrollTop / max : 0;
+      bar.style.transform = `scaleX(${progress})`;
+      ticking = false;
+    };
+
+    const onScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateProgress);
+        ticking = true;
+      }
+    };
+
+    container.addEventListener('scroll', onScroll, { passive: true });
+    return () => container.removeEventListener('scroll', onScroll);
+  }, []);
+
+  return (
+    <div
+      ref={barRef}
+      className="fixed top-0 left-0 right-0 h-[2px] z-[100] origin-left pointer-events-none will-change-transform"
       style={{
-        scaleX,
+        transform: 'scaleX(0)',
         background: 'linear-gradient(to right, var(--color-primary), #fff0c0)',
       }}
     />
@@ -95,18 +159,31 @@ function GoldDivider({
 
 export default function Landing() {
   const { services, shop, stats, loading } = useLandingData();
+  const [show3D, setShow3D] = useState(false);
+
+  // Progressive Activation: Initialize background 3D scenes after first paint
+  useEffect(() => {
+    const start3D = () => setShow3D(true);
+    if ('requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(start3D, { timeout: 1500 });
+    } else {
+      setTimeout(start3D, 800);
+    }
+  }, []);
 
   return (
     <div className="relative h-full" style={{ background: 'var(--color-bg)' }}>
-      {/* Full-page WebGL 3D background */}
-      <Suspense fallback={null}>
-        <FloatingCanvas3D />
-      </Suspense>
-
-      {/* Continuous diagonal travel path for Polyhedrons on scroll */}
-      <Suspense fallback={null}>
-        <FloatingPolyhedronPath />
-      </Suspense>
+      {/* Background 3D canvases — deferred to Phase 2 for instant FCP & LCP */}
+      {show3D && (
+        <>
+          <Suspense fallback={null}>
+            <FloatingCanvas3D />
+          </Suspense>
+          <Suspense fallback={null}>
+            <FloatingPolyhedronPath />
+          </Suspense>
+        </>
+      )}
 
       {/* Scroll progress bar */}
       <ScrollProgress />
@@ -120,42 +197,63 @@ export default function Landing() {
         className="relative z-10 h-full overflow-y-auto overflow-x-hidden"
         style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(229,195,120,0.2) transparent' }}
       >
-        {/* Hero with live shop tagline, live client count, and 3D kinetic centerpiece */}
+        {/* Phase 1: Critical Hero rendered immediately with 0 delay */}
         <HeroSection shop={shop} stats={stats} />
 
         {/* ── Section break: Polyhedron accent + right ── */}
         <GoldDivider variant="polyhedron" side="right" />
 
-        {/* Philosophy & Atmosphere with live DB metric tickers */}
-        <AtmosphereSection stats={stats} />
+        {/* Phase 2: Atmosphere Section (Viewport-Loaded) */}
+        <LazyViewportSection minHeight="720px" id="atmosphere">
+          <AtmosphereSection stats={stats} />
+        </LazyViewportSection>
 
         {/* ── Section break: Polyhedron accent + left ── */}
         <GoldDivider variant="polyhedron" side="left" />
 
-        {/* Services Showcase loaded directly from Database */}
-        <ServicesSection services={services} shop={shop} loading={loading} />
+        {/* Phase 2: Services Showcase (Viewport-Loaded) */}
+        <LazyViewportSection minHeight="850px" id="services">
+          <ServicesSection services={services} shop={shop} loading={loading} />
+        </LazyViewportSection>
 
         {/* ── Section break: ring + right orb ── */}
         <GoldDivider variant="ring" side="right" />
 
-        {/* Craftsmanship Journey Protocol */}
-        <CraftsmanshipSection />
+        {/* Phase 2: Craftsmanship Protocol (Viewport-Loaded) */}
+        <LazyViewportSection minHeight="720px" id="craftsmanship">
+          <CraftsmanshipSection />
+        </LazyViewportSection>
 
         {/* ── Section break: Polyhedron accent + left ── */}
         <GoldDivider variant="polyhedron" side="left" />
 
-        {/* Client Reviews / Comments Marquee */}
-        <TestimonialsSection />
+        {/* Phase 2: Client Reviews / Comments Marquee (Viewport-Loaded) */}
+        <LazyViewportSection minHeight="650px" id="membership">
+          <TestimonialsSection />
+        </LazyViewportSection>
 
         {/* ── Section break: Polyhedron accent + right ── */}
         <GoldDivider variant="polyhedron" side="right" />
 
-        {/* Grand CTA with real DB shop hours, cancellation cutoff, and instant booking lock */}
-        <CtaSection shop={shop} />
+        {/* Phase 2: Client FAQ Accordion (Viewport-Loaded) */}
+        <LazyViewportSection minHeight="600px" id="faq">
+          <FaqSection />
+        </LazyViewportSection>
 
-        {/* Footer with real salon contact details, opening hours, and address */}
-        <LandingFooter shop={shop} />
+        {/* ── Section break: Polyhedron accent + left ── */}
+        <GoldDivider variant="polyhedron" side="left" />
+
+        {/* Phase 2: Grand CTA Section (Viewport-Loaded) */}
+        <LazyViewportSection minHeight="600px" id="reserve">
+          <CtaSection shop={shop} />
+        </LazyViewportSection>
+
+        {/* Phase 2: Footer (Viewport-Loaded) */}
+        <LazyViewportSection minHeight="500px" id="locations">
+          <LandingFooter shop={shop} />
+        </LazyViewportSection>
       </div>
     </div>
   );
 }
+

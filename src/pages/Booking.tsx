@@ -116,6 +116,14 @@ export default function Booking() {
         if (Array.isArray(data)) {
           setServices(data);
           setSelectedService((prev) => {
+            const params = new URLSearchParams(window.location.search);
+            const targetService = params.get('service') || params.get('serviceId');
+            if (targetService) {
+              const matched = data.find(
+                (s) => s.id === targetService || s.name.toLowerCase() === targetService.toLowerCase()
+              );
+              if (matched) return matched;
+            }
             if (!prev) return data.length > 0 ? data[0] : null;
             const updated = data.find((s) => s.id === prev.id);
             return updated || (data.length > 0 ? data[0] : null);

@@ -8,10 +8,12 @@ import { Sparkles } from 'lucide-react';
 import { useTheme } from '../../lib/theme';
 
 const NAV_LINKS = [
+  { label: 'Philosophy', href: '#atmosphere' },
   { label: 'Services', href: '#services' },
-  { label: 'Experience', href: '#experience' },
+  { label: 'Ritual', href: '#craftsmanship' },
   { label: 'Reviews', href: '#membership' },
-  { label: 'Locations', href: '#locations' },
+  { label: 'FAQ', href: '#faq' },
+  { label: 'Sanctuary', href: '#locations' },
 ];
 
 interface LandingHeaderProps {

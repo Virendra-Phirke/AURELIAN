@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { useTheme } from '../../lib/theme';
 
-export function HeroCenterpiece3D() {
+export function HeroCenterpiece3D({ onLoaded }: { onLoaded?: () => void } = {}) {
   const mountRef = useRef<HTMLDivElement>(null);
   const { theme } = useTheme();
   const themeRef = useRef(theme);
@@ -11,6 +11,7 @@ export function HeroCenterpiece3D() {
   const isDragging = useRef(false);
   const prevMouse = useRef({ x: 0, y: 0 });
   const dragDelta = useRef({ x: 0, y: 0 });
+  const hasLoadedNotified = useRef(false);
 
   useEffect(() => { themeRef.current = theme; }, [theme]);
 
@@ -172,6 +173,11 @@ export function HeroCenterpiece3D() {
       pointLightFront.position.y = Math.cos(time * 0.5) * 4;
 
       renderer.render(scene, camera);
+
+      if (!hasLoadedNotified.current) {
+        hasLoadedNotified.current = true;
+        onLoaded?.();
+      }
     };
 
     const intersectionObserver = new IntersectionObserver(([entry]) => {

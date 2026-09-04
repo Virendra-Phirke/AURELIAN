@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Clock, Phone, Mail, Share2, ExternalLink } from 'lucide-react';
+import { MapPin, Clock, Phone, Mail, Check, ArrowRight, Sparkles } from 'lucide-react';
 import { ShopSettings } from '../../lib/useLandingData';
 import { useTheme } from '../../lib/theme';
 
@@ -11,12 +11,14 @@ interface LandingFooterProps {
 export function LandingFooter({ shop }: LandingFooterProps) {
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
+  const [emailInput, setEmailInput] = useState('');
+  const [subscribed, setSubscribed] = useState(false);
 
   const brandName = shop?.shopName || 'AURELIAN';
   const tagline = shop?.shopTagline || 'Haute Coiffure & Private Grooming Sanctuary';
-  const phone = shop?.phone || '+91 98765 43210';
-  const email = shop?.email || 'concierge@aurelian.com';
-  const address = shop?.address || '14 Haute Avenue, Mayfair District';
+  const phone = shop?.phone || '+1 (555) 234-5678';
+  const email = shop?.email || 'concierge@aureliansalon.com';
+  const address = shop?.address || '123 Luxury Ave, Beverly Hills, CA';
   const openingTime = shop?.openingTime || '09:00';
   const closingTime = shop?.closingTime || '20:00';
   const hours = `${openingTime} – ${closingTime}`;
@@ -28,6 +30,17 @@ export function LandingFooter({ shop }: LandingFooterProps) {
       container.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' });
     }
   };
+
+  const handleSubscribe = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (emailInput.trim()) {
+      setSubscribed(true);
+      setTimeout(() => setSubscribed(false), 4000);
+      setEmailInput('');
+    }
+  };
+
+  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
 
   return (
     <footer id="locations" className="relative border-t transition-colors duration-300" style={{ borderColor: isDark ? 'rgba(229,195,120,0.1)' : 'rgba(196,151,42,0.18)', background: 'var(--color-bg)' }}>
@@ -55,22 +68,45 @@ export function LandingFooter({ shop }: LandingFooterProps) {
             <p className="font-sans text-xs max-w-sm leading-relaxed" style={{ color: 'var(--color-secondary-text)' }}>
               {tagline}
             </p>
-            <div className="pt-1 flex items-center gap-3">
-              <Link
-                to="/booking"
-                className="inline-flex font-sans text-xs uppercase tracking-widest font-bold px-7 py-3 rounded-full transition-all duration-300 shadow-md cursor-pointer hover:scale-105"
-                style={{
-                  color: isDark ? '#060606' : '#ffffff',
-                  background: isDark
-                    ? 'linear-gradient(135deg, #e5c378 0%, #c4972a 100%)'
-                    : 'linear-gradient(135deg, #b8860b 0%, #d4af37 100%)',
-                  boxShadow: isDark
-                    ? '0 4px 16px rgba(229,195,120,0.3)'
-                    : '4px 4px 14px rgba(184,134,11,0.35), -2px -2px 8px rgba(255,255,255,0.9)',
-                }}
-              >
-                Book a Session →
-              </Link>
+
+            {/* VIP Dispatch Newsletter */}
+            <div className="space-y-2.5 pt-1">
+              <p className="font-sans text-[10px] uppercase tracking-widest font-semibold flex items-center gap-1.5" style={{ color: 'var(--color-primary)' }}>
+                <Sparkles size={11} /> The Atelier Private Journal
+              </p>
+              <p className="font-sans text-[11px]" style={{ color: 'var(--color-muted-text)' }}>
+                Receive private release notices and seasonal formulation previews.
+              </p>
+              <form onSubmit={handleSubscribe} className="flex max-w-sm gap-2">
+                <input
+                  type="email"
+                  required
+                  placeholder="Enter your email address"
+                  value={emailInput}
+                  onChange={(e) => setEmailInput(e.target.value)}
+                  className="flex-1 px-4 py-2.5 rounded-full text-xs font-sans border outline-none transition-all duration-200"
+                  style={{
+                    background: isDark ? 'rgba(16,14,10,0.8)' : '#ffffff',
+                    borderColor: isDark ? 'rgba(229,195,120,0.2)' : 'rgba(196,151,42,0.25)',
+                    color: 'var(--color-primary-text)',
+                  }}
+                />
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 rounded-full font-sans text-[10px] uppercase tracking-widest font-bold transition-all duration-200 cursor-pointer shadow-md"
+                  style={{
+                    background: isDark ? 'var(--color-primary)' : 'linear-gradient(135deg, #b8860b 0%, #996515 100%)',
+                    color: isDark ? '#060606' : '#ffffff',
+                  }}
+                >
+                  {subscribed ? <Check size={14} className="mx-auto" /> : 'Join'}
+                </button>
+              </form>
+              {subscribed && (
+                <p className="font-sans text-[10px] text-emerald-400">
+                  ✓ Welcome to the Aurelian Private Circle.
+                </p>
+              )}
             </div>
           </div>
 
@@ -82,10 +118,11 @@ export function LandingFooter({ shop }: LandingFooterProps) {
             <ul className="space-y-2.5">
               {[
                 { label: 'Philosophy', id: 'atmosphere' },
-                { label: 'Services', id: 'services' },
-                { label: 'Protocol', id: 'craftsmanship' },
-                { label: 'Accolades', id: 'membership' },
-                { label: 'Reserve', id: 'reserve' },
+                { label: 'Signature Services', id: 'services' },
+                { label: 'Four-Act Protocol', id: 'craftsmanship' },
+                { label: 'Patron Reviews', id: 'membership' },
+                { label: 'Client FAQ', id: 'faq' },
+                { label: 'Reserve Appointment', id: 'reserve' },
               ].map(({ label, id }) => (
                 <li key={label}>
                   <button
@@ -102,7 +139,7 @@ export function LandingFooter({ shop }: LandingFooterProps) {
             </ul>
           </div>
 
-          {/* Real Salon Flagship Details from Database — Neumorphic Cards */}
+          {/* Real Salon Flagship Details from Database */}
           <div className="space-y-4 lg:col-span-2">
             <p className="font-sans text-[9px] uppercase tracking-[0.25em] font-semibold" style={{ color: 'var(--color-primary)' }}>
               Concierge &amp; Flagship Atelier
@@ -126,10 +163,17 @@ export function LandingFooter({ shop }: LandingFooterProps) {
                   <p className="font-sans text-[10px] uppercase tracking-widest font-semibold mt-0.5" style={{ color: 'var(--color-primary)' }}>Private Atelier</p>
                 </div>
                 <div className="space-y-2">
-                  <div className="flex items-start gap-2">
+                  <a
+                    href={mapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-start gap-2 group transition-colors"
+                  >
                     <MapPin size={13} className="mt-0.5 shrink-0" style={{ color: 'var(--color-primary)' }} />
-                    <p className="font-sans text-xs leading-relaxed" style={{ color: 'var(--color-secondary-text)' }}>{address}</p>
-                  </div>
+                    <p className="font-sans text-xs leading-relaxed group-hover:underline" style={{ color: 'var(--color-secondary-text)' }}>
+                      {address} ↗
+                    </p>
+                  </a>
                   <div className="flex items-center gap-2">
                     <Clock size={13} className="shrink-0" style={{ color: 'var(--color-primary)' }} />
                     <p className="font-sans text-xs" style={{ color: 'var(--color-secondary-text)' }}>Mon–Sat · {hours}</p>
@@ -155,14 +199,20 @@ export function LandingFooter({ shop }: LandingFooterProps) {
                   <p className="font-sans text-[10px] uppercase tracking-widest font-semibold mt-0.5" style={{ color: 'var(--color-primary)' }}>Direct Line</p>
                 </div>
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2">
+                  <a
+                    href={`tel:${phone.replace(/[^\d+]/g, '')}`}
+                    className="flex items-center gap-2 group transition-colors"
+                  >
                     <Phone size={13} className="shrink-0" style={{ color: 'var(--color-primary)' }} />
-                    <p className="font-sans text-xs" style={{ color: 'var(--color-secondary-text)' }}>{phone}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
+                    <p className="font-sans text-xs group-hover:underline" style={{ color: 'var(--color-secondary-text)' }}>{phone}</p>
+                  </a>
+                  <a
+                    href={`mailto:${email}`}
+                    className="flex items-center gap-2 group transition-colors"
+                  >
                     <Mail size={13} className="shrink-0" style={{ color: 'var(--color-primary)' }} />
-                    <p className="font-sans text-xs" style={{ color: 'var(--color-secondary-text)' }}>{email}</p>
-                  </div>
+                    <p className="font-sans text-xs group-hover:underline" style={{ color: 'var(--color-secondary-text)' }}>{email}</p>
+                  </a>
                 </div>
               </div>
             </div>
@@ -200,3 +250,6 @@ export function LandingFooter({ shop }: LandingFooterProps) {
     </footer>
   );
 }
+
+export default LandingFooter;
+
