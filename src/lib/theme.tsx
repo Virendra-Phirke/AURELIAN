@@ -32,11 +32,26 @@ export function ThemeProvider({
   storageKey = 'aurelian-ui-theme',
   ...props
 }: ThemeProviderProps) {
-  const [theme, setThemeState] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
-  );
+  const getInitialTheme = (): { theme: Theme; resolved: 'dark' | 'light' } => {
+    let t: Theme = defaultTheme;
+    try {
+      if (typeof localStorage !== 'undefined') {
+        const stored = localStorage.getItem(storageKey) as Theme;
+        if (stored) t = stored;
+      }
+    } catch {}
+    let res: 'dark' | 'light' = 'dark';
+    if (t === 'system') {
+      res = typeof window !== 'undefined' && window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    } else {
+      res = t === 'light' ? 'light' : 'dark';
+    }
+    return { theme: t, resolved: res };
+  };
 
-  const [resolvedTheme, setResolvedTheme] = useState<'dark' | 'light'>('dark');
+  const [initial] = useState(getInitialTheme);
+  const [theme, setThemeState] = useState<Theme>(initial.theme);
+  const [resolvedTheme, setResolvedTheme] = useState<'dark' | 'light'>(initial.resolved);
 
   const applyThemeClasses = (activeTheme: Theme): 'dark' | 'light' => {
     const root = window.document.documentElement;
@@ -52,7 +67,7 @@ export function ThemeProvider({
       resolved = activeTheme;
     }
 
-    setResolvedTheme(resolved);
+    setResolvedTheme(prev => (prev === resolved ? prev : resolved));
     root.classList.add(resolved);
     root.setAttribute('data-theme', resolved);
     return resolved;

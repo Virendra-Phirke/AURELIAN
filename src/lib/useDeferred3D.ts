@@ -10,7 +10,7 @@ import { useState, useEffect } from 'react';
  * 2. Instant visual responsiveness for human users upon first gesture
  * 3. 100% preservation of all 3D kinetic art, polyhedrons, and ambient particle canvases
  */
-export function useDeferred3D(fallbackDelayMs = 4000): boolean {
+export function useDeferred3D(fallbackDelayMs = 6000): boolean {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {

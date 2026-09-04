@@ -52,7 +52,7 @@ export function useLiveEvents(listeners: Record<string, EventCallback>) {
       } catch {}
     }
 
-    const initialTimer = setTimeout(connect, 3500);
+    const initialTimer = setTimeout(connect, 6000);
 
     return () => {
       isDisposed = true;

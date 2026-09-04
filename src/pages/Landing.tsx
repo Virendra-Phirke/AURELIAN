@@ -190,8 +190,8 @@ export default function Landing() {
   const { services, shop, stats, loading } = useLandingData();
   
   // Staggered activation of background 3D canvas and diagonal polyhedrons on gesture or post-load idle
-  const showBackground3D = useDeferred3D(4500);
-  const showPolyhedrons = useDeferred3D(5500);
+  const showBackground3D = useDeferred3D(6500);
+  const showPolyhedrons = useDeferred3D(7500);
 
   return (
     <div className="relative h-full" style={{ background: 'var(--color-bg)' }}>

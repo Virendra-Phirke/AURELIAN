@@ -36,9 +36,9 @@ export function LandingHeader({ shop }: LandingHeaderProps) {
       } catch {}
     };
     if ('requestIdleCallback' in window) {
-      (window as any).requestIdleCallback(checkSession, { timeout: 5000 });
+      (window as any).requestIdleCallback(checkSession, { timeout: 6500 });
     } else {
-      setTimeout(checkSession, 3500);
+      setTimeout(checkSession, 6000);
     }
   }, []);
 

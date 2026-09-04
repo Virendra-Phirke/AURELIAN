@@ -120,7 +120,7 @@ export function HeroSection({ shop, stats }: HeroSectionProps) {
   const isDark = resolvedTheme === 'dark';
   
   // Progressively load 3D kinetic centerpiece on user gesture or post-load idle
-  const show3D = useDeferred3D(4000);
+  const show3D = useDeferred3D(6000);
   const [is3DReady, setIs3DReady] = useState(false);
 
   const scrollInto = (id: string) => {
